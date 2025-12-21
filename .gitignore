@@ -1,0 +1,33 @@
+# Compiled objects
+*.o
+*.obj
+*.exe
+*.out
+
+# Debug files
+*.dSYM/
+*.su
+*.gch
+*.pch
+
+# Executable and libraries
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+
+# Build directories
+build/
+dist/
+bin/
+obj/
+
+# IDE
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Dependencies
+*.d
