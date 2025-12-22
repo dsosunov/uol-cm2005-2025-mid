@@ -1,10 +1,5 @@
-#include "actions.hpp"
+#include "actions/show_version_action.hpp"
 #include <iostream>
-
-void PrintHelloAction::Execute()
-{
-    std::cout << "Hello!\n";
-}
 
 void ShowVersionAction::Execute()
 {

@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 
-struct IMenuAction;
+#include "actions/menu_action.hpp"
 
 class MenuNode
 {
 public:
-    explicit MenuNode(std::string title, std::unique_ptr<IMenuAction> action = nullptr);
+    explicit MenuNode(std::string title, std::unique_ptr<MenuAction> action = nullptr);
 
     const std::string& Title() const;
 
@@ -24,8 +24,8 @@ public:
     const std::vector<std::unique_ptr<MenuNode>>& Children() const;
 
 private:
-    std::string _title;
-    std::unique_ptr<IMenuAction> _action;
-    std::vector<std::unique_ptr<MenuNode>> _children;
-    MenuNode* _parent;
+    std::string title_;
+    std::unique_ptr<MenuAction> action_;
+    std::vector<std::unique_ptr<MenuNode>> children_;
+    MenuNode* parent_;
 };

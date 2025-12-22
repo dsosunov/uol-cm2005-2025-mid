@@ -1,16 +1,16 @@
 #pragma once
-#include "io.hpp"
-#include "menu_node.hpp"
+#include "io/output.hpp"
+#include "menu/menu_node.hpp"
 
 class MenuRenderer
 {
 public:
-    explicit MenuRenderer(IOutput& output);
+    explicit MenuRenderer(Output& output);
 
     void RenderMenu(const MenuNode& current) const;
     void RenderInvalidChoice() const;
 
 private:
-    IOutput& _output;
+    Output& output_;
     void RenderBreadcrumbs(const MenuNode& current) const;
 };

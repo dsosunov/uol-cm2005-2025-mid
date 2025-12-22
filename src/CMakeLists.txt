@@ -1,9 +1,14 @@
 # Source files
 set(SOURCES
-    actions.cpp
-    io.cpp
-    menu_node.cpp
-    menu_renderer.cpp
+    actions/print_hello_action.cpp
+    actions/show_version_action.cpp
+    io/standard_input.cpp
+    io/standard_output.cpp
+    menu/menu_node.cpp
+    menu/menu_renderer.cpp
+    menu/menu_input.cpp
+    menu/menu_engine.cpp
+    menu/menu_builder.cpp
     main.cpp
 )
 
