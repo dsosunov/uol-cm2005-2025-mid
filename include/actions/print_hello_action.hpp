@@ -3,5 +3,5 @@
 
 struct PrintHelloAction final : MenuAction
 {
-    void Execute() override;
+    void Execute(ActionContext& context) override;
 };

@@ -20,10 +20,10 @@ bool MenuNode::HasChildren() const { return !children_.empty(); }
 bool MenuNode::IsRoot() const { return parent_ == nullptr; }
 MenuNode *MenuNode::Parent() const { return parent_; }
 
-void MenuNode::ExecuteAction() const
+void MenuNode::ExecuteAction(ActionContext& context) const
 {
     if (action_)
-        action_->Execute();
+        action_->Execute(context);
 }
 
 const std::vector<std::unique_ptr<MenuNode>> &MenuNode::Children() const { return children_; }

@@ -1,7 +1,13 @@
 #include "core/ui/menu/menu_engine.hpp"
 
-MenuEngine::MenuEngine(std::unique_ptr<MenuNode> root, MenuRenderer renderer, MenuInput input)
-    : root_(std::move(root)), renderer_(std::move(renderer)), input_(std::move(input))
+MenuEngine::MenuEngine(std::unique_ptr<MenuNode> root,
+                       std::shared_ptr<MenuRenderer> renderer,
+                       std::shared_ptr<MenuInput> input,
+                       std::shared_ptr<ActionContext> context)
+    : root_(std::move(root)),
+      renderer_(std::move(renderer)),
+      input_(std::move(input)),
+      context_(std::move(context))
 {
     stack_.push_back(root_.get());
 }
@@ -12,8 +18,8 @@ void MenuEngine::Run()
     {
         auto* current = stack_.back();
 
-        renderer_.RenderMenu(*current);
-        MenuNode* selected = input_.ReadSelection(*current);
+        renderer_->RenderMenu(*current);
+        MenuNode* selected = input_->ReadSelection(*current);
 
         if (!selected)
         {
@@ -26,7 +32,7 @@ void MenuEngine::Run()
         }
         else if (selected->HasAction())
         {
-            selected->ExecuteAction();
+            selected->ExecuteAction(*context_);
         }
         else
         {

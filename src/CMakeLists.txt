@@ -11,11 +11,12 @@ set(SOURCES
     core/ui/menu/menu_engine.cpp
     core/ui/menu/menu_builder.cpp
     core/ui/form/form.cpp
+    core/ui/form/form_builder.cpp
+    core/ui/form/menu_form_input_provider.cpp
     core/ui/form/form_context.cpp
     core/ui/form/data_source.cpp
     core/ui/form/fields/text_field.cpp
     core/ui/form/fields/selection_field.cpp
-    forms/product_query/product_query_form.cpp
     forms/product_query/fields/currency_pair_field.cpp
     forms/product_query/fields/query_type_field.cpp
     forms/product_query/fields/timeframe_field.cpp

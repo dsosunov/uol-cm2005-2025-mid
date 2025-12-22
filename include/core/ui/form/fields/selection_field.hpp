@@ -22,15 +22,12 @@ public:
 
   const std::string& GetName() const override;
   const std::string& GetPrompt() const override;
-  bool IsOptional() const override;
+  std::optional<std::string> ReadInput(FormInputProvider& input_provider,
+                                       const FormContext& context) const override;
   ValidationResult Validate(const std::string& value,
                            const FormContext& context) const override;
-  std::vector<std::string> GetOptions(const FormContext& context) const override;
   void BindValue(std::any& target, const std::string& value,
                 const FormContext& context) const override;
-  bool HasOptions() const override;
-
-  void SetOptional(bool optional) override;
 
 private:
   std::string name_;
@@ -38,7 +35,6 @@ private:
   std::vector<std::string> static_options_;
   std::shared_ptr<DataSource> data_source_;
   ValueBinder binder_;
-  bool is_optional_;
 };
 
 }  // namespace form

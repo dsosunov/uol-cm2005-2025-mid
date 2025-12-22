@@ -3,5 +3,5 @@
 
 struct ShowVersionAction final : MenuAction
 {
-    void Execute() override;
+    void Execute(ActionContext& context) override;
 };

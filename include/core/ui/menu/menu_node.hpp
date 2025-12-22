@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "core/actions/menu_action.hpp"
+#include "core/actions/action_context.hpp"
 
 class MenuNode
 {
@@ -19,7 +20,7 @@ public:
     bool IsRoot() const;
     MenuNode* Parent() const;
 
-    void ExecuteAction() const;
+    void ExecuteAction(ActionContext& context) const;
 
     const std::vector<std::unique_ptr<MenuNode>>& Children() const;
 

@@ -1,8 +1,8 @@
 #include "core/ui/menu/menu_input.hpp"
 #include <string>
 
-MenuInput::MenuInput(Input& input, MenuRenderer& renderer)
-    : input_(input), renderer_(renderer)
+MenuInput::MenuInput(std::shared_ptr<Input> input, std::shared_ptr<MenuRenderer> renderer)
+    : input_(std::move(input)), renderer_(std::move(renderer))
 {
 }
 
@@ -10,7 +10,7 @@ MenuNode* MenuInput::ReadSelection(const MenuNode& current) const
 {
     while (true)
     {
-        std::string line = input_.ReadLine();
+        std::string line = input_->ReadLine();
 
         int option;
         try
@@ -19,8 +19,8 @@ MenuNode* MenuInput::ReadSelection(const MenuNode& current) const
         }
         catch (...)
         {
-            renderer_.RenderInvalidChoice();
-            renderer_.RenderMenu(current);
+            renderer_->RenderInvalidChoice();
+            renderer_->RenderMenu(current);
             continue;
         }
 
@@ -34,8 +34,8 @@ MenuNode* MenuInput::ReadSelection(const MenuNode& current) const
         const int index = option - 1;
         if (index < 0 || static_cast<size_t>(index) >= childCount)
         {
-            renderer_.RenderInvalidChoice();
-            renderer_.RenderMenu(current);
+            renderer_->RenderInvalidChoice();
+            renderer_->RenderMenu(current);
             continue;
         }
 

@@ -1,7 +1,7 @@
 #include "core/ui/menu/menu_renderer.hpp"
 #include <string>
 
-MenuRenderer::MenuRenderer(Output& output) : output_(output) {}
+MenuRenderer::MenuRenderer(std::shared_ptr<Output> output) : output_(std::move(output)) {}
 
 void MenuRenderer::RenderMenu(const MenuNode& current) const
 {
@@ -10,21 +10,21 @@ void MenuRenderer::RenderMenu(const MenuNode& current) const
         RenderBreadcrumbs(current);
     }
 
-    output_.WriteLine("=== " + current.Title() + " ===");
+    output_->WriteLine("=== " + current.Title() + " ===");
 
     const auto& items = current.Children();
     for (size_t i = 0; i < items.size(); ++i)
     {
-        output_.WriteLine(std::to_string(i + 1) + ") " + items[i]->Title());
+        output_->WriteLine(std::to_string(i + 1) + ") " + items[i]->Title());
     }
 
-    output_.WriteLine("0) " + std::string(current.IsRoot() ? "Exit" : "Back"));
-    output_.Write("Select option (0-" + std::to_string(items.size()) + "): ");
+    output_->WriteLine("0) " + std::string(current.IsRoot() ? "Exit" : "Back"));
+    output_->Write("Select option (0-" + std::to_string(items.size()) + "): ");
 }
 
 void MenuRenderer::RenderInvalidChoice() const
 {
-    output_.WriteLine("Invalid choice.");
+    output_->WriteLine("Invalid choice.");
 }
 
 void MenuRenderer::RenderBreadcrumbs(const MenuNode& current) const
@@ -47,5 +47,5 @@ void MenuRenderer::RenderBreadcrumbs(const MenuNode& current) const
         }
         breadcrumb += (*it)->Title();
     }
-    output_.WriteLine(breadcrumb);
+    output_->WriteLine(breadcrumb);
 }

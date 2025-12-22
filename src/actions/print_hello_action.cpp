@@ -1,7 +1,6 @@
 #include "actions/print_hello_action.hpp"
-#include <iostream>
 
-void PrintHelloAction::Execute()
+void PrintHelloAction::Execute(ActionContext& context)
 {
-    std::cout << "Hello!\n";
+    context.output->WriteLine("Hello!");
 }

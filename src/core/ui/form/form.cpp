@@ -1,19 +1,14 @@
 #include "core/ui/form/form.hpp"
-#include "core/ui/menu/menu_builder.hpp"
 
 namespace form
 {
 
 Form::Form(std::vector<std::shared_ptr<Field>> fields,
-           std::shared_ptr<Input> input,
-           std::shared_ptr<Output> output,
-           MenuRenderer& renderer,
-           MenuInput& menu_input)
+           std::shared_ptr<FormInputProvider> input_provider,
+           std::shared_ptr<Output> output)
     : fields_(std::move(fields)),
-      input_(std::move(input)),
-      output_(std::move(output)),
-      renderer_(renderer),
-      menu_input_(menu_input) {}
+      input_provider_(std::move(input_provider)),
+      output_(std::move(output)) {}
 
 bool Form::IsCancelKeyword(const std::string& value) const {
   return value == "cancel" || value == "Cancel" || value == "CANCEL";

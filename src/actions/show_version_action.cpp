@@ -1,7 +1,6 @@
 #include "actions/show_version_action.hpp"
-#include <iostream>
 
-void ShowVersionAction::Execute()
+void ShowVersionAction::Execute(ActionContext& context)
 {
-    std::cout << "Version: 1.0.0\n";
+    context.output->WriteLine("Version: 1.0.0");
 }
