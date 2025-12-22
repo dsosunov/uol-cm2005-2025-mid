@@ -1,5 +1,5 @@
 #include "actions/product_query_action.hpp"
-#include "forms/product_query/product_query_form_factory.hpp"
+#include "forms/product_query/product_query_form.hpp"
 #include <set>
 
 static const std::set<std::string> kAllowedCurrencies = {
@@ -11,10 +11,11 @@ void ProductQueryAction::Execute(ActionContext& context) {
   context.output->WriteLine("");
 
   dto::ProductQuery query;
-  product_query::ProductQueryFormFactory form_factory(kAllowedCurrencies);
-  auto form = form_factory.CreateForm(context);
+  product_query::ProductQueryForm form(context.form_input_provider,
+                                       context.output,
+                                       kAllowedCurrencies);
 
-  form::FormReadResult result = form->Read(query);
+  form::FormReadResult result = form.Read(query);
 
   if (result == form::FormReadResult::kCancelled) {
     context.output->WriteLine("");

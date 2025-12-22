@@ -1,5 +1,6 @@
-#include "forms/product_query/product_query_form_factory.hpp"
+#include "forms/product_query/product_query_form.hpp"
 #include "core/ui/form/data_source.hpp"
+#include "core/ui/form/form_builder.hpp"
 #include "forms/product_query/fields/currency_pair_field.hpp"
 #include "forms/product_query/fields/query_type_field.hpp"
 #include "forms/product_query/fields/timeframe_field.hpp"
@@ -8,16 +9,13 @@
 
 namespace product_query {
 
-ProductQueryFormFactory::ProductQueryFormFactory(const std::set<std::string>& allowed_currencies)
-    : allowed_currencies_(allowed_currencies) {}
+ProductQueryForm::ProductQueryForm(std::shared_ptr<form::FormInputProvider> input_provider,
+                                   std::shared_ptr<Output> output,
+                                   const std::set<std::string>& allowed_currencies)
+    : form::Form(SetupFormLayout(allowed_currencies), input_provider, output) {}
 
-std::unique_ptr<form::Form> ProductQueryFormFactory::CreateForm(ActionContext& context) {
-  form::FormBuilder builder(context.form_input_provider, context.output);
-  SetupFormLayout(builder);
-  return builder.Build();
-}
-
-void ProductQueryFormFactory::SetupFormLayout(form::FormBuilder& builder) {
+std::vector<std::shared_ptr<form::Field>> ProductQueryForm::SetupFormLayout(
+    const std::set<std::string>& allowed_currencies) {
   // Create contextual data sources for date fields
   auto start_date_source = std::make_shared<form::ContextualDataSource>(
       [](const form::FormContext& form_context) -> std::vector<std::string> {
@@ -47,10 +45,13 @@ void ProductQueryFormFactory::SetupFormLayout(form::FormBuilder& builder) {
 
   // Setup form field layout
   builder.AddField(std::make_shared<CurrencyPairField>(allowed_currencies_));
-  builder.AddField(std::make_shared<QueryTypeField>());
-  builder.AddField(std::make_shared<TimeframeField>());
-  builder.AddField(std::make_shared<StartDateField>(start_date_source));
-  builder.AddField(std::make_shared<EndDateField>(end_date_source));
-}
-
+  buiBuild and return field list
+  std::vector<std::shared_ptr<form::Field>> fields;
+  fields.push_back(std::make_shared<CurrencyPairField>(allowed_currencies));
+  fields.push_back(std::make_shared<QueryTypeField>());
+  fields.push_back(std::make_shared<TimeframeField>());
+  fields.push_back(std::make_shared<StartDateField>(start_date_source));
+  fields.push_back(std::make_shared<EndDateField>(end_date_source));
+  
+  return fields
 }  // namespace product_query
