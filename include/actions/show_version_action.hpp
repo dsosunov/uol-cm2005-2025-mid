@@ -1,5 +1,5 @@
 #pragma once
-#include "actions/menu_action.hpp"
+#include "core/actions/menu_action.hpp"
 
 struct ShowVersionAction final : MenuAction
 {
