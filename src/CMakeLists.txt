@@ -15,14 +15,14 @@ set(SOURCES
     core/ui/form/data_source.cpp
     core/ui/form/fields/text_field.cpp
     core/ui/form/fields/selection_field.cpp
-    product_query/product_query_form.cpp
-    product_query/fields/currency_pair_field.cpp
-    product_query/fields/query_type_field.cpp
-    product_query/fields/timeframe_field.cpp
-    product_query/fields/start_date_field.cpp
-    product_query/fields/end_date_field.cpp
-    product_query/validators/currency_pair_validator.cpp
-    product_query/binders/field_binders.cpp
+    forms/product_query/product_query_form.cpp
+    forms/product_query/fields/currency_pair_field.cpp
+    forms/product_query/fields/query_type_field.cpp
+    forms/product_query/fields/timeframe_field.cpp
+    forms/product_query/fields/start_date_field.cpp
+    forms/product_query/fields/end_date_field.cpp
+    forms/product_query/validators/currency_pair_validator.cpp
+    forms/product_query/binders/field_binders.cpp
     main.cpp
 )
 

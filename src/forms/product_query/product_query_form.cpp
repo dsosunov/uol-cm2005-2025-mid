@@ -1,10 +1,10 @@
-#include "product_query/product_query_form.hpp"
+#include "forms/product_query/product_query_form.hpp"
 #include <set>
-#include "product_query/fields/currency_pair_field.hpp"
-#include "product_query/fields/query_type_field.hpp"
-#include "product_query/fields/timeframe_field.hpp"
-#include "product_query/fields/start_date_field.hpp"
-#include "product_query/fields/end_date_field.hpp"
+#include "forms/product_query/fields/currency_pair_field.hpp"
+#include "forms/product_query/fields/query_type_field.hpp"
+#include "forms/product_query/fields/timeframe_field.hpp"
+#include "forms/product_query/fields/start_date_field.hpp"
+#include "forms/product_query/fields/end_date_field.hpp"
 
 namespace product_query
 {

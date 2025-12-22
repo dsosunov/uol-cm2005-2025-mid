@@ -2,7 +2,7 @@
 #include <memory>
 #include "core/actions/menu_action.hpp"
 #include "dto/product_query.hpp"
-#include "product_query/product_query_form.hpp"
+#include "forms/product_query/product_query_form.hpp"
 #include "core/ui/io/input.hpp"
 #include "core/ui/io/output.hpp"
 #include "core/ui/menu/menu_renderer.hpp"
