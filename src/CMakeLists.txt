@@ -24,6 +24,7 @@ set(SOURCES
     forms/product_query/fields/end_date_field.cpp
     forms/product_query/validators/currency_pair_validator.cpp
     forms/product_query/binders/field_binders.cpp
+    forms/product_query/product_query_form_factory.cpp
     main.cpp
 )
 
