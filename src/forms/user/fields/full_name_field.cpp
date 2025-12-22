@@ -1,0 +1,15 @@
+#include "forms/user/fields/full_name_field.hpp"
+#include "core/ui/form/binders/field_binders.hpp"
+#include "dto/user_registration.hpp"
+
+namespace user_forms
+{
+
+FullNameField::FullNameField()
+    : form::TextField(
+          "full_name",
+          "Enter full name",
+          form::SimpleFieldBinder<dto::UserRegistration, std::string>(
+              &dto::UserRegistration::full_name)) {}
+
+}  // namespace user_forms
