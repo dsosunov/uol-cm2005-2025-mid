@@ -1,8 +1,8 @@
 #include "core/ui/form/fields/text_field.hpp"
+
 #include "core/ui/form/form_input_provider.hpp"
 
-namespace form
-{
+namespace form {
 
 TextField::TextField(std::string name, std::string prompt, ValueBinder binder,
                      FieldValidator validator)
@@ -20,8 +20,7 @@ std::optional<std::string> TextField::ReadInput(FormInputProvider& input_provide
   return input_provider.ReadText(prompt_);
 }
 
-ValidationResult TextField::Validate(const std::string& value,
-                                     const FormContext& context) const {
+ValidationResult TextField::Validate(const std::string& value, const FormContext& context) const {
   if (validator_) {
     return validator_(value, context);
   }
@@ -29,7 +28,7 @@ ValidationResult TextField::Validate(const std::string& value,
 }
 
 void TextField::BindValue(std::any& target, const std::string& value,
-                         const FormContext& context) const {
+                          const FormContext& context) const {
   binder_(target, value, context);
 }
 

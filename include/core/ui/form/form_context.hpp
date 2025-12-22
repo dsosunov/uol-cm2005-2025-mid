@@ -3,8 +3,7 @@
 #include <optional>
 #include <string>
 
-namespace form
-{
+namespace form {
 
 class FormContext {
  public:

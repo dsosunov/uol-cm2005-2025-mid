@@ -1,10 +1,10 @@
 #include "forms/transaction/fields/product_pair_field.hpp"
-#include "forms/shared/validators/currency_pair_validator.hpp"
+
 #include "core/ui/form/binders/field_binders.hpp"
 #include "dto/transaction_query.hpp"
+#include "forms/shared/validators/currency_pair_validator.hpp"
 
-namespace transaction_forms
-{
+namespace transaction_forms {
 
 ProductPairField::ProductPairField(std::set<std::string> allowed_currencies)
     : form::TextField("product_pair", "Enter product pair (e.g., USD/CAD)",

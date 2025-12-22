@@ -2,12 +2,10 @@
 #include "core/ui/form/fields/selection_field.hpp"
 #include "dto/candlestick_query.hpp"
 
-namespace candlestick
-{
+namespace candlestick {
 
-class AsksBidsField : public form::SelectionField
-{
-public:
+class AsksBidsField : public form::SelectionField {
+ public:
   AsksBidsField();
 };
 

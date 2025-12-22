@@ -19,19 +19,20 @@ set(SOURCES
     core/ui/menu/menu_engine.cpp
     core/ui/menu/menu_builder.cpp
     core/ui/form/form.cpp
-    core/ui/form/form_builder.cpp
     core/ui/form/menu_form_input_provider.cpp
     core/ui/form/form_context.cpp
     core/ui/form/data_source.cpp
     core/ui/form/fields/text_field.cpp
     core/ui/form/fields/selection_field.cpp
     forms/shared/validators/currency_pair_validator.cpp
+    forms/shared/validators/date_validator.cpp
     forms/candlestick/fields/currency_pair_field.cpp
     forms/candlestick/fields/asks_bids_field.cpp
     forms/candlestick/fields/timeframe_field.cpp
     forms/candlestick/fields/start_date_field.cpp
     forms/candlestick/fields/end_date_field.cpp
     forms/candlestick/candlestick_form.cpp
+    forms/user/validators/user_validators.cpp
     forms/user/fields/full_name_field.cpp
     forms/user/fields/email_field.cpp
     forms/user/fields/password_field.cpp
@@ -45,6 +46,7 @@ set(SOURCES
     forms/wallet/fields/currency_field.cpp
     forms/wallet/fields/amount_field.cpp
     forms/wallet/validators/currency_validator.cpp
+    forms/wallet/validators/amount_validator.cpp
     forms/wallet/wallet_operation_form.cpp
     forms/transaction/fields/product_pair_field.cpp
     forms/transaction/fields/timeframe_field.cpp

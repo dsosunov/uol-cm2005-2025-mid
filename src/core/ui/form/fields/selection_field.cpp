@@ -1,12 +1,11 @@
 #include "core/ui/form/fields/selection_field.hpp"
+
 #include "core/ui/form/form_input_provider.hpp"
 
-namespace form
-{
+namespace form {
 
 SelectionField::SelectionField(std::string name, std::string prompt,
-                               std::vector<std::string> options,
-                               ValueBinder binder)
+                               std::vector<std::string> options, ValueBinder binder)
     : name_(std::move(name)),
       prompt_(std::move(prompt)),
       static_options_(std::move(options)),
@@ -14,8 +13,7 @@ SelectionField::SelectionField(std::string name, std::string prompt,
       binder_(std::move(binder)) {}
 
 SelectionField::SelectionField(std::string name, std::string prompt,
-                               std::shared_ptr<DataSource> data_source,
-                               ValueBinder binder)
+                               std::shared_ptr<DataSource> data_source, ValueBinder binder)
     : name_(std::move(name)),
       prompt_(std::move(prompt)),
       data_source_(std::move(data_source)),
@@ -37,7 +35,7 @@ std::optional<std::string> SelectionField::ReadInput(FormInputProvider& input_pr
 }
 
 ValidationResult SelectionField::Validate(const std::string& value,
-                                         const FormContext& context) const {
+                                          const FormContext& context) const {
   return ValidationResult::Valid();
 }
 

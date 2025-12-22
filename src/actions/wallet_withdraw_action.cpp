@@ -1,9 +1,11 @@
 #include "actions/wallet_withdraw_action.hpp"
-#include "forms/wallet/wallet_operation_form.hpp"
+
 #include <set>
 
-static const std::set<std::string> kAllowedCurrencies = {
-    "USD", "CAD", "EUR", "GBP", "JPY", "AUD", "CHF", "CNY"};
+#include "forms/wallet/wallet_operation_form.hpp"
+
+static const std::set<std::string> kAllowedCurrencies = {"USD", "CAD", "EUR", "GBP",
+                                                         "JPY", "AUD", "CHF", "CNY"};
 
 void WalletWithdrawAction::Execute(ActionContext& context) {
   context.output->WriteLine("=== Withdraw Funds ===");
@@ -11,7 +13,8 @@ void WalletWithdrawAction::Execute(ActionContext& context) {
   context.output->WriteLine("");
 
   dto::WalletOperation data;
-  wallet_forms::WalletOperationForm form(context.form_input_provider, context.output, kAllowedCurrencies);
+  wallet_forms::WalletOperationForm form(context.form_input_provider, context.output,
+                                         kAllowedCurrencies);
 
   form::FormReadResult result = form.Read(data);
 

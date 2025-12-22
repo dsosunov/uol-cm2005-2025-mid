@@ -1,6 +1,7 @@
 #include "forms/wallet/wallet_operation_form.hpp"
-#include "forms/wallet/fields/currency_field.hpp"
+
 #include "forms/wallet/fields/amount_field.hpp"
+#include "forms/wallet/fields/currency_field.hpp"
 
 namespace wallet_forms {
 

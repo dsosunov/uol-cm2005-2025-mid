@@ -1,11 +1,12 @@
 #ifndef FORMS_TRANSACTION_ACTIVITY_SUMMARY_FORM_HPP_
 #define FORMS_TRANSACTION_ACTIVITY_SUMMARY_FORM_HPP_
 
+#include <memory>
+#include <vector>
+
 #include "core/ui/form/form.hpp"
 #include "core/ui/form/form_input_provider.hpp"
 #include "core/ui/io/output.hpp"
-#include <memory>
-#include <vector>
 
 namespace transaction_forms {
 

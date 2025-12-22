@@ -1,4 +1,5 @@
 #include "forms/user/reset_form.hpp"
+
 #include "forms/user/fields/email_or_username_field.hpp"
 #include "forms/user/fields/new_password_field.hpp"
 

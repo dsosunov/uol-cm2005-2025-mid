@@ -1,9 +1,11 @@
 #include "actions/candlestick_summary_action.hpp"
-#include "forms/candlestick/candlestick_form.hpp"
+
 #include <set>
 
-static const std::set<std::string> kAllowedCurrencies = {
-    "USD", "CAD", "EUR", "GBP", "JPY", "AUD", "CHF", "CNY"};
+#include "forms/candlestick/candlestick_form.hpp"
+
+static const std::set<std::string> kAllowedCurrencies = {"USD", "CAD", "EUR", "GBP",
+                                                         "JPY", "AUD", "CHF", "CNY"};
 
 void CandlestickSummaryAction::Execute(ActionContext& context) {
   context.output->WriteLine("=== Candlestick Summary ===");
@@ -11,8 +13,7 @@ void CandlestickSummaryAction::Execute(ActionContext& context) {
   context.output->WriteLine("");
 
   dto::CandlestickQuery query;
-  candlestick::CandlestickForm form(context.form_input_provider,
-                                    context.output,
+  candlestick::CandlestickForm form(context.form_input_provider, context.output,
                                     kAllowedCurrencies);
 
   form::FormReadResult result = form.Read(query);
@@ -30,8 +31,7 @@ void CandlestickSummaryAction::DisplayResults(const dto::CandlestickQuery& query
                                               ActionContext& context) {
   context.output->WriteLine("");
   context.output->WriteLine("=== Candlestick Summary Results ===");
-  context.output->WriteLine("Product Pair: " + query.currency_base + "/" +
-                            query.currency_quote);
+  context.output->WriteLine("Product Pair: " + query.currency_base + "/" + query.currency_quote);
   context.output->WriteLine("Data Type: " + query.asks_bids);
   context.output->WriteLine("Timeframe: " + query.timeframe);
 

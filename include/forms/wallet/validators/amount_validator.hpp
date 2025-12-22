@@ -1,5 +1,4 @@
 #pragma once
-#include <set>
 #include <string>
 
 #include "core/ui/form/form_context.hpp"
@@ -7,15 +6,10 @@
 
 namespace wallet_forms {
 
-class CurrencyValidator {
+class AmountValidator {
  public:
-  explicit CurrencyValidator(std::set<std::string> allowed_currencies);
-
   form::ValidationResult operator()(const std::string& value,
                                     const form::FormContext& context) const;
-
- private:
-  std::set<std::string> allowed_currencies_;
 };
 
 }  // namespace wallet_forms

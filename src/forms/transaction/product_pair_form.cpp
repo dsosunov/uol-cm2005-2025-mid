@@ -1,4 +1,5 @@
 #include "forms/transaction/product_pair_form.hpp"
+
 #include "forms/transaction/fields/product_pair_field.hpp"
 
 namespace transaction_forms {

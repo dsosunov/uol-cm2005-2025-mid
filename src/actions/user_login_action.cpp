@@ -1,4 +1,5 @@
 #include "actions/user_login_action.hpp"
+
 #include "forms/user/login_form.hpp"
 
 void UserLoginAction::Execute(ActionContext& context) {
@@ -20,8 +21,7 @@ void UserLoginAction::Execute(ActionContext& context) {
   DisplayResults(data, context);
 }
 
-void UserLoginAction::DisplayResults(const dto::UserLogin& data,
-                                     ActionContext& context) {
+void UserLoginAction::DisplayResults(const dto::UserLogin& data, ActionContext& context) {
   context.output->WriteLine("");
   context.output->WriteLine("=== Login Successful ===");
   context.output->WriteLine("Username: " + data.username);

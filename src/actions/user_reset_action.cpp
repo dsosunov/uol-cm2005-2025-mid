@@ -1,4 +1,5 @@
 #include "actions/user_reset_action.hpp"
+
 #include "forms/user/reset_form.hpp"
 
 void UserResetAction::Execute(ActionContext& context) {
@@ -20,8 +21,7 @@ void UserResetAction::Execute(ActionContext& context) {
   DisplayResults(data, context);
 }
 
-void UserResetAction::DisplayResults(const dto::UserReset& data,
-                                     ActionContext& context) {
+void UserResetAction::DisplayResults(const dto::UserReset& data, ActionContext& context) {
   context.output->WriteLine("");
   context.output->WriteLine("=== Password Reset Successful ===");
   context.output->WriteLine("Account: " + data.email_or_username);

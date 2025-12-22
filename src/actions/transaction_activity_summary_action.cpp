@@ -1,4 +1,5 @@
 #include "actions/transaction_activity_summary_action.hpp"
+
 #include "forms/transaction/activity_summary_form.hpp"
 
 void TransactionActivitySummaryAction::Execute(ActionContext& context) {
@@ -21,7 +22,7 @@ void TransactionActivitySummaryAction::Execute(ActionContext& context) {
 }
 
 void TransactionActivitySummaryAction::DisplayResults(const dto::ActivitySummary& data,
-                                                       ActionContext& context) {
+                                                      ActionContext& context) {
   context.output->WriteLine("");
   context.output->WriteLine("=== Activity Summary Results ===");
   context.output->WriteLine("Timeframe: " + data.timeframe);

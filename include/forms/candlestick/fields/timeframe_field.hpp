@@ -2,12 +2,10 @@
 #include "core/ui/form/fields/selection_field.hpp"
 #include "dto/candlestick_query.hpp"
 
-namespace candlestick
-{
+namespace candlestick {
 
-class TimeframeField : public form::SelectionField
-{
-public:
+class TimeframeField : public form::SelectionField {
+ public:
   TimeframeField();
 };
 

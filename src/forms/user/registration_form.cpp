@@ -1,6 +1,7 @@
 #include "forms/user/registration_form.hpp"
-#include "forms/user/fields/full_name_field.hpp"
+
 #include "forms/user/fields/email_field.hpp"
+#include "forms/user/fields/full_name_field.hpp"
 #include "forms/user/fields/password_field.hpp"
 
 namespace user_forms {

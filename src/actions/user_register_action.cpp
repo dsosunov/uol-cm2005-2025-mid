@@ -1,4 +1,5 @@
 #include "actions/user_register_action.hpp"
+
 #include "forms/user/registration_form.hpp"
 
 void UserRegisterAction::Execute(ActionContext& context) {
@@ -20,8 +21,7 @@ void UserRegisterAction::Execute(ActionContext& context) {
   DisplayResults(data, context);
 }
 
-void UserRegisterAction::DisplayResults(const dto::UserRegistration& data,
-                                        ActionContext& context) {
+void UserRegisterAction::DisplayResults(const dto::UserRegistration& data, ActionContext& context) {
   context.output->WriteLine("");
   context.output->WriteLine("=== Registration Successful ===");
   context.output->WriteLine("Full Name: " + data.full_name);

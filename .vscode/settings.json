@@ -1,6 +1,9 @@
 {
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "editor.formatOnSave": true,
   "cmake.debugConfig": {
     "console": "externalTerminal"
-  }
+  },
+  "formatFiles.excludedFolders": [".vscode", ".git", "build"],
+  "formatFiles.extensionsToInclude": "cpp,hpp"
 }

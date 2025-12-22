@@ -1,17 +1,17 @@
 #ifndef FORMS_WALLET_WALLET_OPERATION_FORM_HPP_
 #define FORMS_WALLET_WALLET_OPERATION_FORM_HPP_
 
-#include "core/ui/form/form.hpp"
-#include "core/ui/form/form_input_provider.hpp"
-#include "core/ui/io/output.hpp"
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
+#include "core/ui/form/form.hpp"
+#include "core/ui/form/form_input_provider.hpp"
+#include "core/ui/io/output.hpp"
+
 namespace wallet_forms {
 
-/// Single form for both deposit and withdraw operations
 class WalletOperationForm : public form::Form {
  public:
   WalletOperationForm(std::shared_ptr<form::FormInputProvider> input_provider,

@@ -1,7 +1,6 @@
 #include "core/ui/form/form_context.hpp"
 
-namespace form
-{
+namespace form {
 
 void FormContext::SetValue(const std::string& key, const std::string& value) {
   values_[key] = value;
@@ -15,8 +14,6 @@ std::optional<std::string> FormContext::GetValue(const std::string& key) const {
   return std::nullopt;
 }
 
-void FormContext::Clear() {
-  values_.clear();
-}
+void FormContext::Clear() { values_.clear(); }
 
 }  // namespace form

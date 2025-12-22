@@ -1,8 +1,10 @@
 #include "forms/transaction/activity_summary_form.hpp"
+
 #include "core/ui/form/data_source.hpp"
-#include "forms/transaction/fields/timeframe_field.hpp"
-#include "forms/transaction/fields/start_date_field.hpp"
+#include "dto/constants.hpp"
 #include "forms/transaction/fields/end_date_field.hpp"
+#include "forms/transaction/fields/start_date_field.hpp"
+#include "forms/transaction/fields/timeframe_field.hpp"
 
 namespace transaction_forms {
 
@@ -11,31 +13,26 @@ ActivitySummaryForm::ActivitySummaryForm(std::shared_ptr<form::FormInputProvider
     : form::Form(SetupFormLayout(), input_provider, output) {}
 
 std::vector<std::shared_ptr<form::Field>> ActivitySummaryForm::SetupFormLayout() {
-  // Create contextual data sources for date fields
   auto start_date_source = std::make_shared<form::ContextualDataSource>(
       [](const form::FormContext& form_context) -> std::vector<std::string> {
         auto timeframe = form_context.GetValue("timeframe");
-        if (timeframe && *timeframe == "monthly") {
-          return {"2025-01", "2025-02", "2025-03", "2025-04", "2025-05",
-                  "2025-06", "2025-07", "2025-08", "2025-09", "2025-10",
-                  "2025-11", "2025-12"};
-        } else if (timeframe && *timeframe == "yearly") {
-          return {"2020", "2021", "2022", "2023", "2024", "2025"};
+        if (timeframe && *timeframe == dto::timeframe::MONTHLY) {
+          return dto::sample_dates::GetMonthlySamples();
+        } else if (timeframe && *timeframe == dto::timeframe::YEARLY) {
+          return dto::sample_dates::GetYearlySamples();
         }
-        return {"2025-12-01", "2025-12-15", "2025-12-22"};
+        return dto::sample_dates::GetDailySamples();
       });
 
   auto end_date_source = std::make_shared<form::ContextualDataSource>(
       [](const form::FormContext& form_context) -> std::vector<std::string> {
         auto timeframe = form_context.GetValue("timeframe");
-        if (timeframe && *timeframe == "monthly") {
-          return {"2025-01", "2025-02", "2025-03", "2025-04", "2025-05",
-                  "2025-06", "2025-07", "2025-08", "2025-09", "2025-10",
-                  "2025-11", "2025-12"};
-        } else if (timeframe && *timeframe == "yearly") {
-          return {"2020", "2021", "2022", "2023", "2024", "2025"};
+        if (timeframe && *timeframe == dto::timeframe::MONTHLY) {
+          return dto::sample_dates::GetMonthlySamples();
+        } else if (timeframe && *timeframe == dto::timeframe::YEARLY) {
+          return dto::sample_dates::GetYearlySamples();
         }
-        return {"2025-12-01", "2025-12-15", "2025-12-22"};
+        return dto::sample_dates::GetDailySamples();
       });
 
   std::vector<std::shared_ptr<form::Field>> fields;

@@ -1,8 +1,7 @@
 #pragma once
 #include <string>
 
-namespace dto
-{
+namespace dto {
 
 struct UserRegistration {
   std::string full_name;
@@ -10,4 +9,4 @@ struct UserRegistration {
   std::string password;
 };
 
-}
+}  // namespace dto

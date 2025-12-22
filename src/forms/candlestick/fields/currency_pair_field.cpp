@@ -1,10 +1,10 @@
 #include "forms/candlestick/fields/currency_pair_field.hpp"
-#include "forms/shared/validators/currency_pair_validator.hpp"
-#include "forms/shared/binders/currency_pair_binder.hpp"
-#include "dto/candlestick_query.hpp"
 
-namespace candlestick
-{
+#include "dto/candlestick_query.hpp"
+#include "forms/shared/binders/currency_pair_binder.hpp"
+#include "forms/shared/validators/currency_pair_validator.hpp"
+
+namespace candlestick {
 
 CurrencyPairField::CurrencyPairField(std::set<std::string> allowed_currencies)
     : form::TextField("product_pair", "Enter product pair (e.g., USD/CAD)",

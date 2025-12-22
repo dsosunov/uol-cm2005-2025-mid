@@ -1,9 +1,11 @@
 #include "actions/transaction_show_by_pair_action.hpp"
-#include "forms/transaction/product_pair_form.hpp"
+
 #include <set>
 
-static const std::set<std::string> kAllowedCurrencies = {
-    "USD", "CAD", "EUR", "GBP", "JPY", "AUD", "CHF", "CNY"};
+#include "forms/transaction/product_pair_form.hpp"
+
+static const std::set<std::string> kAllowedCurrencies = {"USD", "CAD", "EUR", "GBP",
+                                                         "JPY", "AUD", "CHF", "CNY"};
 
 void TransactionShowByPairAction::Execute(ActionContext& context) {
   context.output->WriteLine("=== Show Transactions by Product Pair ===");
@@ -11,7 +13,8 @@ void TransactionShowByPairAction::Execute(ActionContext& context) {
   context.output->WriteLine("");
 
   dto::TransactionQuery data;
-  transaction_forms::ProductPairForm form(context.form_input_provider, context.output, kAllowedCurrencies);
+  transaction_forms::ProductPairForm form(context.form_input_provider, context.output,
+                                          kAllowedCurrencies);
 
   form::FormReadResult result = form.Read(data);
 
@@ -25,7 +28,7 @@ void TransactionShowByPairAction::Execute(ActionContext& context) {
 }
 
 void TransactionShowByPairAction::DisplayResults(const dto::TransactionQuery& data,
-                                                  ActionContext& context) {
+                                                 ActionContext& context) {
   context.output->WriteLine("");
   context.output->WriteLine("=== Transactions for " + data.product_pair + " ===");
   context.output->WriteLine("1. Buy  - 100.00 @ 1.25 - 2025-12-22 10:30");

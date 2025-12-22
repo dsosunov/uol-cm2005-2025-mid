@@ -2,11 +2,11 @@
 #include <any>
 #include <optional>
 #include <string>
-#include "core/ui/form/validation_result.hpp"
-#include "core/ui/form/form_context.hpp"
 
-namespace form
-{
+#include "core/ui/form/form_context.hpp"
+#include "core/ui/form/validation_result.hpp"
+
+namespace form {
 
 class FormInputProvider;
 
@@ -21,10 +21,9 @@ class Field {
   virtual std::optional<std::string> ReadInput(FormInputProvider& input_provider,
                                                const FormContext& context) const = 0;
 
-  virtual ValidationResult Validate(const std::string& value,
-                                   const FormContext& context) const = 0;
+  virtual ValidationResult Validate(const std::string& value, const FormContext& context) const = 0;
   virtual void BindValue(std::any& target, const std::string& value,
-                        const FormContext& context) const = 0;
+                         const FormContext& context) const = 0;
 };
 
 }  // namespace form
