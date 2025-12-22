@@ -1,33 +1,77 @@
-# Compiled objects
+# Build directories
+build/
+out/
+bin/
+lib/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+_deps/
+*.cmake
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.sln.docstates
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# Test results
+Testing/
+*.xml
+
+# Compiled Object files
+*.slo
+*.lo
 *.o
 *.obj
-*.exe
-*.out
 
-# Debug files
-*.dSYM/
-*.su
+# Precompiled Headers
 *.gch
 *.pch
 
-# Executable and libraries
+# Compiled Dynamic libraries
 *.so
 *.dylib
 *.dll
+
+# Compiled Static libraries
+*.lai
+*.la
 *.a
 *.lib
 
-# Build directories
-build/
-dist/
-bin/
-obj/
+# Executables
+*.exe
+*.out
+*.app
 
 # IDE
+.vscode/
+.idea/
 *.swp
 *.swo
 *~
-.DS_Store
 
-# Dependencies
-*.d
+# OS
+.DS_Store
+Thumbs.db
