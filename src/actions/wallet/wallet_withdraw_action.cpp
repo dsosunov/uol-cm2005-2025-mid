@@ -10,8 +10,6 @@ static const std::set<std::string> kAllowedCurrencies = {"USD", "CAD", "EUR", "G
 void WalletWithdrawAction::Execute(ActionContext &context)
 {
   context.output->WriteLine("=== Withdraw Funds ===");
-  context.output->WriteLine("Type 'cancel' to abort at any time");
-  context.output->WriteLine("");
 
   dto::WalletOperation data;
   wallet_forms::WalletOperationForm form(context.form_input_provider, context.output,

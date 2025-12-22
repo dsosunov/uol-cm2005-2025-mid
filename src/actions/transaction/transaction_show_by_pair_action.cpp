@@ -10,8 +10,6 @@ static const std::set<std::string> kAllowedCurrencies = {"USD", "CAD", "EUR", "G
 void TransactionShowByPairAction::Execute(ActionContext &context)
 {
   context.output->WriteLine("=== Show Transactions by Product Pair ===");
-  context.output->WriteLine("Type 'cancel' to abort at any time");
-  context.output->WriteLine("");
 
   dto::TransactionQuery data;
   transaction_forms::ProductPairForm form(context.form_input_provider, context.output,

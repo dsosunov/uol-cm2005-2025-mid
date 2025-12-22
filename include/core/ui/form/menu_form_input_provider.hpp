@@ -10,24 +10,30 @@
 #include "core/ui/menu/menu_input.hpp"
 #include "core/ui/menu/menu_renderer.hpp"
 
-namespace form {
+namespace form
+{
 
-class MenuFormInputProvider : public FormInputProvider {
- public:
-  MenuFormInputProvider(std::shared_ptr<Input> input, std::shared_ptr<Output> output,
-                        std::shared_ptr<MenuRenderer> renderer,
-                        std::shared_ptr<MenuInput> menu_input);
+  class MenuFormInputProvider : public FormInputProvider
+  {
+  public:
+    MenuFormInputProvider(std::shared_ptr<Input> input, std::shared_ptr<Output> output,
+                          std::shared_ptr<MenuRenderer> renderer,
+                          std::shared_ptr<MenuInput> menu_input);
 
-  std::string ReadText(const std::string& prompt) override;
+    void DisplayCancellationInstructions() override;
 
-  std::optional<std::string> ReadSelection(const std::string& title,
-                                           const std::vector<std::string>& options) override;
+    std::optional<std::string> ReadText(const std::string &prompt) override;
 
- private:
-  std::shared_ptr<Input> input_;
-  std::shared_ptr<Output> output_;
-  std::shared_ptr<MenuRenderer> renderer_;
-  std::shared_ptr<MenuInput> menu_input_;
-};
+    std::optional<std::string> ReadSelection(const std::string &title,
+                                             const std::vector<std::string> &options) override;
 
-}  // namespace form
+  private:
+    std::shared_ptr<Input> input_;
+    std::shared_ptr<Output> output_;
+    std::shared_ptr<MenuRenderer> renderer_;
+    std::shared_ptr<MenuInput> menu_input_;
+
+    bool IsCancelKeyword(const std::string &value) const;
+  };
+
+} // namespace form

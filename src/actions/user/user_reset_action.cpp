@@ -5,8 +5,6 @@
 void UserResetAction::Execute(ActionContext &context)
 {
   context.output->WriteLine("=== Reset / Remind Password ===");
-  context.output->WriteLine("Type 'cancel' to abort at any time");
-  context.output->WriteLine("");
 
   dto::UserReset data;
   user_forms::ResetForm form(context.form_input_provider, context.output);

@@ -5,8 +5,6 @@
 void UserRegisterAction::Execute(ActionContext &context)
 {
   context.output->WriteLine("=== User Registration ===");
-  context.output->WriteLine("Type 'cancel' to abort at any time");
-  context.output->WriteLine("");
 
   dto::UserRegistration data;
   user_forms::RegistrationForm form(context.form_input_provider, context.output);
