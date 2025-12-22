@@ -1,8 +1,9 @@
-#include "actions/transaction_activity_summary_action.hpp"
+#include "actions/transaction/transaction_activity_summary_action.hpp"
 
 #include "forms/transaction/activity_summary_form.hpp"
 
-void TransactionActivitySummaryAction::Execute(ActionContext& context) {
+void TransactionActivitySummaryAction::Execute(ActionContext &context)
+{
   context.output->WriteLine("=== Activity Summary ===");
   context.output->WriteLine("Type 'cancel' to abort at any time");
   context.output->WriteLine("");
@@ -12,7 +13,8 @@ void TransactionActivitySummaryAction::Execute(ActionContext& context) {
 
   form::FormReadResult result = form.Read(data);
 
-  if (result == form::FormReadResult::kCancelled) {
+  if (result == form::FormReadResult::kCancelled)
+  {
     context.output->WriteLine("");
     context.output->WriteLine("Query cancelled by user.");
     return;
@@ -21,8 +23,9 @@ void TransactionActivitySummaryAction::Execute(ActionContext& context) {
   DisplayResults(data, context);
 }
 
-void TransactionActivitySummaryAction::DisplayResults(const dto::ActivitySummary& data,
-                                                      ActionContext& context) {
+void TransactionActivitySummaryAction::DisplayResults(const dto::ActivitySummary &data,
+                                                      ActionContext &context)
+{
   context.output->WriteLine("");
   context.output->WriteLine("=== Activity Summary Results ===");
   context.output->WriteLine("Timeframe: " + data.timeframe);

@@ -1,16 +1,16 @@
 # Source files
 set(SOURCES
-    actions/candlestick_summary_action.cpp
-    actions/user_register_action.cpp
-    actions/user_login_action.cpp
-    actions/user_reset_action.cpp
-    actions/wallet_view_balance_action.cpp
-    actions/wallet_deposit_action.cpp
-    actions/wallet_withdraw_action.cpp
-    actions/transaction_show_last5_action.cpp
-    actions/transaction_show_by_pair_action.cpp
-    actions/transaction_activity_summary_action.cpp
-    actions/auto_generate_trades_action.cpp
+    actions/summary/candlestick_summary_action.cpp
+    actions/user/user_register_action.cpp
+    actions/user/user_login_action.cpp
+    actions/user/user_reset_action.cpp
+    actions/wallet/wallet_view_balance_action.cpp
+    actions/wallet/wallet_deposit_action.cpp
+    actions/wallet/wallet_withdraw_action.cpp
+    actions/transaction/transaction_show_last5_action.cpp
+    actions/transaction/transaction_show_by_pair_action.cpp
+    actions/transaction/transaction_activity_summary_action.cpp
+    actions/generation/auto_generate_trades_action.cpp
     core/ui/io/standard_input.cpp
     core/ui/io/standard_output.cpp
     core/ui/menu/menu_node.cpp

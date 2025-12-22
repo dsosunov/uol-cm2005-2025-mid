@@ -1,16 +1,16 @@
 #include <memory>
 
-#include "actions/auto_generate_trades_action.hpp"
-#include "actions/candlestick_summary_action.hpp"
-#include "actions/transaction_activity_summary_action.hpp"
-#include "actions/transaction_show_by_pair_action.hpp"
-#include "actions/transaction_show_last5_action.hpp"
-#include "actions/user_login_action.hpp"
-#include "actions/user_register_action.hpp"
-#include "actions/user_reset_action.hpp"
-#include "actions/wallet_deposit_action.hpp"
-#include "actions/wallet_view_balance_action.hpp"
-#include "actions/wallet_withdraw_action.hpp"
+#include "actions/generation/auto_generate_trades_action.hpp"
+#include "actions/summary/candlestick_summary_action.hpp"
+#include "actions/transaction/transaction_activity_summary_action.hpp"
+#include "actions/transaction/transaction_show_by_pair_action.hpp"
+#include "actions/transaction/transaction_show_last5_action.hpp"
+#include "actions/user/user_login_action.hpp"
+#include "actions/user/user_register_action.hpp"
+#include "actions/user/user_reset_action.hpp"
+#include "actions/wallet/wallet_deposit_action.hpp"
+#include "actions/wallet/wallet_view_balance_action.hpp"
+#include "actions/wallet/wallet_withdraw_action.hpp"
 #include "core/actions/action_context.hpp"
 #include "core/ui/form/menu_form_input_provider.hpp"
 #include "core/ui/io/standard_input.hpp"
@@ -20,7 +20,8 @@
 #include "core/ui/menu/menu_input.hpp"
 #include "core/ui/menu/menu_renderer.hpp"
 
-std::unique_ptr<MenuNode> BuildMenu() {
+std::unique_ptr<MenuNode> BuildMenu()
+{
   return MenuBuilder("Trading Platform")
       .AddLeaf("Candlestick summary", std::make_unique<CandlestickSummaryAction>())
       .AddBranch("User")
@@ -42,7 +43,8 @@ std::unique_ptr<MenuNode> BuildMenu() {
       .Build();
 }
 
-int main() {
+int main()
+{
   auto output = std::make_shared<StandardOutput>();
   auto input = std::make_shared<StandardInput>();
   auto renderer = std::make_shared<MenuRenderer>(output);

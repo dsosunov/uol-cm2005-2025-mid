@@ -1,6 +1,7 @@
-#include "actions/wallet_view_balance_action.hpp"
+#include "actions/wallet/wallet_view_balance_action.hpp"
 
-void WalletViewBalanceAction::Execute(ActionContext& context) {
+void WalletViewBalanceAction::Execute(ActionContext &context)
+{
   context.output->WriteLine("=== Wallet Balance ===");
   context.output->WriteLine("");
   context.output->WriteLine("USD: $1,234.56");

@@ -1,6 +1,7 @@
-#include "actions/auto_generate_trades_action.hpp"
+#include "actions/generation/auto_generate_trades_action.hpp"
 
-void AutoGenerateTradesAction::Execute(ActionContext& context) {
+void AutoGenerateTradesAction::Execute(ActionContext &context)
+{
   context.output->WriteLine("=== Auto-Generate Trades ===");
   context.output->WriteLine("");
   context.output->WriteLine("This action will automatically generate sample trades");
@@ -10,7 +11,8 @@ void AutoGenerateTradesAction::Execute(ActionContext& context) {
 
   auto input = context.form_input_provider->ReadText("Confirm");
 
-  if (input == "cancel") {
+  if (input == "cancel")
+  {
     context.output->WriteLine("");
     context.output->WriteLine("Auto-generation cancelled.");
     return;

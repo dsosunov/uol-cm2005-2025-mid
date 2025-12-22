@@ -1,8 +1,9 @@
-#include "actions/user_register_action.hpp"
+#include "actions/user/user_register_action.hpp"
 
 #include "forms/user/registration_form.hpp"
 
-void UserRegisterAction::Execute(ActionContext& context) {
+void UserRegisterAction::Execute(ActionContext &context)
+{
   context.output->WriteLine("=== User Registration ===");
   context.output->WriteLine("Type 'cancel' to abort at any time");
   context.output->WriteLine("");
@@ -12,7 +13,8 @@ void UserRegisterAction::Execute(ActionContext& context) {
 
   form::FormReadResult result = form.Read(data);
 
-  if (result == form::FormReadResult::kCancelled) {
+  if (result == form::FormReadResult::kCancelled)
+  {
     context.output->WriteLine("");
     context.output->WriteLine("Registration cancelled by user.");
     return;
@@ -21,7 +23,8 @@ void UserRegisterAction::Execute(ActionContext& context) {
   DisplayResults(data, context);
 }
 
-void UserRegisterAction::DisplayResults(const dto::UserRegistration& data, ActionContext& context) {
+void UserRegisterAction::DisplayResults(const dto::UserRegistration &data, ActionContext &context)
+{
   context.output->WriteLine("");
   context.output->WriteLine("=== Registration Successful ===");
   context.output->WriteLine("Full Name: " + data.full_name);
