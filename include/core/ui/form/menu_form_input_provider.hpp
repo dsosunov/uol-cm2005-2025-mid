@@ -26,9 +26,9 @@ namespace form
     std::shared_ptr<MenuRenderer> renderer_;
     std::shared_ptr<MenuInput> menu_input_;
 
-    std::optional<std::string> ReadLine();
+    std::optional<std::string> ReadLine() const;
     std::optional<std::string> ReadMenuSelection(const std::string &title,
-                                                 const std::vector<std::string> &options);
+                                                 const std::vector<std::string> &options) const;
   };
 
 } // namespace form

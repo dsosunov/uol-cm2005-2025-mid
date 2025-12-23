@@ -30,14 +30,14 @@ namespace form
     return std::nullopt; // Unknown field type
   }
 
-  std::optional<std::string> MenuFormInputProvider::ReadLine()
+  std::optional<std::string> MenuFormInputProvider::ReadLine() const
   {
     // Just reads text input - no prompt display, no cancellation check
     return input_->ReadLine();
   }
 
   std::optional<std::string> MenuFormInputProvider::ReadMenuSelection(
-      const std::string &title, const std::vector<std::string> &options)
+      const std::string &title, const std::vector<std::string> &options) const
   {
     MenuBuilder builder(title);
     for (const auto &option : options)

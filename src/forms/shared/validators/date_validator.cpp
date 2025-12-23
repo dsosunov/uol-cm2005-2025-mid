@@ -31,8 +31,7 @@ namespace forms::shared
       return numeric_result;
     }
 
-    int day = std::stoi(std::string(day_str));
-    if (day < 1 || day > 31)
+    if (int day = std::stoi(std::string(day_str)); day < 1 || day > 31)
     {
       return form::ValidationResult::Invalid("Day must be between 1 and 31");
     }
@@ -52,8 +51,7 @@ namespace forms::shared
       return numeric_result;
     }
 
-    int month = std::stoi(std::string(month_str));
-    if (month < 1 || month > 12)
+    if (int month = std::stoi(std::string(month_str)); month < 1 || month > 12)
     {
       return form::ValidationResult::Invalid("Month must be between 1 and 12");
     }
@@ -73,8 +71,7 @@ namespace forms::shared
       return numeric_result;
     }
 
-    int year = std::stoi(std::string(year_str));
-    if (year < 1900 || year > 2100)
+    if (int year = std::stoi(std::string(year_str)); year < 1900 || year > 2100)
     {
       return form::ValidationResult::Invalid("Year must be between 1900 and 2100");
     }

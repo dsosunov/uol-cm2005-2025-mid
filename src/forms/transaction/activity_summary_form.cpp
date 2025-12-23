@@ -17,10 +17,9 @@ namespace transaction_forms
   std::vector<std::shared_ptr<form::Field>> ActivitySummaryForm::SetupFormLayout()
   {
     auto start_date_source = std::make_shared<form::ContextualDataSource>(
-        [](const form::FormContext &form_context) -> std::vector<std::string>
+        [](const form::FormContext &form_context)
         {
-          auto timeframe = form_context.GetValue("timeframe");
-          if (timeframe && *timeframe == dto::timeframe::MONTHLY)
+          if (auto timeframe = form_context.GetValue("timeframe"); timeframe && *timeframe == dto::timeframe::MONTHLY)
           {
             return dto::sample_dates::GetMonthlySamples();
           }
@@ -32,10 +31,9 @@ namespace transaction_forms
         });
 
     auto end_date_source = std::make_shared<form::ContextualDataSource>(
-        [](const form::FormContext &form_context) -> std::vector<std::string>
+        [](const form::FormContext &form_context)
         {
-          auto timeframe = form_context.GetValue("timeframe");
-          if (timeframe && *timeframe == dto::timeframe::MONTHLY)
+          if (auto timeframe = form_context.GetValue("timeframe"); timeframe && *timeframe == dto::timeframe::MONTHLY)
           {
             return dto::sample_dates::GetMonthlySamples();
           }
