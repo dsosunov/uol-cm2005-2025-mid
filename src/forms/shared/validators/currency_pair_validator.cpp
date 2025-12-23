@@ -1,11 +1,13 @@
 #include "forms/shared/validators/currency_pair_validator.hpp"
+
+#include <format>
 #include <algorithm>
 #include <cctype>
 
 namespace forms::shared
 {
 
-  CurrencyPairValidator::CurrencyPairValidator(std::set<std::string> allowed_currencies)
+  CurrencyPairValidator::CurrencyPairValidator(std::set<std::string, std::less<>> allowed_currencies)
       : allowed_currencies_(std::move(allowed_currencies)) {}
 
   form::ValidationResult CurrencyPairValidator::Validate(const std::string &value,
@@ -26,12 +28,12 @@ namespace forms::shared
 
     if (allowed_currencies_.find(first) == allowed_currencies_.end())
     {
-      return form::ValidationResult::Invalid("Unknown currency: " + first);
+      return form::ValidationResult::Invalid(std::format("Unknown currency: {}", first));
     }
 
     if (allowed_currencies_.find(second) == allowed_currencies_.end())
     {
-      return form::ValidationResult::Invalid("Unknown currency: " + second);
+      return form::ValidationResult::Invalid(std::format("Unknown currency: {}", second));
     }
 
     return form::ValidationResult::Valid();

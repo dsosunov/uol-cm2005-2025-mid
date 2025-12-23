@@ -7,7 +7,7 @@
 namespace candlestick
 {
 
-    CurrencyPairField::CurrencyPairField(std::set<std::string> allowed_currencies)
+    CurrencyPairField::CurrencyPairField(std::set<std::string, std::less<>> allowed_currencies)
         : form::TextField("product_pair", "Currency pair",
                           forms::shared::CurrencyPairBinder<dto::CandlestickQuery>(),
                           std::make_shared<forms::shared::CurrencyPairValidator>(std::move(allowed_currencies))) {}

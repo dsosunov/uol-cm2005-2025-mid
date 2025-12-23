@@ -9,5 +9,5 @@ public:
   void Execute(ActionContext &context) override;
 
 private:
-  void DisplayResults(const dto::ActivitySummary &data, ActionContext &context);
+  void DisplayResults(const dto::ActivitySummary &data, ActionContext &context) const;
 };

@@ -13,11 +13,11 @@ namespace candlestick
 
   CandlestickForm::CandlestickForm(std::shared_ptr<form::FormInputProvider> input_provider,
                                    std::shared_ptr<Output> output,
-                                   const std::set<std::string> &allowed_currencies)
+                                   const std::set<std::string, std::less<>> &allowed_currencies)
       : form::Form(SetupFormLayout(allowed_currencies), input_provider, output) {}
 
   std::vector<std::shared_ptr<form::Field>> CandlestickForm::SetupFormLayout(
-      const std::set<std::string> &allowed_currencies)
+      const std::set<std::string, std::less<>> &allowed_currencies)
   {
     auto start_date_source = std::make_shared<form::ContextualDataSource>(
         [](const form::FormContext &form_context) -> std::vector<std::string>

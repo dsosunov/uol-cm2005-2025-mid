@@ -13,7 +13,7 @@ namespace forms::shared
   class CurrencyPairValidator : public form::Validator
   {
   public:
-    explicit CurrencyPairValidator(std::set<std::string> allowed_currencies);
+    explicit CurrencyPairValidator(std::set<std::string, std::less<>> allowed_currencies);
 
     form::ValidationResult Validate(const std::string &value,
                                     const form::FormContext &context) const override;
@@ -21,7 +21,7 @@ namespace forms::shared
     std::optional<std::string> GetHint() const override;
 
   private:
-    std::set<std::string> allowed_currencies_;
+    std::set<std::string, std::less<>> allowed_currencies_;
   };
 
 } // namespace forms::shared

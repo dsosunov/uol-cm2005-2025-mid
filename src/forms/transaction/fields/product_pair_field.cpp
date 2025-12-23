@@ -7,7 +7,7 @@
 namespace transaction_forms
 {
 
-    ProductPairField::ProductPairField(std::set<std::string> allowed_currencies)
+    ProductPairField::ProductPairField(std::set<std::string, std::less<>> allowed_currencies)
         : form::TextField("product_pair", "Product pair",
                           form::SimpleFieldBinder<dto::TransactionQuery, std::string>(
                               &dto::TransactionQuery::product_pair),

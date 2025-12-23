@@ -1,11 +1,12 @@
 #include "actions/wallet/wallet_withdraw_action.hpp"
 
+#include <format>
 #include <set>
 
 #include "forms/wallet/wallet_operation_form.hpp"
 
-static const std::set<std::string> kAllowedCurrencies = {"USD", "CAD", "EUR", "GBP",
-                                                         "JPY", "AUD", "CHF", "CNY"};
+static const std::set<std::string, std::less<>> kAllowedCurrencies = {"USD", "CAD", "EUR", "GBP",
+                                                                      "JPY", "AUD", "CHF", "CNY"};
 
 void WalletWithdrawAction::Execute(ActionContext &context)
 {
@@ -26,10 +27,10 @@ void WalletWithdrawAction::Execute(ActionContext &context)
 }
 
 void WalletWithdrawAction::DisplayResults(const dto::WalletOperation &data,
-                                          ActionContext &context)
+                                          ActionContext &context) const
 {
   context.output->WriteLine("");
   context.output->WriteLine("=== Withdrawal Successful ===");
-  context.output->WriteLine("Currency: " + data.currency);
-  context.output->WriteLine("Amount: " + data.amount);
+  context.output->WriteLine(std::format("Currency: {}", data.currency));
+  context.output->WriteLine(std::format("Amount: {}", data.amount));
 }

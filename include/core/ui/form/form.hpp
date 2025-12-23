@@ -1,5 +1,6 @@
 #pragma once
 #include <any>
+#include <format>
 #include <functional>
 #include <memory>
 #include <string>
@@ -51,11 +52,11 @@ namespace form
       auto hint = field->GetValidationHint();
       if (hint)
       {
-        output_->WriteLine("[" + *hint + "]");
+        output_->WriteLine(std::format("[{}]", *hint));
       }
 
       // Form displays prompt
-      output_->Write(field->GetPrompt() + ": ");
+      output_->Write(std::format("{}: ", field->GetPrompt()));
 
       // Provider adapts based on field type, receives context for data sources
       auto valueOpt = input_provider_->ReadField(*field, context_);
@@ -79,7 +80,7 @@ namespace form
       auto validation = field->Validate(value, context_);
       if (!validation.is_valid)
       {
-        output_->WriteLine("Error: " + validation.error_message);
+        output_->WriteLine(std::format("Error: {}", validation.error_message));
         return FormReadResult::kCancelled;
       }
 

@@ -1,11 +1,12 @@
 #include "actions/wallet/wallet_deposit_action.hpp"
 
+#include <format>
 #include <set>
 
 #include "forms/wallet/wallet_operation_form.hpp"
 
-static const std::set<std::string> kAllowedCurrencies = {"USD", "CAD", "EUR", "GBP",
-                                                         "JPY", "AUD", "CHF", "CNY"};
+static const std::set<std::string, std::less<>> kAllowedCurrencies = {"USD", "CAD", "EUR", "GBP",
+                                                                      "JPY", "AUD", "CHF", "CNY"};
 
 void WalletDepositAction::Execute(ActionContext &context)
 {
@@ -25,10 +26,10 @@ void WalletDepositAction::Execute(ActionContext &context)
   DisplayResults(data, context);
 }
 
-void WalletDepositAction::DisplayResults(const dto::WalletOperation &data, ActionContext &context)
+void WalletDepositAction::DisplayResults(const dto::WalletOperation &data, ActionContext &context) const
 {
   context.output->WriteLine("");
   context.output->WriteLine("=== Deposit Successful ===");
-  context.output->WriteLine("Currency: " + data.currency);
-  context.output->WriteLine("Amount: " + data.amount);
+  context.output->WriteLine(std::format("Currency: {}", data.currency));
+  context.output->WriteLine(std::format("Amount: {}", data.amount));
 }

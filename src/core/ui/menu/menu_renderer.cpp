@@ -1,5 +1,6 @@
 #include "core/ui/menu/menu_renderer.hpp"
 
+#include <format>
 #include <string>
 
 MenuRenderer::MenuRenderer(std::shared_ptr<Output> output) : output_(std::move(output)) {}
@@ -11,21 +12,21 @@ void MenuRenderer::RenderMenu(const MenuNode &current) const
     RenderBreadcrumbs(current);
   }
 
-  output_->WriteLine("=== " + current.Title() + " ===");
+  output_->WriteLine(std::format("=== {} ===", current.Title()));
 
   const auto &items = current.Children();
   for (size_t i = 0; i < items.size(); ++i)
   {
-    output_->WriteLine(std::to_string(i + 1) + ") " + items[i]->Title());
+    output_->WriteLine(std::format("{}) {}", i + 1, items[i]->Title()));
   }
 
-  output_->WriteLine("0) " + std::string(current.IsRoot() ? "Exit" : "Back"));
-  output_->Write("Select option (0-" + std::to_string(items.size()) + "): ");
+  output_->WriteLine(std::format("0) {}", current.IsRoot() ? "Exit" : "Back"));
+  output_->Write(std::format("Select option (0-{}): ", items.size()));
 }
 
 void MenuRenderer::RenderActionHeader(const MenuNode &node) const
 {
-  output_->WriteLine("=== " + node.Title() + " ===");
+  output_->WriteLine(std::format("=== {} ===", node.Title()));
 }
 
 void MenuRenderer::RenderInvalidChoice() const { output_->WriteLine("Invalid choice."); }

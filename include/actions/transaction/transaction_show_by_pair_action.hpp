@@ -3,10 +3,11 @@
 #include "core/actions/menu_action.hpp"
 #include "dto/transaction_query.hpp"
 
-class TransactionShowByPairAction : public MenuAction {
- public:
-  void Execute(ActionContext& context) override;
+class TransactionShowByPairAction : public MenuAction
+{
+public:
+  void Execute(ActionContext &context) override;
 
- private:
-  void DisplayResults(const dto::TransactionQuery& data, ActionContext& context);
+private:
+  void DisplayResults(const dto::TransactionQuery &data, ActionContext &context) const;
 };

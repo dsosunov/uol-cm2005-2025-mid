@@ -5,11 +5,13 @@
 #include "core/ui/form/fields/text_field.hpp"
 #include "dto/candlestick_query.hpp"
 
-namespace candlestick {
+namespace candlestick
+{
 
-class CurrencyPairField : public form::TextField {
- public:
-  explicit CurrencyPairField(std::set<std::string> allowed_currencies);
-};
+  class CurrencyPairField : public form::TextField
+  {
+  public:
+    explicit CurrencyPairField(std::set<std::string, std::less<>> allowed_currencies);
+  };
 
-}  // namespace candlestick
+} // namespace candlestick

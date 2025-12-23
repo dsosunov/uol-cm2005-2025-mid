@@ -13,7 +13,7 @@ namespace wallet_forms
   class CurrencyValidator : public form::Validator
   {
   public:
-    explicit CurrencyValidator(std::set<std::string> allowed_currencies);
+    explicit CurrencyValidator(std::set<std::string, std::less<>> allowed_currencies);
 
     form::ValidationResult Validate(const std::string &value,
                                     const form::FormContext &context) const override;
@@ -21,7 +21,7 @@ namespace wallet_forms
     std::optional<std::string> GetHint() const override;
 
   private:
-    std::set<std::string> allowed_currencies_;
+    std::set<std::string, std::less<>> allowed_currencies_;
   };
 
 } // namespace wallet_forms

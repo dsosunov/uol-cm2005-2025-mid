@@ -1,5 +1,7 @@
 #include "actions/user/user_register_action.hpp"
 
+#include <format>
+
 #include "forms/user/registration_form.hpp"
 
 void UserRegisterAction::Execute(ActionContext &context)
@@ -19,11 +21,11 @@ void UserRegisterAction::Execute(ActionContext &context)
   DisplayResults(data, context);
 }
 
-void UserRegisterAction::DisplayResults(const dto::UserRegistration &data, ActionContext &context)
+void UserRegisterAction::DisplayResults(const dto::UserRegistration &data, ActionContext &context) const
 {
   context.output->WriteLine("");
   context.output->WriteLine("=== Registration Successful ===");
-  context.output->WriteLine("Full Name: " + data.full_name);
-  context.output->WriteLine("Email: " + data.email);
-  context.output->WriteLine("Password: " + std::string(data.password.length(), '*'));
+  context.output->WriteLine(std::format("Full Name: {}", data.full_name));
+  context.output->WriteLine(std::format("Email: {}", data.email));
+  context.output->WriteLine(std::format("Password: {}", std::string(data.password.length(), '*')));
 }

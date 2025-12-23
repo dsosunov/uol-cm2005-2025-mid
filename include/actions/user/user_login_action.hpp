@@ -3,10 +3,11 @@
 #include "core/actions/menu_action.hpp"
 #include "dto/user_login.hpp"
 
-class UserLoginAction : public MenuAction {
- public:
-  void Execute(ActionContext& context) override;
+class UserLoginAction : public MenuAction
+{
+public:
+  void Execute(ActionContext &context) override;
 
- private:
-  void DisplayResults(const dto::UserLogin& data, ActionContext& context);
+private:
+  void DisplayResults(const dto::UserLogin &data, ActionContext &context) const;
 };
