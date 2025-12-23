@@ -4,15 +4,13 @@
 namespace services
 {
 
-    TransactionsService::TransactionsService() : next_transaction_id_(6), default_user_id_(1)
+    TransactionsService::TransactionsService()
+        : transactions_({{1, "USD/EUR", "Buy", 100.00, 0.95, "2025-12-22 10:30", 1},
+                         {2, "GBP/USD", "Sell", 50.00, 1.28, "2025-12-22 09:15", 1},
+                         {3, "USD/JPY", "Buy", 200.00, 150.5, "2025-12-21 15:45", 1},
+                         {4, "EUR/GBP", "Sell", 75.00, 0.85, "2025-12-21 12:20", 1},
+                         {5, "CAD/USD", "Buy", 150.00, 0.73, "2025-12-20 16:00", 1}})
     {
-        // Pre-populate with some test transactions
-        transactions_ = {
-            {1, "USD/EUR", "Buy", 100.00, 0.95, "2025-12-22 10:30", 1},
-            {2, "GBP/USD", "Sell", 50.00, 1.28, "2025-12-22 09:15", 1},
-            {3, "USD/JPY", "Buy", 200.00, 150.5, "2025-12-21 15:45", 1},
-            {4, "EUR/GBP", "Sell", 75.00, 0.85, "2025-12-21 12:20", 1},
-            {5, "CAD/USD", "Buy", 150.00, 0.73, "2025-12-20 16:00", 1}};
     }
 
     int TransactionsService::GetEffectiveUserId(std::optional<int> user_id) const
@@ -40,7 +38,7 @@ namespace services
     }
 
     std::vector<Transaction> TransactionsService::GetTransactionsByPair(
-        const std::string &product_pair, std::optional<int> user_id) const
+        std::string_view product_pair, std::optional<int> user_id) const
     {
         int effective_id = GetEffectiveUserId(user_id);
         std::vector<Transaction> result;
@@ -56,9 +54,9 @@ namespace services
         return result;
     }
 
-    ActivityStats TransactionsService::GetActivitySummary(const std::string &timeframe,
-                                                          const std::string &start_date,
-                                                          const std::string &end_date,
+    ActivityStats TransactionsService::GetActivitySummary([[maybe_unused]] std::string_view timeframe,
+                                                          [[maybe_unused]] std::string_view start_date,
+                                                          [[maybe_unused]] std::string_view end_date,
                                                           std::optional<int> user_id) const
     {
         int effective_id = GetEffectiveUserId(user_id);

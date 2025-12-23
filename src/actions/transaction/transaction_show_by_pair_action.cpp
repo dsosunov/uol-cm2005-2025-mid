@@ -51,8 +51,9 @@ void TransactionShowByPairAction::DisplayResults(
     for (const auto &transaction : transactions)
     {
       context.output->WriteLine(
-          std::format("{}. {} - {:.2f} @ {:.4f} - {}", index++, transaction.type,
+          std::format("{}. {} - {:.2f} @ {:.4f} - {}", index, transaction.type,
                       transaction.amount, transaction.price, transaction.timestamp));
+      ++index;
     }
   }
 }

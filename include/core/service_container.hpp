@@ -6,6 +6,15 @@
 #include <typeindex>
 #include <unordered_map>
 
+class ServiceNotRegisteredException : public std::runtime_error
+{
+public:
+    explicit ServiceNotRegisteredException(const std::string &service_name)
+        : std::runtime_error("Service not registered: " + service_name)
+    {
+    }
+};
+
 class ServiceContainer
 {
 public:
@@ -23,7 +32,7 @@ public:
         auto it = services_.find(std::type_index(typeid(T)));
         if (it == services_.end())
         {
-            throw std::runtime_error("Service not registered");
+            throw ServiceNotRegisteredException(typeid(T).name());
         }
         return std::any_cast<std::shared_ptr<T>>(it->second);
     }

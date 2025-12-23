@@ -3,7 +3,7 @@
 namespace services
 {
 
-    WalletService::WalletService() : default_user_id_(1)
+    WalletService::WalletService()
     {
         // Pre-populate with some test balances for default user
         balances_[1]["USD"] = 1234.56;
@@ -18,22 +18,20 @@ namespace services
         return user_id.value_or(default_user_id_);
     }
 
-    std::map<std::string, double> WalletService::GetBalances(std::optional<int> user_id) const
+    std::map<std::string, double, std::less<>> WalletService::GetBalances(std::optional<int> user_id) const
     {
         int effective_id = GetEffectiveUserId(user_id);
-        auto it = balances_.find(effective_id);
-        if (it != balances_.end())
+        if (auto it = balances_.find(effective_id); it != balances_.end())
         {
             return it->second;
         }
         return {}; // Empty map if user has no balances
     }
 
-    double WalletService::GetBalance(const std::string &currency, std::optional<int> user_id) const
+    double WalletService::GetBalance(std::string_view currency, std::optional<int> user_id) const
     {
         int effective_id = GetEffectiveUserId(user_id);
-        auto user_it = balances_.find(effective_id);
-        if (user_it != balances_.end())
+        if (auto user_it = balances_.find(effective_id); user_it != balances_.end())
         {
             auto currency_it = user_it->second.find(currency);
             if (currency_it != user_it->second.end())
@@ -47,7 +45,7 @@ namespace services
     double WalletService::GetTotalBalanceInUSD(std::optional<int> user_id) const
     {
         // Simplified conversion rates (hard-coded)
-        std::map<std::string, double> rates = {
+        std::map<std::string, double, std::less<>> rates = {
             {"USD", 1.0}, {"EUR", 1.09}, {"GBP", 1.27}, {"JPY", 0.0067}, {"CAD", 0.73}, {"AUD", 0.65}, {"CHF", 1.13}, {"CNY", 0.14}};
 
         int effective_id = GetEffectiveUserId(user_id);
@@ -70,7 +68,7 @@ namespace services
         return total_usd;
     }
 
-    OperationResult WalletService::Deposit(const std::string &currency, double amount,
+    OperationResult WalletService::Deposit(std::string_view currency, double amount,
                                            std::optional<int> user_id)
     {
         if (amount <= 0)
@@ -79,13 +77,14 @@ namespace services
         }
 
         int effective_id = GetEffectiveUserId(user_id);
-        balances_[effective_id][currency] += amount;
-        double new_balance = balances_[effective_id][currency];
+        std::string currency_str(currency);
+        balances_[effective_id][currency_str] += amount;
+        double new_balance = balances_[effective_id][currency_str];
 
         return {true, "Deposit successful", new_balance};
     }
 
-    OperationResult WalletService::Withdraw(const std::string &currency, double amount,
+    OperationResult WalletService::Withdraw(std::string_view currency, double amount,
                                             std::optional<int> user_id)
     {
         if (amount <= 0)
@@ -94,15 +93,15 @@ namespace services
         }
 
         int effective_id = GetEffectiveUserId(user_id);
-        double current_balance = GetBalance(currency, user_id);
 
-        if (current_balance < amount)
+        if (double current_balance = GetBalance(currency, user_id); current_balance < amount)
         {
             return {false, "Insufficient balance", current_balance};
         }
 
-        balances_[effective_id][currency] -= amount;
-        double new_balance = balances_[effective_id][currency];
+        std::string currency_str(currency);
+        balances_[effective_id][currency_str] -= amount;
+        double new_balance = balances_[effective_id][currency_str];
 
         return {true, "Withdrawal successful", new_balance};
     }

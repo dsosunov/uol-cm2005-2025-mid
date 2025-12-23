@@ -2,6 +2,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "services/trading_service.hpp"
@@ -37,7 +38,7 @@ namespace candlestick
          * @param timeframe "daily", "monthly", or "yearly"
          * @return Vector of date strings appropriate for the timeframe
          */
-        std::vector<std::string> GetStartDates(const std::string &timeframe) const;
+        std::vector<std::string> GetStartDates(std::string_view timeframe) const;
 
         /**
          * @brief Get end date options based on timeframe and start date
@@ -45,13 +46,13 @@ namespace candlestick
          * @param start_date Optional start date for filtering (empty if not selected yet)
          * @return Vector of date strings >= start_date (or all if start_date empty)
          */
-        std::vector<std::string> GetEndDates(const std::string &timeframe,
-                                             const std::string &start_date) const;
+        std::vector<std::string> GetEndDates(std::string_view timeframe,
+                                             std::string_view start_date) const;
 
     private:
         std::shared_ptr<services::TradingService> trading_service_;
 
-        std::vector<std::string> GetDatesByTimeframe(const std::string &timeframe) const;
+        std::vector<std::string> GetDatesByTimeframe(std::string_view timeframe) const;
     };
 
 } // namespace candlestick

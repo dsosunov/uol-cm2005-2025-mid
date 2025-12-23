@@ -2,6 +2,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <string_view>
 
 namespace services
 {
@@ -20,21 +21,21 @@ namespace services
         ~WalletService() = default;
 
         // Balance operations
-        std::map<std::string, double> GetBalances(std::optional<int> user_id = std::nullopt) const;
-        double GetBalance(const std::string &currency,
+        std::map<std::string, double, std::less<>> GetBalances(std::optional<int> user_id = std::nullopt) const;
+        double GetBalance(std::string_view currency,
                           std::optional<int> user_id = std::nullopt) const;
         double GetTotalBalanceInUSD(std::optional<int> user_id = std::nullopt) const;
 
         // Transaction operations
-        OperationResult Deposit(const std::string &currency, double amount,
+        OperationResult Deposit(std::string_view currency, double amount,
                                 std::optional<int> user_id = std::nullopt);
-        OperationResult Withdraw(const std::string &currency, double amount,
+        OperationResult Withdraw(std::string_view currency, double amount,
                                  std::optional<int> user_id = std::nullopt);
 
     private:
         // Map of user_id -> currency -> balance
-        std::map<int, std::map<std::string, double>> balances_;
-        int default_user_id_;
+        std::map<int, std::map<std::string, double, std::less<>>> balances_;
+        int default_user_id_ = 1;
 
         // Helper to get effective user ID
         int GetEffectiveUserId(std::optional<int> user_id) const;

@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace services
@@ -33,10 +34,10 @@ namespace services
         // Query operations
         std::vector<Transaction> GetLastTransactions(int count,
                                                      std::optional<int> user_id = std::nullopt) const;
-        std::vector<Transaction> GetTransactionsByPair(const std::string &product_pair,
+        std::vector<Transaction> GetTransactionsByPair(std::string_view product_pair,
                                                        std::optional<int> user_id = std::nullopt) const;
-        ActivityStats GetActivitySummary(const std::string &timeframe, const std::string &start_date,
-                                         const std::string &end_date,
+        ActivityStats GetActivitySummary(std::string_view timeframe, std::string_view start_date,
+                                         std::string_view end_date,
                                          std::optional<int> user_id = std::nullopt) const;
 
         // Mutation operations
@@ -44,8 +45,8 @@ namespace services
 
     private:
         std::vector<Transaction> transactions_;
-        int next_transaction_id_;
-        int default_user_id_;
+        int next_transaction_id_ = 6;
+        int default_user_id_ = 1;
 
         // Helper to get effective user ID
         int GetEffectiveUserId(std::optional<int> user_id) const;

@@ -17,7 +17,7 @@ namespace candlestick
     }
 
     std::vector<std::string> CandlestickFormDataProvider::GetStartDates(
-        const std::string &timeframe) const
+        std::string_view timeframe) const
     {
         // Request limited dataset from service (lazy loading)
         services::DateQueryOptions options;
@@ -27,8 +27,8 @@ namespace candlestick
     }
 
     std::vector<std::string> CandlestickFormDataProvider::GetEndDates(
-        const std::string &timeframe,
-        const std::string &start_date) const
+        std::string_view timeframe,
+        std::string_view start_date) const
     {
         // Pass filter to service for server-side filtering
         services::DateQueryOptions options;
@@ -45,12 +45,10 @@ namespace candlestick
     }
 
     std::vector<std::string> CandlestickFormDataProvider::GetDatesByTimeframe(
-        const std::string &timeframe) const
+        std::string_view timeframe) const
     {
-        // Legacy method - now delegates to new API
-        services::DateQueryOptions options;
-        options.limit = 100;
-        return trading_service_->GetDateSamples(timeframe, options);
+        // Legacy method - delegates to GetStartDates
+        return GetStartDates(timeframe);
     }
 
 } // namespace candlestick

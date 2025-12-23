@@ -3,6 +3,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace services
@@ -31,7 +32,7 @@ namespace services
     {
         bool success;
         int trades_generated;
-        std::map<std::string, int> trades_by_pair;
+        std::map<std::string, int, std::less<>> trades_by_pair;
         double total_volume;
         std::string message;
     };
@@ -55,15 +56,15 @@ namespace services
         ~TradingService() = default;
 
         // Market data operations
-        CandlestickResult GetCandlestickData(const std::string &currency_base,
-                                             const std::string &currency_quote,
-                                             const std::string &asks_bids,
-                                             const std::string &timeframe,
-                                             const std::string &start_date,
-                                             const std::string &end_date) const;
+        CandlestickResult GetCandlestickData(std::string_view currency_base,
+                                             std::string_view currency_quote,
+                                             std::string_view asks_bids,
+                                             std::string_view timeframe,
+                                             std::string_view start_date,
+                                             std::string_view end_date) const;
 
         // Trade generation
-        GenerationResult GenerateTrades(int count);
+        GenerationResult GenerateTrades(int count) const;
 
         // Utility
         std::set<std::string, std::less<>> GetAvailableCurrencies() const;
@@ -74,7 +75,7 @@ namespace services
          * @param options Query filters (start_date, end_date, limit, offset)
          * @return Filtered date strings (only requested subset, not all data)
          */
-        std::vector<std::string> GetDateSamples(const std::string &timeframe,
+        std::vector<std::string> GetDateSamples(std::string_view timeframe,
                                                 const DateQueryOptions &options) const;
 
     private:

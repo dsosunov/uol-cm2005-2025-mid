@@ -2,6 +2,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace services
@@ -42,11 +43,11 @@ namespace services
         ~UserService() = default;
 
         // User operations
-        RegistrationResult RegisterUser(const std::string &full_name, const std::string &email,
-                                        const std::string &password);
-        LoginResult LoginUser(const std::string &username, const std::string &password);
-        ResetResult ResetPassword(const std::string &email_or_username,
-                                  const std::string &new_password);
+        RegistrationResult RegisterUser(std::string_view full_name, std::string_view email,
+                                        std::string_view password);
+        LoginResult LoginUser(std::string_view username, std::string_view password);
+        ResetResult ResetPassword(std::string_view email_or_username,
+                                  std::string_view new_password) const;
 
         // Session management
         std::optional<User> GetCurrentUser() const;

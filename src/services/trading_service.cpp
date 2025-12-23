@@ -4,34 +4,33 @@ namespace services
 {
 
     TradingService::TradingService()
+        : available_currencies_({"USD", "CAD", "EUR", "GBP", "JPY", "AUD", "CHF", "CNY"})
     {
-        // Initialize available currencies
-        available_currencies_ = {"USD", "CAD", "EUR", "GBP", "JPY", "AUD", "CHF", "CNY"};
     }
 
-    CandlestickResult TradingService::GetCandlestickData(const std::string &currency_base,
-                                                         const std::string &currency_quote,
-                                                         const std::string &asks_bids,
-                                                         const std::string &timeframe,
-                                                         const std::string &start_date,
-                                                         const std::string &end_date) const
+    CandlestickResult TradingService::GetCandlestickData(std::string_view currency_base,
+                                                         std::string_view currency_quote,
+                                                         [[maybe_unused]] std::string_view asks_bids,
+                                                         std::string_view timeframe,
+                                                         [[maybe_unused]] std::string_view start_date,
+                                                         [[maybe_unused]] std::string_view end_date) const
     {
-        std::string product_pair = currency_base + "/" + currency_quote;
+        std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
 
         // Generate some mock candlestick data
         std::vector<CandlestickData> data;
 
         // Create 5 sample candlesticks with realistic-looking data
-        data.push_back({"2025-12-22 10:00", 1.2450, 1.2485, 1.2440, 1.2470, 125000.0});
-        data.push_back({"2025-12-22 11:00", 1.2470, 1.2510, 1.2455, 1.2495, 145000.0});
-        data.push_back({"2025-12-22 12:00", 1.2495, 1.2520, 1.2480, 1.2505, 135000.0});
-        data.push_back({"2025-12-22 13:00", 1.2505, 1.2530, 1.2490, 1.2515, 155000.0});
-        data.push_back({"2025-12-22 14:00", 1.2515, 1.2545, 1.2505, 1.2530, 165000.0});
+        data.emplace_back("2025-12-22 10:00", 1.2450, 1.2485, 1.2440, 1.2470, 125000.0);
+        data.emplace_back("2025-12-22 11:00", 1.2470, 1.2510, 1.2455, 1.2495, 145000.0);
+        data.emplace_back("2025-12-22 12:00", 1.2495, 1.2520, 1.2480, 1.2505, 135000.0);
+        data.emplace_back("2025-12-22 13:00", 1.2505, 1.2530, 1.2490, 1.2515, 155000.0);
+        data.emplace_back("2025-12-22 14:00", 1.2515, 1.2545, 1.2505, 1.2530, 165000.0);
 
-        return {data, product_pair, timeframe, true, "Data retrieved successfully"};
+        return {data, product_pair, std::string(timeframe), true, "Data retrieved successfully"};
     }
 
-    GenerationResult TradingService::GenerateTrades(int count)
+    GenerationResult TradingService::GenerateTrades(int count) const
     {
         if (count <= 0)
         {
@@ -39,7 +38,7 @@ namespace services
         }
 
         // Simulate trade generation
-        std::map<std::string, int> trades_by_pair = {
+        std::map<std::string, int, std::less<>> trades_by_pair = {
             {"USD/EUR", count / 3}, {"GBP/USD", count / 5}, {"USD/JPY", count / 3}, {"EUR/GBP", count / 5}, {"CAD/USD", count / 10}, {"AUD/USD", count / 10}, {"USD/CHF", count / 10 + 1}};
 
         // Adjust to match exact count
@@ -62,7 +61,7 @@ namespace services
     }
 
     std::vector<std::string> TradingService::GetDateSamples(
-        const std::string &timeframe,
+        std::string_view timeframe,
         const DateQueryOptions &options) const
     {
         // Simulate database with huge datasets

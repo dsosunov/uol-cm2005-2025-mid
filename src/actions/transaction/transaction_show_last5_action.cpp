@@ -26,9 +26,10 @@ void TransactionShowLast5Action::Execute(ActionContext &context)
     for (const auto &transaction : transactions)
     {
       context.output->WriteLine(
-          std::format("{}. {} - {} - {:.2f} @ {:.4f} - {}", index++, transaction.product_pair,
+          std::format("{}. {} - {} - {:.2f} @ {:.4f} - {}", index, transaction.product_pair,
                       transaction.type, transaction.amount, transaction.price,
                       transaction.timestamp));
+      ++index;
     }
   }
 }
