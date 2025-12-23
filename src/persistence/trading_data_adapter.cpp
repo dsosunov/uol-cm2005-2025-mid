@@ -11,7 +11,7 @@ namespace persistence
     }
     void TradingDataAdapter::ReadWithProcessor(
         dto::OrderType order_type,
-        std::function<void(const services::OrderRecord &)> processor) const
+        const std::function<void(const services::OrderRecord &)> &processor) const
     {
         BaseDataAdapter<services::OrderRecord>::ReadWithProcessor(
             [order_type](const services::OrderRecord &order)
@@ -19,7 +19,7 @@ namespace persistence
             processor);
     }
     void TradingDataAdapter::ReadWithProcessor(
-        std::function<void(const services::OrderRecord &)> processor) const
+        const std::function<void(const services::OrderRecord &)> &processor) const
     {
         BaseDataAdapter<services::OrderRecord>::ReadWithProcessor(
             [](const services::OrderRecord &)
@@ -57,17 +57,11 @@ namespace persistence
         try
         {
             std::string clean_price = record.price;
-            clean_price.erase(
-                std::remove_if(clean_price.begin(), clean_price.end(),
-                               [](char c)
-                               { return !std::isdigit(c) && c != '.' && c != '-'; }),
-                clean_price.end());
+            std::erase_if(clean_price, [](char c)
+                          { return !std::isdigit(c) && c != '.' && c != '-'; });
             std::string clean_amount = record.amount;
-            clean_amount.erase(
-                std::remove_if(clean_amount.begin(), clean_amount.end(),
-                               [](char c)
-                               { return !std::isdigit(c) && c != '.' && c != '-'; }),
-                clean_amount.end());
+            std::erase_if(clean_amount, [](char c)
+                          { return !std::isdigit(c) && c != '.' && c != '-'; });
             if (clean_price.empty() || clean_amount.empty())
             {
                 return std::nullopt;

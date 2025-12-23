@@ -23,7 +23,7 @@ void UserResetAction::DisplayResults(const utils::ServiceResult<void> &result,
 {
   actions::ActionHelper::DisplayResult(
       result.success, "Password Reset", result.message, context,
-      [&]()
+      [&context, &account]()
       {
         context.output->WriteLine(std::format("Account: {}", account));
         context.output->WriteLine("New password has been set.");

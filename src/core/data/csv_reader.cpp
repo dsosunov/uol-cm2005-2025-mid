@@ -14,7 +14,7 @@ namespace data
     {
         return file_path_;
     }
-    std::vector<CsvRecord> CsvReader::ReadAll(RecordFilter filter) const
+    std::vector<CsvRecord> CsvReader::ReadAll(const RecordFilter &filter) const
     {
         std::vector<CsvRecord> results;
         results.reserve(100);
@@ -40,7 +40,7 @@ namespace data
         }
         return results;
     }
-    size_t CsvReader::Count(RecordFilter filter) const
+    size_t CsvReader::Count(const RecordFilter &filter) const
     {
         size_t count = 0;
         std::ifstream file(file_path_);

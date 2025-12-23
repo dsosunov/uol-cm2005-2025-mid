@@ -1,17 +1,9 @@
 ﻿#pragma once
 #include <any>
 #include <memory>
-#include <stdexcept>
 #include <typeindex>
 #include <unordered_map>
-class ServiceNotRegisteredException : public std::runtime_error
-{
-public:
-    explicit ServiceNotRegisteredException(const std::string &service_name)
-        : std::runtime_error("Service not registered: " + service_name)
-    {
-    }
-};
+#include "service_not_registered_exception.hpp"
 class ServiceContainer
 {
 public:
@@ -31,6 +23,7 @@ public:
         }
         return std::any_cast<std::shared_ptr<T>>(it->second);
     }
+
 private:
     std::unordered_map<std::type_index, std::any> services_;
 };

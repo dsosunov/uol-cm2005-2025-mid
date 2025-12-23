@@ -13,8 +13,8 @@ namespace persistence
     {
     public:
         explicit TradingDataAdapter(std::shared_ptr<data::CsvReader> reader);
-        void ReadWithProcessor(dto::OrderType order_type, std::function<void(const services::OrderRecord &)> processor) const;
-        void ReadWithProcessor(std::function<void(const services::OrderRecord &)> processor) const;
+        void ReadWithProcessor(dto::OrderType order_type, const std::function<void(const services::OrderRecord &)> &processor) const;
+        void ReadWithProcessor(const std::function<void(const services::OrderRecord &)> &processor) const;
         static bool WriteAll(data::CsvWriter &writer, const std::vector<services::OrderRecord> &records);
 
     protected:

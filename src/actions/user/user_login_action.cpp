@@ -17,7 +17,7 @@ void UserLoginAction::DisplayResults(const utils::ServiceResult<services::User> 
 {
   actions::ActionHelper::DisplayResult(
       result.success, GetOperationName(), result.message, context,
-      [&]()
+      [&result, &context]()
       {
         if (result.data.has_value())
         {

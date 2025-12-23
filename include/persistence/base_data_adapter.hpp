@@ -64,7 +64,9 @@ namespace persistence
         }
 
     protected:
-        std::shared_ptr<data::CsvReader> reader_;
         virtual std::optional<TEntity> TransformToEntity(const data::CsvRecord &record) const = 0;
+
+    private:
+        std::shared_ptr<data::CsvReader> reader_;
     };
 }

@@ -20,7 +20,7 @@ void WalletWithdrawAction::DisplayResults(const utils::ServiceResult<double> &re
 {
   actions::ActionHelper::DisplayResult(
       result.success, GetOperationName(), result.message, context,
-      [&]()
+      [&context, &data, &result]()
       {
         context.output->WriteLine(std::format("Currency: {}", data.currency));
         context.output->WriteLine(std::format("New Balance: {:.2f}", *result.data));

@@ -30,8 +30,7 @@ namespace services
         int effective_id = GetEffectiveUserId(user_id);
         if (reader_ && balances_.find(effective_id) == balances_.end())
         {
-            const_cast<WalletService *>(this)->balances_[effective_id] =
-                reader_->ReadBalances(effective_id);
+            balances_[effective_id] = reader_->ReadBalances(effective_id);
         }
         if (auto it = balances_.find(effective_id); it != balances_.end())
         {

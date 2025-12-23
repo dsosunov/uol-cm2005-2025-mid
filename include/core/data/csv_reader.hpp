@@ -19,10 +19,10 @@ namespace data
         CsvReader &operator=(CsvReader &&) noexcept = default;
         bool IsOpen() const;
         const std::filesystem::path &GetFilePath() const;
-        std::vector<CsvRecord> ReadAll(RecordFilter filter = nullptr) const;
+        std::vector<CsvRecord> ReadAll(const RecordFilter &filter = nullptr) const;
         template <typename T>
         std::vector<T> ReadAllTransformed(RecordTransform<T> transform,
-                                          RecordFilter filter = nullptr) const
+                                          const RecordFilter &filter = nullptr) const
         {
             std::vector<T> results;
             results.reserve(100);
@@ -70,8 +70,9 @@ namespace data
                 }
             }
         }
-        size_t Count(RecordFilter filter = nullptr) const;
+        size_t Count(const RecordFilter &filter = nullptr) const;
         bool FileExists() const;
+
     private:
         std::filesystem::path file_path_;
     };

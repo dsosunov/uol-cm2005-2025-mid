@@ -57,17 +57,11 @@ namespace persistence
         try
         {
             std::string clean_price = record.price;
-            clean_price.erase(
-                std::remove_if(clean_price.begin(), clean_price.end(),
-                               [](char c)
-                               { return !std::isdigit(c) && c != '.' && c != '-'; }),
-                clean_price.end());
+            std::erase_if(clean_price, [](char c)
+                          { return !std::isdigit(c) && c != '.' && c != '-'; });
             std::string clean_amount = record.amount;
-            clean_amount.erase(
-                std::remove_if(clean_amount.begin(), clean_amount.end(),
-                               [](char c)
-                               { return !std::isdigit(c) && c != '.' && c != '-'; }),
-                clean_amount.end());
+            std::erase_if(clean_amount, [](char c)
+                          { return !std::isdigit(c) && c != '.' && c != '-'; });
             if (clean_price.empty() || clean_amount.empty())
             {
                 return std::nullopt;

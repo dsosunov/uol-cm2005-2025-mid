@@ -42,6 +42,14 @@ namespace services
         int trades_generated;
         std::map<std::string, int, std::less<>> trades_by_pair;
         double total_volume;
+
+        GenerationData() = default;
+        GenerationData(int trades_generated, std::map<std::string, int, std::less<>> trades_by_pair, double total_volume)
+            : trades_generated(trades_generated), trades_by_pair(std::move(trades_by_pair)), total_volume(total_volume) {}
+        GenerationData(GenerationData &&) noexcept = default;
+        GenerationData &operator=(GenerationData &&) noexcept = default;
+        GenerationData(const GenerationData &) = default;
+        GenerationData &operator=(const GenerationData &) = default;
     };
     struct DateQueryOptions
     {

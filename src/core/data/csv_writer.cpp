@@ -10,9 +10,48 @@ namespace data
             std::filesystem::create_directories(file_path_.parent_path());
         }
     }
-    CsvWriter::~CsvWriter()
+    CsvWriter::~CsvWriter() noexcept
     {
-        Flush();
+        try
+        {
+            Flush();
+        }
+        catch (...)
+        {
+        }
+    }
+
+    CsvWriter::CsvWriter(CsvWriter &&other) noexcept
+        : file_path_(std::move(other.file_path_)),
+          append_mode_(other.append_mode_),
+          buffer_size_(other.buffer_size_),
+          buffer_(std::move(other.buffer_)),
+          has_flushed_(other.has_flushed_)
+    {
+        other.buffer_size_ = 0;
+        other.has_flushed_ = false;
+    }
+
+    CsvWriter &CsvWriter::operator=(CsvWriter &&other) noexcept
+    {
+        if (this != &other)
+        {
+            try
+            {
+                Flush();
+            }
+            catch (...)
+            {
+            }
+            file_path_ = std::move(other.file_path_);
+            append_mode_ = other.append_mode_;
+            buffer_size_ = other.buffer_size_;
+            buffer_ = std::move(other.buffer_);
+            has_flushed_ = other.has_flushed_;
+            other.buffer_size_ = 0;
+            other.has_flushed_ = false;
+        }
+        return *this;
     }
     bool CsvWriter::Write(const CsvRecord &record)
     {

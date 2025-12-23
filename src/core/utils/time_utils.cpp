@@ -12,7 +12,7 @@ namespace utils
         }
         std::tm tm = {};
         std::istringstream ss{std::string(str)};
-        if (str.find('/') != std::string_view::npos)
+        if (str.contains('/'))
         {
             char delim;
             ss >> tm.tm_year >> delim >> tm.tm_mon >> delim >> tm.tm_mday;
@@ -33,7 +33,7 @@ namespace utils
                 }
             }
         }
-        else if (str.find('-') != std::string_view::npos)
+        else if (str.contains('-'))
         {
             char delim;
             ss >> tm.tm_year >> delim >> tm.tm_mon >> delim >> tm.tm_mday;
@@ -87,7 +87,7 @@ namespace utils
 #endif
         std::ostringstream ss;
         ss << std::put_time(&tm, "%Y/%m/%d %H:%M:%S");
-        ss << '.' << std::setfill('0') << std::setw(6) << microseconds;
+        ss << std::format(".{:06}", microseconds);
         return ss.str();
     }
 }

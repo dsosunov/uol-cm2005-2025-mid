@@ -17,7 +17,7 @@ namespace actions
                                      std::string_view operation_name,
                                      std::string_view message,
                                      ActionContext &context,
-                                     std::function<void()> display_data)
+                                     const std::function<void()> &display_data)
     {
         context.output->WriteLine("");
         if (success)

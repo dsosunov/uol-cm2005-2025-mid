@@ -18,7 +18,7 @@ namespace actions
                                   std::string_view operation_name,
                                   std::string_view message,
                                   ActionContext &context,
-                                  std::function<void()> display_data = nullptr);
+                                  const std::function<void()> &display_data = nullptr);
         static void DisplaySectionHeader(std::string_view title, ActionContext &context);
         template <typename T>
         static void DisplayField(std::string_view label, const T &value, ActionContext &context)

@@ -32,7 +32,7 @@ namespace services
                                               std::optional<int> user_id = std::nullopt);
 
     private:
-        std::map<int, std::map<std::string, double, std::less<>>> balances_;
+        mutable std::map<int, std::map<std::string, double, std::less<>>> balances_;
         int default_user_id_ = 1;
         std::shared_ptr<persistence::WalletDataAdapter> reader_;
         std::shared_ptr<data::CsvWriter> writer_;

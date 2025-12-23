@@ -17,7 +17,7 @@ void UserRegisterAction::DisplayResults(const utils::ServiceResult<services::Use
 {
   actions::ActionHelper::DisplayResult(
       result.success, GetOperationName(), result.message, context,
-      [&]()
+      [&result, &context]()
       {
         if (result.data.has_value())
         {

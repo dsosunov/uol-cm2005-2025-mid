@@ -21,7 +21,7 @@ namespace services
         std::vector<Transaction> result;
         if (adapter_)
         {
-            adapter_->ReadWithProcessor([&](const Transaction &transaction)
+            adapter_->ReadWithProcessor([&result, effective_id, count](const Transaction &transaction)
                                         {
                 if (transaction.user_id == effective_id && result.size() < static_cast<size_t>(count))
                 {
@@ -48,7 +48,7 @@ namespace services
         std::vector<Transaction> result;
         if (adapter_)
         {
-            adapter_->ReadWithProcessor([&](const Transaction &transaction)
+            adapter_->ReadWithProcessor([&result, effective_id, &product_pair](const Transaction &transaction)
                                         {
                 if (transaction.user_id == effective_id && transaction.product_pair == product_pair)
                 {
