@@ -14,16 +14,16 @@ namespace forms::shared
   class CurrencyPairBinder
   {
   public:
-    void operator()(std::any &target, const std::string &value,
+    void operator()(std::any &target, std::string_view value,
                     const form::FormContext &) const
     {
       auto &dto = std::any_cast<std::reference_wrapper<DTO>>(target).get();
 
       size_t pos = value.find('/');
-      if (pos != std::string::npos)
+      if (pos != std::string_view::npos)
       {
-        std::string base = value.substr(0, pos);
-        std::string quote = value.substr(pos + 1);
+        std::string base(value.substr(0, pos));
+        std::string quote(value.substr(pos + 1));
 
         // Convert to uppercase
         std::transform(base.begin(), base.end(), base.begin(), ::toupper);

@@ -17,9 +17,8 @@ void AutoGenerateTradesAction::Execute(ActionContext &context)
                                },
                                nullptr);
   form::FormContext emptyContext;
-  auto inputOpt = context.form_input_provider->ReadField(confirmField, emptyContext);
 
-  if (!inputOpt || *inputOpt == "cancel")
+  if (auto inputOpt = context.form_input_provider->ReadField(confirmField, emptyContext); !inputOpt || *inputOpt == "cancel")
   {
     context.output->WriteLine("");
     context.output->WriteLine("Auto-generation cancelled.");

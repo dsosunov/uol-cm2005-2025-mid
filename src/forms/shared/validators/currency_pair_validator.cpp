@@ -26,12 +26,12 @@ namespace forms::shared
     std::transform(first.begin(), first.end(), first.begin(), ::toupper);
     std::transform(second.begin(), second.end(), second.begin(), ::toupper);
 
-    if (allowed_currencies_.find(first) == allowed_currencies_.end())
+    if (!allowed_currencies_.contains(first))
     {
       return form::ValidationResult::Invalid(std::format("Unknown currency: {}", first));
     }
 
-    if (allowed_currencies_.find(second) == allowed_currencies_.end())
+    if (!allowed_currencies_.contains(second))
     {
       return form::ValidationResult::Invalid(std::format("Unknown currency: {}", second));
     }

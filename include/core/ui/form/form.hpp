@@ -49,8 +49,7 @@ namespace form
     for (const auto &field : fields_)
     {
       // Form displays validation hint
-      auto hint = field->GetValidationHint();
-      if (hint)
+      if (auto hint = field->GetValidationHint(); hint)
       {
         output_->WriteLine(std::format("[{}]", *hint));
       }
@@ -77,8 +76,7 @@ namespace form
       }
 
       // Form validates
-      auto validation = field->Validate(value, context_);
-      if (!validation.is_valid)
+      if (auto validation = field->Validate(value, context_); !validation.is_valid)
       {
         output_->WriteLine(std::format("Error: {}", validation.error_message));
         return FormReadResult::kCancelled;

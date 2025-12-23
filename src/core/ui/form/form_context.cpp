@@ -1,19 +1,22 @@
 #include "core/ui/form/form_context.hpp"
 
-namespace form {
+namespace form
+{
 
-void FormContext::SetValue(const std::string& key, const std::string& value) {
-  values_[key] = value;
-}
-
-std::optional<std::string> FormContext::GetValue(const std::string& key) const {
-  auto it = values_.find(key);
-  if (it != values_.end()) {
-    return it->second;
+  void FormContext::SetValue(std::string_view key, std::string_view value)
+  {
+    values_[std::string(key)] = std::string(value);
   }
-  return std::nullopt;
-}
 
-void FormContext::Clear() { values_.clear(); }
+  std::optional<std::string> FormContext::GetValue(std::string_view key) const
+  {
+    if (auto it = values_.find(std::string(key)); it != values_.end())
+    {
+      return it->second;
+    }
+    return std::nullopt;
+  }
 
-}  // namespace form
+  void FormContext::Clear() { values_.clear(); }
+
+} // namespace form

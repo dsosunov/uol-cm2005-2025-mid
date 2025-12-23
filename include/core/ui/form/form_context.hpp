@@ -9,8 +9,8 @@ namespace form
   class FormContext
   {
   public:
-    void SetValue(const std::string &key, const std::string &value);
-    std::optional<std::string> GetValue(const std::string &key) const;
+    void SetValue(std::string_view key, std::string_view value);
+    std::optional<std::string> GetValue(std::string_view key) const;
     void Clear();
 
   private:
