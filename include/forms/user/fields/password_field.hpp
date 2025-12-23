@@ -8,4 +8,4 @@ class PasswordField : public form::TextField {
   explicit PasswordField();
 };
 
-}  // namespace user_forms
+}

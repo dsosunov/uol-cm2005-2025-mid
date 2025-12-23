@@ -16,4 +16,4 @@ std::vector<std::shared_ptr<form::Field>> ResetForm::SetupFormLayout() {
   return fields;
 }
 
-}  // namespace user_forms
+}

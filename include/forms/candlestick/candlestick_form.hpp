@@ -23,4 +23,4 @@ namespace candlestick
             std::shared_ptr<CandlestickFormDataProvider> data_provider);
     };
 
-} // namespace candlestick
+}

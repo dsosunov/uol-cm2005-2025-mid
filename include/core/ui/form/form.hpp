@@ -39,7 +39,6 @@ namespace form
   template <typename T>
   FormReadResult Form::Read(T &target)
   {
-    // Form owns all display and flow control
     output_->WriteLine("Type 'cancel' to abort at any time");
     output_->WriteLine("");
 
@@ -48,19 +47,12 @@ namespace form
 
     for (const auto &field : fields_)
     {
-      // Form displays validation hint
       if (auto hint = field->GetValidationHint(); hint)
       {
         output_->WriteLine(std::format("[{}]", *hint));
       }
-
-      // Form displays prompt
       output_->Write(std::format("{}: ", field->GetPrompt()));
-
-      // Provider adapts based on field type, receives context for data sources
       auto valueOpt = input_provider_->ReadField(*field, context_);
-
-      // Check if provider returned no input (error/unknown field type)
       if (!valueOpt)
       {
         output_->WriteLine("Error: Failed to read input");
@@ -68,14 +60,10 @@ namespace form
       }
 
       std::string value = *valueOpt;
-
-      // Form checks cancellation
       if (value == "cancel" || value == "Cancel" || value == "CANCEL")
       {
         return FormReadResult::kCancelled;
       }
-
-      // Form validates
       if (auto validation = field->Validate(value, context_); !validation.is_valid)
       {
         output_->WriteLine(std::format("Error: {}", validation.error_message));
@@ -89,4 +77,4 @@ namespace form
     return FormReadResult::kSuccess;
   }
 
-} // namespace form
+}

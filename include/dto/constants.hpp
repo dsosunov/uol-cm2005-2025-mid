@@ -1,25 +1,49 @@
 #pragma once
 #include <string>
-#include <vector>
+#include <string_view>
 
 namespace dto
 {
 
-  namespace timeframe
+  enum class Timeframe
   {
-    inline constexpr const char *DAILY = "daily";
-    inline constexpr const char *MONTHLY = "monthly";
-    inline constexpr const char *YEARLY = "yearly";
+    Daily,
+    Monthly,
+    Yearly
+  };
 
-    inline std::vector<std::string> GetAll() { return {DAILY, MONTHLY, YEARLY}; }
-  } // namespace timeframe
-
-  namespace order_type
+  enum class OrderType
   {
-    inline constexpr const char *ASKS = "asks";
-    inline constexpr const char *BIDS = "bids";
+    Asks,
+    Bids
+  };
 
-    inline std::vector<std::string> GetAll() { return {ASKS, BIDS}; }
-  } // namespace order_type
+  inline std::string_view TimeframeToString(Timeframe timeframe)
+  {
+    switch (timeframe)
+    {
+    case Timeframe::Daily:
+      return "daily";
+    case Timeframe::Monthly:
+      return "monthly";
+    case Timeframe::Yearly:
+      return "yearly";
+    default:
+      return "";
+    }
+  }
 
-} // namespace dto
+  inline std::string_view OrderTypeToString(OrderType order_type)
+  {
+    switch (order_type)
+    {
+    case OrderType::Asks:
+      return "asks";
+    case OrderType::Bids:
+      return "bids";
+    default:
+      return "";
+    }
+  }
+
+}

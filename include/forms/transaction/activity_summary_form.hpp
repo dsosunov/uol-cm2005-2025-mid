@@ -21,4 +21,4 @@ namespace transaction_forms
         std::shared_ptr<ActivitySummaryFormDataProvider> data_provider);
   };
 
-} // namespace transaction_forms
+}

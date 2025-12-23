@@ -15,7 +15,14 @@ set(SOURCES
     services/wallet_service.cpp
     services/transactions_service.cpp
     services/trading_service.cpp
-    core/service_container.cpp
+    persistence/trading_data_adapter.cpp
+    persistence/transaction_data_adapter.cpp
+    persistence/wallet_data_adapter.cpp
+    core/data/csv_types.cpp
+    core/data/csv_reader.cpp
+    core/data/csv_writer.cpp
+    core/utils/time_utils.cpp
+    service_container.cpp
     core/ui/io/standard_input.cpp
     core/ui/io/standard_output.cpp
     core/ui/menu/menu_node.cpp
@@ -27,6 +34,7 @@ set(SOURCES
     core/ui/form/menu_form_input_provider.cpp
     core/ui/form/form_context.cpp
     core/ui/form/data_source.cpp
+    core/ui/form/static_data_source.cpp
     core/ui/form/fields/text_field.cpp
     core/ui/form/fields/selection_field.cpp
     forms/shared/validators/currency_pair_validator.cpp

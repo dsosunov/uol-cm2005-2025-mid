@@ -4,7 +4,7 @@ namespace form
 {
 
   SelectionField::SelectionField(std::string name, std::string prompt,
-                                 std::vector<std::string> options, ValueBinder binder)
+                                 std::vector<OptionPair> options, ValueBinder binder)
       : name_(std::move(name)),
         prompt_(std::move(prompt)),
         static_options_(std::move(options)),
@@ -24,14 +24,11 @@ namespace form
 
   std::optional<std::string> SelectionField::GetValidationHint() const
   {
-    // Selection fields don't need validation hints - options are presented to user
     return std::nullopt;
   }
 
-  std::vector<std::string> SelectionField::GetOptions(const FormContext &context) const
+  std::vector<SelectionField::OptionPair> SelectionField::GetOptions(const FormContext &context) const
   {
-    // Provider calls this to get options for menu rendering
-    // Evaluate data source if present, otherwise return static options
     if (data_source_)
     {
       return data_source_->GetOptions(context);
@@ -51,4 +48,4 @@ namespace form
     binder_(target, value, context);
   }
 
-} // namespace form
+}

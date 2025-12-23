@@ -30,4 +30,4 @@ namespace user_forms
         return "Valid email format (e.g., user@example.com)";
     }
 
-} // namespace user_forms
+}

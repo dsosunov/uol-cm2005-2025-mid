@@ -1,5 +1,7 @@
 #include "forms/candlestick/candlestick_form_data_provider.hpp"
 
+#include "core/utils/time_utils.hpp"
+
 #include "dto/constants.hpp"
 
 namespace candlestick
@@ -11,44 +13,72 @@ namespace candlestick
     {
     }
 
-    std::set<std::string, std::less<>> CandlestickFormDataProvider::GetAvailableCurrencies() const
+    std::set<std::string, std::less<>> CandlestickFormDataProvider::GetAvailableProducts() const
     {
-        return trading_service_->GetAvailableCurrencies();
+        return trading_service_->GetAvailableProducts();
     }
 
-    std::vector<std::string> CandlestickFormDataProvider::GetStartDates(
+    std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider::GetStartDates(
         std::string_view timeframe) const
     {
-        // Request limited dataset from service (lazy loading)
         services::DateQueryOptions options;
-        options.limit = 100; // Reasonable UI dropdown limit
+        options.limit = 100;
 
-        return trading_service_->GetDateSamples(timeframe, options);
+        // Convert string to enum
+        dto::Timeframe timeframe_enum = dto::Timeframe::Daily;
+        if (timeframe == "monthly")
+            timeframe_enum = dto::Timeframe::Monthly;
+        else if (timeframe == "yearly")
+            timeframe_enum = dto::Timeframe::Yearly;
+
+        auto dates = trading_service_->GetDateSamples(timeframe_enum, options);
+        std::vector<OptionPair> pairs;
+        pairs.reserve(dates.size());
+        for (const auto &date : dates)
+        {
+            pairs.emplace_back(date, date);
+        }
+        return pairs;
     }
 
-    std::vector<std::string> CandlestickFormDataProvider::GetEndDates(
+    std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider::GetEndDates(
         std::string_view timeframe,
         std::string_view start_date) const
     {
-        // Pass filter to service for server-side filtering
         services::DateQueryOptions options;
 
         if (!start_date.empty())
         {
-            options.start_date = start_date; // Server filters: date >= start_date
+            auto parsed = utils::ParseTimestamp(start_date);
+            if (parsed.has_value())
+            {
+                options.start_date = *parsed;
+            }
         }
 
-        options.limit = 100; // Reasonable UI dropdown limit
+        options.limit = 100;
 
-        // Service applies filter at source - NO client-side filtering!
-        return trading_service_->GetDateSamples(timeframe, options);
+        // Convert string to enum
+        dto::Timeframe timeframe_enum = dto::Timeframe::Daily;
+        if (timeframe == "monthly")
+            timeframe_enum = dto::Timeframe::Monthly;
+        else if (timeframe == "yearly")
+            timeframe_enum = dto::Timeframe::Yearly;
+
+        auto dates = trading_service_->GetDateSamples(timeframe_enum, options);
+        std::vector<OptionPair> pairs;
+        pairs.reserve(dates.size());
+        for (const auto &date : dates)
+        {
+            pairs.emplace_back(date, date);
+        }
+        return pairs;
     }
 
-    std::vector<std::string> CandlestickFormDataProvider::GetDatesByTimeframe(
+    std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider::GetDatesByTimeframe(
         std::string_view timeframe) const
     {
-        // Legacy method - delegates to GetStartDates
         return GetStartDates(timeframe);
     }
 
-} // namespace candlestick
+}

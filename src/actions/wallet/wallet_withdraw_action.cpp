@@ -12,11 +12,9 @@ WalletWithdrawAction::WalletWithdrawAction(std::shared_ptr<services::WalletServi
 
 void WalletWithdrawAction::Execute(ActionContext &context)
 {
-  // Controller: Prepare data from service
-  auto allowed_currencies = trading_service_->GetAvailableCurrencies();
+  auto allowed_currencies = trading_service_->GetAvailableProducts();
 
   dto::WalletOperation data;
-  // Pass prepared data to view (form)
   wallet_forms::WalletOperationForm form(context.form_input_provider, context.output,
                                          allowed_currencies);
 
@@ -26,8 +24,6 @@ void WalletWithdrawAction::Execute(ActionContext &context)
     context.output->WriteLine("Withdrawal cancelled by user.");
     return;
   }
-
-  // Use service to withdraw funds
   double amount = std::stod(data.amount);
   auto result = wallet_service_->Withdraw(data.currency, amount);
   DisplayResults(result, data.currency, context);

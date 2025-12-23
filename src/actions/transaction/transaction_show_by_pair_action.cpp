@@ -2,6 +2,7 @@
 
 #include <format>
 
+#include "core/utils/time_utils.hpp"
 #include "forms/transaction/product_pair_form.hpp"
 
 TransactionShowByPairAction::TransactionShowByPairAction(
@@ -14,11 +15,9 @@ TransactionShowByPairAction::TransactionShowByPairAction(
 
 void TransactionShowByPairAction::Execute(ActionContext &context)
 {
-  // Controller: Prepare data from service
-  auto allowed_currencies = trading_service_->GetAvailableCurrencies();
+  auto allowed_currencies = trading_service_->GetAvailableProducts();
 
   dto::TransactionQuery data;
-  // Pass prepared data to view (form)
   transaction_forms::ProductPairForm form(context.form_input_provider, context.output,
                                           allowed_currencies);
 
@@ -28,8 +27,6 @@ void TransactionShowByPairAction::Execute(ActionContext &context)
     context.output->WriteLine("Query cancelled by user.");
     return;
   }
-
-  // Get transactions by product pair from service
   auto transactions = transactions_service_->GetTransactionsByPair(data.product_pair);
   DisplayResults(data.product_pair, transactions, context);
 }
@@ -52,7 +49,7 @@ void TransactionShowByPairAction::DisplayResults(
     {
       context.output->WriteLine(
           std::format("{}. {} - {:.2f} @ {:.4f} - {}", index, transaction.type,
-                      transaction.amount, transaction.price, transaction.timestamp));
+                      transaction.amount, transaction.price, utils::FormatTimestamp(transaction.timestamp)));
       ++index;
     }
   }

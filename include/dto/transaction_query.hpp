@@ -9,4 +9,4 @@ namespace dto
     std::string product_pair;
   };
 
-} // namespace dto
+}

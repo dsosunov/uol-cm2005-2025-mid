@@ -20,8 +20,6 @@ void UserLoginAction::Execute(ActionContext &context)
     context.output->WriteLine("Login cancelled by user.");
     return;
   }
-
-  // Use service to login user
   auto result = user_service_->LoginUser(data.username, data.password);
   DisplayResults(result, context);
 }

@@ -12,4 +12,4 @@ namespace candlestick
                           forms::shared::CurrencyPairBinder<dto::CandlestickQuery>(),
                           std::make_shared<forms::shared::CurrencyPairValidator>(std::move(allowed_currencies))) {}
 
-} // namespace candlestick
+}

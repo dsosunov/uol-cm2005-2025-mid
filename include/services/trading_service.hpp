@@ -1,17 +1,34 @@
 #pragma once
+#include "core/utils/time_utils.hpp"
+#include "dto/constants.hpp"
 #include <map>
+#include <memory>
 #include <optional>
 #include <set>
 #include <string>
 #include <string_view>
 #include <vector>
 
+namespace persistence
+{
+    class TradingDataAdapter;
+}
+
 namespace services
 {
+    // Raw order/trade record from CSV (what adapter returns)
+    struct OrderRecord
+    {
+        std::string product_pair;
+        utils::TimePoint timestamp;
+        dto::OrderType order_type;
+        double price;
+        double amount;
+    };
 
     struct CandlestickData
     {
-        std::string timestamp;
+        utils::TimePoint timestamp;
         double open;
         double high;
         double low;
@@ -23,7 +40,7 @@ namespace services
     {
         std::vector<CandlestickData> data;
         std::string product_pair;
-        std::string timeframe;
+        dto::Timeframe timeframe;
         bool success;
         std::string message;
     };
@@ -37,49 +54,60 @@ namespace services
         std::string message;
     };
 
-    /**
-     * @brief Options for querying date samples with server-side filtering
-     * Enables lazy loading by only fetching needed data from source
-     */
     struct DateQueryOptions
     {
-        std::optional<std::string> start_date; // Filter: date >= start_date
-        std::optional<std::string> end_date;   // Filter: date <= end_date
-        std::optional<int> limit;              // Max results to return (pagination)
-        int offset = 0;                        // Skip N results (pagination)
+        std::optional<utils::TimePoint> start_date;
+        std::optional<utils::TimePoint> end_date;
+        std::optional<int> limit;
+        int offset = 0;
+    };
+
+    struct PeriodSummary
+    {
+        std::string period;
+        double min_price;
+        double max_price;
+        double total_volume;
+        double avg_volume;
+        int trade_count;
+    };
+
+    struct CandlestickSummaryResult
+    {
+        std::vector<PeriodSummary> periods;
+        std::string product_pair;
+        dto::Timeframe timeframe;
+        bool success;
+        std::string message;
     };
 
     class TradingService
     {
     public:
-        TradingService() = default;
+        explicit TradingService(std::shared_ptr<persistence::TradingDataAdapter> adapter);
         ~TradingService() = default;
-
-        // Market data operations
         CandlestickResult GetCandlestickData(std::string_view currency_base,
                                              std::string_view currency_quote,
-                                             std::string_view asks_bids,
-                                             std::string_view timeframe,
-                                             std::string_view start_date,
-                                             std::string_view end_date) const;
+                                             dto::OrderType order_type,
+                                             dto::Timeframe timeframe,
+                                             const std::optional<utils::TimePoint> &start_date,
+                                             const std::optional<utils::TimePoint> &end_date) const;
 
-        // Trade generation
+        CandlestickSummaryResult GetCandlestickSummary(std::string_view currency_base,
+                                                       std::string_view currency_quote,
+                                                       dto::OrderType order_type,
+                                                       dto::Timeframe timeframe,
+                                                       const std::optional<utils::TimePoint> &start_date,
+                                                       const std::optional<utils::TimePoint> &end_date) const;
+
         GenerationResult GenerateTrades(int count) const;
+        std::set<std::string, std::less<>> GetAvailableProducts() const;
 
-        // Utility
-        std::set<std::string, std::less<>> GetAvailableCurrencies() const;
-
-        /**
-         * @brief Get date samples with server-side filtering (lazy loading)
-         * @param timeframe "daily", "monthly", or "yearly"
-         * @param options Query filters (start_date, end_date, limit, offset)
-         * @return Filtered date strings (only requested subset, not all data)
-         */
-        std::vector<std::string> GetDateSamples(std::string_view timeframe,
+        std::vector<std::string> GetDateSamples(dto::Timeframe timeframe,
                                                 const DateQueryOptions &options) const;
 
     private:
-        std::set<std::string, std::less<>> available_currencies_ = {"USD", "CAD", "EUR", "GBP", "JPY", "AUD", "CHF", "CNY"};
+        std::shared_ptr<persistence::TradingDataAdapter> adapter_;
     };
 
-} // namespace services
+}

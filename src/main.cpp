@@ -11,7 +11,7 @@
 #include "actions/wallet/wallet_deposit_action.hpp"
 #include "actions/wallet/wallet_view_balance_action.hpp"
 #include "actions/wallet/wallet_withdraw_action.hpp"
-#include "core/service_container.hpp"
+#include "service_container.hpp"
 #include "core/ui/menu/menu_builder.hpp"
 #include "core/ui/menu/menu_engine.hpp"
 

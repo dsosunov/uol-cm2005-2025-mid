@@ -12,8 +12,6 @@ void WalletViewBalanceAction::Execute(ActionContext &context)
 {
   context.output->WriteLine("");
   context.output->WriteLine("=== Wallet Balances ===");
-
-  // Get all balances from service
   auto balances = wallet_service_->GetBalances();
 
   if (balances.empty())
@@ -24,7 +22,6 @@ void WalletViewBalanceAction::Execute(ActionContext &context)
   {
     for (const auto &[currency, amount] : balances)
     {
-      // Format currency with appropriate symbols
       std::string symbol = "$";
       if (currency == "EUR")
         symbol = "€";

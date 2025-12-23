@@ -13,4 +13,4 @@ namespace transaction_forms
     explicit ProductPairField(std::set<std::string, std::less<>> allowed_currencies);
   };
 
-} // namespace transaction_forms
+}

@@ -40,4 +40,4 @@ namespace user_forms
         return "3-20 characters, letters, numbers, and underscores only";
     }
 
-} // namespace user_forms
+}

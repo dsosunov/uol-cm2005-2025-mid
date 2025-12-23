@@ -18,4 +18,4 @@ namespace user_forms
         std::optional<std::string> GetHint() const override;
     };
 
-} // namespace user_forms
+}

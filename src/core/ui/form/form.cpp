@@ -9,4 +9,4 @@ namespace form
         input_provider_(std::move(input_provider)),
         output_(std::move(output)) {}
 
-} // namespace form
+}

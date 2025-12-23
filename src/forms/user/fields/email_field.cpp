@@ -11,6 +11,6 @@ namespace user_forms
         : form::TextField("email", "Email",
                           form::SimpleFieldBinder<dto::UserRegistration, std::string>(
                               &dto::UserRegistration::email),
-                          std::make_shared<EmailValidator>()) {} // Hint auto-extracted!
+                          std::make_shared<EmailValidator>()) {}
 
-} // namespace user_forms
+}

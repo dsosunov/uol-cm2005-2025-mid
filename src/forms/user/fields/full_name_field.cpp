@@ -13,4 +13,4 @@ namespace user_forms
                               &dto::UserRegistration::full_name),
                           std::make_shared<FullNameValidator>()) {}
 
-} // namespace user_forms
+}

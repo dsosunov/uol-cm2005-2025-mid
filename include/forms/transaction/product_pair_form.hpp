@@ -24,4 +24,4 @@ namespace transaction_forms
             const std::set<std::string, std::less<>> &allowed_currencies);
     };
 
-} // namespace transaction_forms
+}

@@ -1,14 +1,17 @@
 #pragma once
+#include "core/utils/time_utils.hpp"
+#include "dto/constants.hpp"
 #include <string>
+#include <optional>
 
 namespace dto
 {
 
     struct ActivitySummary
     {
-        std::string timeframe; // Use dto::timeframe constants
-        std::string start_date;
-        std::string end_date;
+        Timeframe timeframe;
+        std::optional<utils::TimePoint> start_date;
+        std::optional<utils::TimePoint> end_date;
     };
 
-} // namespace dto
+}

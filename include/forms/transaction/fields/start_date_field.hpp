@@ -11,4 +11,4 @@ class StartDateField : public form::SelectionField {
   explicit StartDateField(std::shared_ptr<form::DataSource> data_source);
 };
 
-}  // namespace transaction_forms
+}

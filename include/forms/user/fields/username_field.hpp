@@ -8,4 +8,4 @@ class UsernameField : public form::TextField {
   explicit UsernameField();
 };
 
-}  // namespace user_forms
+}

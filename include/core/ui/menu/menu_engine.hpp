@@ -16,7 +16,7 @@ class MenuEngine {
 
  private:
   std::unique_ptr<MenuNode> root_;
-  std::vector<MenuNode*> stack_;  // Non-owning pointers to nodes owned by root_
+  std::vector<MenuNode*> stack_;
   std::shared_ptr<MenuRenderer> renderer_;
   std::shared_ptr<MenuInput> input_;
   std::shared_ptr<ActionContext> context_;

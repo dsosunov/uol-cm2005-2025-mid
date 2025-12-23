@@ -1,11 +1,13 @@
 #pragma once
 #include <string>
 
-namespace dto {
+namespace dto
+{
 
-struct WalletOperation {
-  std::string currency;
-  std::string amount;
-};
+  struct WalletOperation
+  {
+    std::string currency;
+    std::string amount;
+  };
 
-}  // namespace dto
+}

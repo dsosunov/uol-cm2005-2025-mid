@@ -13,7 +13,6 @@ namespace form
   class TextField : public Field
   {
   public:
-    /// Constructor with validator object (automatically extracts hint)
     TextField(std::string name, std::string prompt, ValueBinder binder,
               std::shared_ptr<Validator> validator = nullptr);
 
@@ -31,4 +30,4 @@ namespace form
     std::shared_ptr<Validator> validator_;
   };
 
-} // namespace form
+}

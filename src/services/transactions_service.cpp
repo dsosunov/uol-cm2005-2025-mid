@@ -1,8 +1,16 @@
 #include "services/transactions_service.hpp"
+#include "persistence/transaction_data_adapter.hpp"
+#include "dto/constants.hpp"
 #include <algorithm>
 
 namespace services
 {
+
+    TransactionsService::TransactionsService(
+        std::shared_ptr<persistence::TransactionDataAdapter> adapter)
+        : adapter_(adapter)
+    {
+    }
 
     int TransactionsService::GetEffectiveUserId(std::optional<int> user_id) const
     {
@@ -15,13 +23,26 @@ namespace services
         int effective_id = GetEffectiveUserId(user_id);
         std::vector<Transaction> result;
 
-        // Filter by user and get last N transactions
-        for (auto it = transactions_.rbegin(); it != transactions_.rend() && result.size() < count;
-             ++it)
+        // Get transactions from adapter using streaming
+        if (adapter_)
         {
-            if (it->user_id == effective_id)
+            adapter_->ReadWithProcessor([&](const Transaction &transaction)
+                                        {
+                if (transaction.user_id == effective_id && result.size() < static_cast<size_t>(count))
+                {
+                    result.push_back(transaction);
+                } });
+        }
+        else
+        {
+            // Fallback to in-memory
+            for (auto it = transactions_.rbegin();
+                 it != transactions_.rend() && result.size() < static_cast<size_t>(count); ++it)
             {
-                result.push_back(*it);
+                if (it->user_id == effective_id)
+                {
+                    result.push_back(*it);
+                }
             }
         }
 
@@ -34,26 +55,37 @@ namespace services
         int effective_id = GetEffectiveUserId(user_id);
         std::vector<Transaction> result;
 
-        for (const auto &transaction : transactions_)
+        // Get transactions from adapter using streaming
+        if (adapter_)
         {
-            if (transaction.user_id == effective_id && transaction.product_pair == product_pair)
+            adapter_->ReadWithProcessor([&](const Transaction &transaction)
+                                        {
+                if (transaction.user_id == effective_id && transaction.product_pair == product_pair)
+                {
+                    result.push_back(transaction);
+                } });
+        }
+        else
+        {
+            // Fallback to in-memory
+            for (const auto &transaction : transactions_)
             {
-                result.push_back(transaction);
+                if (transaction.user_id == effective_id && transaction.product_pair == product_pair)
+                {
+                    result.push_back(transaction);
+                }
             }
         }
 
         return result;
     }
 
-    ActivityStats TransactionsService::GetActivitySummary([[maybe_unused]] std::string_view timeframe,
-                                                          [[maybe_unused]] std::string_view start_date,
-                                                          [[maybe_unused]] std::string_view end_date,
+    ActivityStats TransactionsService::GetActivitySummary([[maybe_unused]] dto::Timeframe timeframe,
+                                                          [[maybe_unused]] const std::optional<utils::TimePoint> &start_date,
+                                                          [[maybe_unused]] const std::optional<utils::TimePoint> &end_date,
                                                           std::optional<int> user_id) const
     {
         int effective_id = GetEffectiveUserId(user_id);
-
-        // For simplicity, we'll just count all transactions and calculate stats
-        // In a real system, we'd filter by date range
         int total = 0;
         double total_volume = 0.0;
 
@@ -79,4 +111,4 @@ namespace services
         return true;
     }
 
-} // namespace services
+}

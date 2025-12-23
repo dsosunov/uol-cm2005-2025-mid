@@ -8,4 +8,4 @@ class TimeframeField : public form::SelectionField {
   explicit TimeframeField();
 };
 
-}  // namespace transaction_forms
+}

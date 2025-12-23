@@ -13,4 +13,4 @@ namespace user_forms
               form::SimpleFieldBinder<dto::UserReset, std::string>(&dto::UserReset::email_or_username),
               std::make_shared<EmailOrUsernameValidator>()) {}
 
-} // namespace user_forms
+}

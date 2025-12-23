@@ -24,8 +24,6 @@ namespace forms::shared
       {
         std::string base(value.substr(0, pos));
         std::string quote(value.substr(pos + 1));
-
-        // Convert to uppercase
         std::transform(base.begin(), base.end(), base.begin(), ::toupper);
         std::transform(quote.begin(), quote.end(), quote.begin(), ::toupper);
 
@@ -35,4 +33,4 @@ namespace forms::shared
     }
   };
 
-} // namespace forms::shared
+}

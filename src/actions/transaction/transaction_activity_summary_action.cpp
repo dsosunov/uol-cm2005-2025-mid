@@ -2,6 +2,8 @@
 
 #include <format>
 
+#include "core/utils/time_utils.hpp"
+#include "dto/constants.hpp"
 #include "forms/transaction/activity_summary_form.hpp"
 #include "forms/transaction/activity_summary_form_data_provider.hpp"
 
@@ -15,7 +17,6 @@ TransactionActivitySummaryAction::TransactionActivitySummaryAction(
 
 void TransactionActivitySummaryAction::Execute(ActionContext &context)
 {
-  // Create form data provider that bridges service and form
   auto form_data_provider = std::make_shared<transaction_forms::ActivitySummaryFormDataProvider>(trading_service_);
 
   dto::ActivitySummary data;
@@ -28,8 +29,6 @@ void TransactionActivitySummaryAction::Execute(ActionContext &context)
     context.output->WriteLine("Query cancelled by user.");
     return;
   }
-
-  // Get activity summary from service
   auto stats = transactions_service_->GetActivitySummary(data.timeframe, data.start_date, data.end_date);
   DisplayResults(data, stats, context);
 }
@@ -40,9 +39,18 @@ void TransactionActivitySummaryAction::DisplayResults(const dto::ActivitySummary
 {
   context.output->WriteLine("");
   context.output->WriteLine("=== Activity Summary Results ===");
-  context.output->WriteLine(std::format("Timeframe: {}", query.timeframe));
-  context.output->WriteLine(std::format("Start Date: {}", query.start_date));
-  context.output->WriteLine(std::format("End Date: {}", query.end_date));
+  context.output->WriteLine(std::format("Timeframe: {}", dto::TimeframeToString(query.timeframe)));
+
+  if (query.start_date.has_value())
+  {
+    context.output->WriteLine(std::format("Start Date: {}", utils::FormatDate(*query.start_date)));
+  }
+
+  if (query.end_date.has_value())
+  {
+    context.output->WriteLine(std::format("End Date: {}", utils::FormatDate(*query.end_date)));
+  }
+
   context.output->WriteLine("");
   context.output->WriteLine(std::format("Total Transactions: {}", stats.total_transactions));
   context.output->WriteLine(std::format("Total Volume: ${:.2f}", stats.total_volume));

@@ -18,4 +18,4 @@ std::vector<std::shared_ptr<form::Field>> RegistrationForm::SetupFormLayout() {
   return fields;
 }
 
-}  // namespace user_forms
+}

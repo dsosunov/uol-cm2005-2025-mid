@@ -78,4 +78,4 @@ namespace wallet_forms
     return "Enter a positive number with up to 8 decimal places";
   }
 
-} // namespace wallet_forms
+}

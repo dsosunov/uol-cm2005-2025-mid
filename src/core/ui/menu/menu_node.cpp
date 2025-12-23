@@ -2,10 +2,12 @@
 
 #include "core/actions/menu_action.hpp"
 
-MenuNode::MenuNode(std::string title, std::unique_ptr<MenuAction> action)
-    : title_(std::move(title)), action_(std::move(action)) {}
+MenuNode::MenuNode(std::string title, std::unique_ptr<MenuAction> action, std::string value)
+    : title_(std::move(title)), value_(std::move(value)), action_(std::move(action)) {}
 
 const std::string &MenuNode::Title() const { return title_; }
+
+const std::string &MenuNode::Value() const { return value_; }
 
 MenuNode &MenuNode::AddChild(std::unique_ptr<MenuNode> child)
 {

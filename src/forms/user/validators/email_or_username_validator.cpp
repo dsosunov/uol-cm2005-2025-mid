@@ -31,4 +31,4 @@ namespace user_forms
         return "Enter a valid email address or username (3-20 alphanumeric characters or underscores)";
     }
 
-} // namespace user_forms
+}

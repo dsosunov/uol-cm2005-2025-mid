@@ -20,8 +20,6 @@ void UserResetAction::Execute(ActionContext &context)
     context.output->WriteLine("Reset cancelled by user.");
     return;
   }
-
-  // Use service to reset password
   auto result = user_service_->ResetPassword(data.email_or_username, data.new_password);
   DisplayResults(result, data.email_or_username, context);
 }

@@ -13,4 +13,4 @@ namespace wallet_forms
                               &dto::WalletOperation::currency),
                           std::make_shared<CurrencyValidator>(std::move(allowed_currencies))) {}
 
-} // namespace wallet_forms
+}

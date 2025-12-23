@@ -20,8 +20,6 @@ void UserRegisterAction::Execute(ActionContext &context)
     context.output->WriteLine("Registration cancelled by user.");
     return;
   }
-
-  // Use service to register user
   auto result = user_service_->RegisterUser(data.full_name, data.email, data.password);
   DisplayResults(result, context);
 }

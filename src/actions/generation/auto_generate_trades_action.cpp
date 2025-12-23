@@ -18,13 +18,10 @@ void AutoGenerateTradesAction::Execute(ActionContext &context)
   context.output->WriteLine("based on current market conditions.");
   context.output->WriteLine("");
   context.output->WriteLine("Press Enter to confirm, or type 'cancel' to abort...");
-
-  // Create a simple TextField for reading confirmation
   form::TextField confirmField(
       "confirm", "Confirm",
       [](const std::any &, const std::string &, const form::FormContext &)
       {
-        // Not implemented yet
       },
       nullptr);
   form::FormContext emptyContext;
@@ -36,8 +33,6 @@ void AutoGenerateTradesAction::Execute(ActionContext &context)
     context.output->WriteLine("Auto-generation cancelled.");
     return;
   }
-
-  // Use service to generate trades
   auto result = trading_service_->GenerateTrades(10);
 
   context.output->WriteLine("");

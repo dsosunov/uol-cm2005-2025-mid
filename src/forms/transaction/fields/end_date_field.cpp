@@ -8,7 +8,7 @@ namespace transaction_forms
 
     EndDateField::EndDateField(std::shared_ptr<form::DataSource> data_source)
         : form::SelectionField("end_date", "Select end date", std::move(data_source),
-                               form::SimpleFieldBinder<dto::ActivitySummary, std::string>(
+                               form::DateFieldBinder<dto::ActivitySummary>(
                                    &dto::ActivitySummary::end_date)) {}
 
-} // namespace transaction_forms
+}

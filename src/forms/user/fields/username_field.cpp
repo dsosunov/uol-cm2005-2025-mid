@@ -11,6 +11,6 @@ namespace user_forms
         : form::TextField(
               "username", "Username",
               form::SimpleFieldBinder<dto::UserLogin, std::string>(&dto::UserLogin::username),
-              std::make_shared<UsernameValidator>()) {} // Hint auto-extracted!
+              std::make_shared<UsernameValidator>()) {}
 
-} // namespace user_forms
+}

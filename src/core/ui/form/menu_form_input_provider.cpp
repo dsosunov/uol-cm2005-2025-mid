@@ -16,33 +16,30 @@ namespace form
 
   std::optional<std::string> MenuFormInputProvider::ReadField(const Field &field, const FormContext &context)
   {
-    // Provider introspects field type and adapts reading mechanism
     if (dynamic_cast<const TextField *>(&field))
     {
       return ReadLine();
     }
     else if (auto *selection_field = dynamic_cast<const SelectionField *>(&field))
     {
-      // Get options from field, passing context for data source evaluation
-      auto options = selection_field->GetOptions(context);
-      return ReadMenuSelection(field.GetPrompt(), options);
+      auto option_pairs = selection_field->GetOptions(context);
+      return ReadMenuSelection(field.GetPrompt(), option_pairs);
     }
-    return std::nullopt; // Unknown field type
+    return std::nullopt;
   }
 
   std::optional<std::string> MenuFormInputProvider::ReadLine() const
   {
-    // Just reads text input - no prompt display, no cancellation check
     return input_->ReadLine();
   }
 
   std::optional<std::string> MenuFormInputProvider::ReadMenuSelection(
-      const std::string &title, const std::vector<std::string> &options) const
+      const std::string &title, const std::vector<std::pair<std::string, std::string>> &option_pairs) const
   {
     MenuBuilder builder(title);
-    for (const auto &option : options)
+    for (const auto &[display_title, value] : option_pairs)
     {
-      builder.AddLeaf(option, nullptr);
+      builder.AddLeaf(display_title, value, nullptr);
     }
     auto menu = builder.Build();
 
@@ -51,10 +48,10 @@ namespace form
 
     if (!selected || selected == menu.get())
     {
-      return std::nullopt; // No selection made
+      return std::nullopt;
     }
 
-    return selected->Title();
+    return selected->Value();
   }
 
-} // namespace form
+}

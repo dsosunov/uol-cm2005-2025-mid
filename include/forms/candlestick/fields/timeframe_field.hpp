@@ -9,4 +9,4 @@ class TimeframeField : public form::SelectionField {
   TimeframeField();
 };
 
-}  // namespace candlestick
+}

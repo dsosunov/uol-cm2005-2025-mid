@@ -46,4 +46,4 @@ namespace user_forms
         return "Full name must be 2-100 characters and contain at least one letter";
     }
 
-} // namespace user_forms
+}

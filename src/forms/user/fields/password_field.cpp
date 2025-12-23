@@ -13,4 +13,4 @@ namespace user_forms
                               &dto::UserRegistration::password),
                           std::make_shared<PasswordValidator>()) {}
 
-} // namespace user_forms
+}

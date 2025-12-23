@@ -16,8 +16,6 @@ namespace form
 
         virtual const std::string &GetName() const = 0;
         virtual const std::string &GetPrompt() const = 0;
-
-        /// Exposes validation hint if available. Form uses this to display guidance.
         virtual std::optional<std::string> GetValidationHint() const = 0;
 
         virtual ValidationResult Validate(const std::string &value, const FormContext &context) const = 0;
@@ -25,4 +23,4 @@ namespace form
                                const FormContext &context) const = 0;
     };
 
-} // namespace form
+}

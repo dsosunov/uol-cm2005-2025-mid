@@ -18,4 +18,4 @@ namespace transaction_forms
     return fields;
   }
 
-} // namespace transaction_forms
+}

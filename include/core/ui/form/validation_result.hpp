@@ -12,4 +12,4 @@ struct ValidationResult {
   static ValidationResult Invalid(std::string message) { return {false, std::move(message)}; }
 };
 
-}  // namespace form
+}

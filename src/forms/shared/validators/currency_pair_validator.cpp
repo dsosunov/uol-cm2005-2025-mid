@@ -21,8 +21,6 @@ namespace forms::shared
 
     std::string first = value.substr(0, pos);
     std::string second = value.substr(pos + 1);
-
-    // Convert to uppercase for case-insensitive comparison
     std::transform(first.begin(), first.end(), first.begin(), ::toupper);
     std::transform(second.begin(), second.end(), second.begin(), ::toupper);
 
@@ -44,4 +42,4 @@ namespace forms::shared
     return "Enter currency pair in format CUR1/CUR2 (e.g., USD/CAD)";
   }
 
-} // namespace forms::shared
+}

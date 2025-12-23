@@ -20,4 +20,4 @@ namespace user_forms
     static std::vector<std::shared_ptr<form::Field>> SetupFormLayout();
   };
 
-} // namespace user_forms
+}

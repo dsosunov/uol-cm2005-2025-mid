@@ -24,4 +24,4 @@ namespace wallet_forms
     std::set<std::string, std::less<>> allowed_currencies_;
   };
 
-} // namespace wallet_forms
+}

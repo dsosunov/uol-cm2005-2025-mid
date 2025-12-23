@@ -19,4 +19,4 @@ namespace form
 
   void FormContext::Clear() { values_.clear(); }
 
-} // namespace form
+}

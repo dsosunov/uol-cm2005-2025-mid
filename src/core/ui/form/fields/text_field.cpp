@@ -16,7 +16,6 @@ namespace form
 
   std::optional<std::string> TextField::GetValidationHint() const
   {
-    // Auto-extract hint from validator if available
     if (validator_)
     {
       return validator_->GetHint();
@@ -39,4 +38,4 @@ namespace form
     binder_(target, value, context);
   }
 
-} // namespace form
+}

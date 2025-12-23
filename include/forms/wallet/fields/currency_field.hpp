@@ -13,4 +13,4 @@ namespace wallet_forms
     explicit CurrencyField(std::set<std::string, std::less<>> allowed_currencies);
   };
 
-} // namespace wallet_forms
+}

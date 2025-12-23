@@ -1,16 +1,27 @@
 #include "services/wallet_service.hpp"
+#include "persistence/wallet_data_adapter.hpp"
+#include "core/data/csv_writer.hpp"
 
 namespace services
 {
 
     WalletService::WalletService()
     {
-        // Pre-populate with some test balances for default user
         balances_[1]["USD"] = 1234.56;
         balances_[1]["EUR"] = 987.65;
         balances_[1]["GBP"] = 543.21;
         balances_[1]["JPY"] = 50000.00;
         balances_[1]["CAD"] = 1500.00;
+    }
+
+    WalletService::WalletService(std::shared_ptr<persistence::WalletDataAdapter> reader,
+                                 std::shared_ptr<data::CsvWriter> writer)
+        : reader_(reader), writer_(writer)
+    {
+        if (reader_)
+        {
+            balances_[default_user_id_] = reader_->ReadBalances(default_user_id_);
+        }
     }
 
     int WalletService::GetEffectiveUserId(std::optional<int> user_id) const
@@ -21,11 +32,17 @@ namespace services
     std::map<std::string, double, std::less<>> WalletService::GetBalances(std::optional<int> user_id) const
     {
         int effective_id = GetEffectiveUserId(user_id);
+        if (reader_ && balances_.find(effective_id) == balances_.end())
+        {
+            const_cast<WalletService *>(this)->balances_[effective_id] =
+                reader_->ReadBalances(effective_id);
+        }
+
         if (auto it = balances_.find(effective_id); it != balances_.end())
         {
             return it->second;
         }
-        return {}; // Empty map if user has no balances
+        return {};
     }
 
     double WalletService::GetBalance(std::string_view currency, std::optional<int> user_id) const
@@ -44,7 +61,6 @@ namespace services
 
     double WalletService::GetTotalBalanceInUSD(std::optional<int> user_id) const
     {
-        // Simplified conversion rates (hard-coded)
         std::map<std::string, double, std::less<>> rates = {
             {"USD", 1.0}, {"EUR", 1.09}, {"GBP", 1.27}, {"JPY", 0.0067}, {"CAD", 0.73}, {"AUD", 0.65}, {"CHF", 1.13}, {"CNY", 0.14}};
 
@@ -81,6 +97,8 @@ namespace services
         balances_[effective_id][currency_str] += amount;
         double new_balance = balances_[effective_id][currency_str];
 
+        SaveBalances(effective_id);
+
         return {true, "Deposit successful", new_balance};
     }
 
@@ -103,7 +121,17 @@ namespace services
         balances_[effective_id][currency_str] -= amount;
         double new_balance = balances_[effective_id][currency_str];
 
+        SaveBalances(effective_id);
+
         return {true, "Withdrawal successful", new_balance};
     }
 
-} // namespace services
+    void WalletService::SaveBalances(int user_id)
+    {
+        if (writer_ && balances_.find(user_id) != balances_.end())
+        {
+            persistence::WalletDataAdapter::WriteBalances(*writer_, user_id, balances_[user_id]);
+        }
+    }
+
+}

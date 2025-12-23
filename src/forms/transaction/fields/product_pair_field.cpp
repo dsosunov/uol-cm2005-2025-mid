@@ -13,4 +13,4 @@ namespace transaction_forms
                               &dto::TransactionQuery::product_pair),
                           std::make_shared<forms::shared::CurrencyPairValidator>(std::move(allowed_currencies))) {}
 
-} // namespace transaction_forms
+}

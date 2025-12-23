@@ -2,6 +2,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "core/ui/form/data_source.hpp"
@@ -13,13 +14,13 @@ namespace form
     class ContextualDataSource : public DataSource
     {
     public:
-        using ProviderFunc = std::function<std::vector<std::string>(const FormContext &)>;
+        using ProviderFunc = std::function<std::vector<OptionPair>(const FormContext &)>;
 
         explicit ContextualDataSource(ProviderFunc provider);
-        std::vector<std::string> GetOptions(const FormContext &context) const override;
+        std::vector<OptionPair> GetOptions(const FormContext &context) const override;
 
     private:
         ProviderFunc provider_;
     };
 
-} // namespace form
+}

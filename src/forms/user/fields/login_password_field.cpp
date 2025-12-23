@@ -13,4 +13,4 @@ namespace user_forms
               form::SimpleFieldBinder<dto::UserLogin, std::string>(&dto::UserLogin::password),
               std::make_shared<PasswordValidator>()) {}
 
-} // namespace user_forms
+}

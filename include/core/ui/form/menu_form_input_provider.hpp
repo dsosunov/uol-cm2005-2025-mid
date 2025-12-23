@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "core/ui/form/form_context.hpp"
@@ -28,7 +29,7 @@ namespace form
 
     std::optional<std::string> ReadLine() const;
     std::optional<std::string> ReadMenuSelection(const std::string &title,
-                                                 const std::vector<std::string> &options) const;
+                                                 const std::vector<std::pair<std::string, std::string>> &option_pairs) const;
   };
 
-} // namespace form
+}

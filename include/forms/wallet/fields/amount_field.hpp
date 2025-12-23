@@ -8,4 +8,4 @@ class AmountField : public form::TextField {
   explicit AmountField();
 };
 
-}  // namespace wallet_forms
+}

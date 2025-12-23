@@ -9,4 +9,4 @@ class AsksBidsField : public form::SelectionField {
   AsksBidsField();
 };
 
-}  // namespace candlestick
+}

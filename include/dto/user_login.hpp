@@ -1,11 +1,13 @@
 #pragma once
 #include <string>
 
-namespace dto {
+namespace dto
+{
 
-struct UserLogin {
-  std::string username;
-  std::string password;
-};
+  struct UserLogin
+  {
+    std::string username;
+    std::string password;
+  };
 
-}  // namespace dto
+}

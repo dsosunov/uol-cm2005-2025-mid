@@ -20,4 +20,4 @@ namespace wallet_forms
     return fields;
   }
 
-} // namespace wallet_forms
+}

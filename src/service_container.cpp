@@ -1,11 +1,13 @@
-#include "core/service_container.hpp"
+#include "service_container.hpp"
 
 #include "core/actions/action_context.hpp"
+#include "core/data/csv_reader.hpp"
 #include "core/ui/form/menu_form_input_provider.hpp"
 #include "core/ui/io/standard_input.hpp"
 #include "core/ui/io/standard_output.hpp"
 #include "core/ui/menu/menu_input.hpp"
 #include "core/ui/menu/menu_renderer.hpp"
+#include "persistence/trading_data_adapter.hpp"
 #include "services/trading_service.hpp"
 #include "services/transactions_service.hpp"
 #include "services/user_service.hpp"
@@ -13,13 +15,13 @@
 
 ServiceContainer::ServiceContainer()
 {
-    // Initialize and register services
+    auto csv_reader = std::make_shared<data::CsvReader>("data/20200317.csv");
+    auto trading_adapter = std::make_shared<persistence::TradingDataAdapter>(csv_reader);
+
     Register(std::make_shared<services::UserService>());
     Register(std::make_shared<services::WalletService>());
     Register(std::make_shared<services::TransactionsService>());
-    Register(std::make_shared<services::TradingService>());
-
-    // Initialize and register UI components
+    Register(std::make_shared<services::TradingService>(trading_adapter));
     auto output = std::make_shared<StandardOutput>();
     auto input = std::make_shared<StandardInput>();
     auto renderer = std::make_shared<MenuRenderer>(output);

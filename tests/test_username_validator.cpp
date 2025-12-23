@@ -4,24 +4,18 @@
 
 using namespace user_forms;
 using namespace form;
-
-// Test fixture for UsernameValidator
 class UsernameValidatorTest : public ::testing::Test
 {
 protected:
     UsernameValidator validator;
     FormContext context;
 };
-
-// Test empty string
 TEST_F(UsernameValidatorTest, RejectsEmptyString)
 {
     auto result = validator.Validate("", context);
     EXPECT_FALSE(result.is_valid);
     EXPECT_EQ(result.error_message, "Username cannot be empty");
 }
-
-// Test minimum length validation
 TEST_F(UsernameValidatorTest, RejectsTwoCharacters)
 {
     auto result = validator.Validate("ab", context);
@@ -42,8 +36,6 @@ TEST_F(UsernameValidatorTest, AcceptsThreeCharacters)
     EXPECT_TRUE(result.is_valid);
     EXPECT_TRUE(result.error_message.empty());
 }
-
-// Test maximum length validation
 TEST_F(UsernameValidatorTest, AcceptsExactly20Characters)
 {
     std::string username_20_chars(20, 'a');
@@ -59,8 +51,6 @@ TEST_F(UsernameValidatorTest, Rejects21Characters)
     EXPECT_FALSE(result.is_valid);
     EXPECT_EQ(result.error_message, "Username must be at most 20 characters");
 }
-
-// Test character restrictions
 TEST_F(UsernameValidatorTest, RejectsSpaces)
 {
     auto result = validator.Validate("user name", context);
@@ -102,8 +92,6 @@ TEST_F(UsernameValidatorTest, RejectsMultipleSpecialCharacters)
     EXPECT_FALSE(result.is_valid);
     EXPECT_EQ(result.error_message, "Username can only contain letters, numbers, and underscores");
 }
-
-// Test valid usernames
 TEST_F(UsernameValidatorTest, AcceptsLettersOnly)
 {
     auto result = validator.Validate("username", context);

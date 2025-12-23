@@ -23,4 +23,4 @@ namespace wallet_forms
     return "Enter one of the supported currency codes";
   }
 
-} // namespace wallet_forms
+}

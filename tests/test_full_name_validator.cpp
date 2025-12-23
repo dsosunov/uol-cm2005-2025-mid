@@ -4,24 +4,18 @@
 
 using namespace user_forms;
 using namespace form;
-
-// Test fixture for FullNameValidator
 class FullNameValidatorTest : public ::testing::Test
 {
 protected:
     FullNameValidator validator;
     FormContext context;
 };
-
-// Test empty string
 TEST_F(FullNameValidatorTest, RejectsEmptyString)
 {
     auto result = validator.Validate("", context);
     EXPECT_FALSE(result.is_valid);
     EXPECT_EQ(result.error_message, "Full name cannot be empty");
 }
-
-// Test minimum length validation
 TEST_F(FullNameValidatorTest, RejectsSingleCharacter)
 {
     auto result = validator.Validate("A", context);
@@ -35,8 +29,6 @@ TEST_F(FullNameValidatorTest, AcceptsTwoCharacters)
     EXPECT_TRUE(result.is_valid);
     EXPECT_TRUE(result.error_message.empty());
 }
-
-// Test maximum length validation
 TEST_F(FullNameValidatorTest, AcceptsExactly100Characters)
 {
     std::string name_100_chars(100, 'A');
@@ -52,8 +44,6 @@ TEST_F(FullNameValidatorTest, Rejects101Characters)
     EXPECT_FALSE(result.is_valid);
     EXPECT_EQ(result.error_message, "Full name must be at most 100 characters");
 }
-
-// Test letter requirement
 TEST_F(FullNameValidatorTest, RejectsOnlyNumbers)
 {
     auto result = validator.Validate("12345", context);
@@ -74,8 +64,6 @@ TEST_F(FullNameValidatorTest, RejectsSpacesOnly)
     EXPECT_FALSE(result.is_valid);
     EXPECT_EQ(result.error_message, "Full name must contain at least one letter");
 }
-
-// Test valid names
 TEST_F(FullNameValidatorTest, AcceptsSimpleName)
 {
     auto result = validator.Validate("John", context);

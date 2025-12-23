@@ -13,4 +13,4 @@ namespace wallet_forms
               form::SimpleFieldBinder<dto::WalletOperation, std::string>(&dto::WalletOperation::amount),
               std::make_shared<AmountValidator>()) {}
 
-} // namespace wallet_forms
+}

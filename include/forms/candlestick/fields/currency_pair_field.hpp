@@ -14,4 +14,4 @@ namespace candlestick
     explicit CurrencyPairField(std::set<std::string, std::less<>> allowed_currencies);
   };
 
-} // namespace candlestick
+}

@@ -16,15 +16,12 @@ namespace transaction_forms
   std::vector<std::shared_ptr<form::Field>> ActivitySummaryForm::SetupFormLayout(
       std::shared_ptr<ActivitySummaryFormDataProvider> data_provider)
   {
-    // Start date: ContextualDataSource queries context, calls provider method
     auto start_date_source = std::make_shared<form::ContextualDataSource>(
         [data_provider](const form::FormContext &form_context)
         {
           auto timeframe = form_context.GetValue("timeframe");
           return data_provider->GetStartDates(timeframe.value_or(""));
         });
-
-    // End date: ContextualDataSource queries context (timeframe + start_date), calls provider method
     auto end_date_source = std::make_shared<form::ContextualDataSource>(
         [data_provider](const form::FormContext &form_context)
         {
@@ -42,4 +39,4 @@ namespace transaction_forms
     return fields;
   }
 
-} // namespace transaction_forms
+}

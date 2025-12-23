@@ -12,11 +12,9 @@ WalletDepositAction::WalletDepositAction(std::shared_ptr<services::WalletService
 
 void WalletDepositAction::Execute(ActionContext &context)
 {
-  // Controller: Prepare data from service
-  auto allowed_currencies = trading_service_->GetAvailableCurrencies();
+  auto allowed_currencies = trading_service_->GetAvailableProducts();
 
   dto::WalletOperation data;
-  // Pass prepared data to view (form)
   wallet_forms::WalletOperationForm form(context.form_input_provider, context.output,
                                          allowed_currencies);
 
@@ -26,8 +24,6 @@ void WalletDepositAction::Execute(ActionContext &context)
     context.output->WriteLine("Deposit cancelled by user.");
     return;
   }
-
-  // Use service to deposit funds
   double amount = std::stod(data.amount);
   auto result = wallet_service_->Deposit(data.currency, amount);
   DisplayResults(result, data.currency, context);

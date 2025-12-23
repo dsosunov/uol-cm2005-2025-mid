@@ -12,4 +12,4 @@ class EndDateField : public form::SelectionField {
   explicit EndDateField(std::shared_ptr<form::DataSource> data_source);
 };
 
-}  // namespace candlestick
+}

@@ -17,4 +17,4 @@ namespace wallet_forms
         std::optional<std::string> GetHint() const override;
     };
 
-} // namespace wallet_forms
+}

@@ -29,4 +29,4 @@ namespace user_forms
         return "Password must be 6-50 characters";
     }
 
-} // namespace user_forms
+}

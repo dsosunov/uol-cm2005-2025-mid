@@ -19,15 +19,12 @@ namespace candlestick
   std::vector<std::shared_ptr<form::Field>> CandlestickForm::SetupFormLayout(
       std::shared_ptr<CandlestickFormDataProvider> data_provider)
   {
-    // Start date: ContextualDataSource queries context, calls provider method
     auto start_date_source = std::make_shared<form::ContextualDataSource>(
         [data_provider](const form::FormContext &form_context)
         {
           auto timeframe = form_context.GetValue("timeframe");
           return data_provider->GetStartDates(timeframe.value_or(""));
         });
-
-    // End date: ContextualDataSource queries context (timeframe + start_date), calls provider method
     auto end_date_source = std::make_shared<form::ContextualDataSource>(
         [data_provider](const form::FormContext &form_context)
         {
@@ -39,7 +36,7 @@ namespace candlestick
         });
 
     std::vector<std::shared_ptr<form::Field>> fields;
-    fields.push_back(std::make_shared<CurrencyPairField>(data_provider->GetAvailableCurrencies()));
+    fields.push_back(std::make_shared<CurrencyPairField>(data_provider->GetAvailableProducts()));
     fields.push_back(std::make_shared<AsksBidsField>());
     fields.push_back(std::make_shared<TimeframeField>());
     fields.push_back(std::make_shared<StartDateField>(start_date_source));
@@ -48,4 +45,4 @@ namespace candlestick
     return fields;
   }
 
-} // namespace candlestick
+}

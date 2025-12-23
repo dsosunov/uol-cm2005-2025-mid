@@ -41,15 +41,11 @@ namespace services
     public:
         UserService();
         ~UserService() = default;
-
-        // User operations
         RegistrationResult RegisterUser(std::string_view full_name, std::string_view email,
                                         std::string_view password);
         LoginResult LoginUser(std::string_view username, std::string_view password);
         ResetResult ResetPassword(std::string_view email_or_username,
                                   std::string_view new_password) const;
-
-        // Session management
         std::optional<User> GetCurrentUser() const;
         void Logout();
         bool IsLoggedIn() const;
@@ -60,4 +56,4 @@ namespace services
         int next_user_id_ = 4;
     };
 
-} // namespace services
+}

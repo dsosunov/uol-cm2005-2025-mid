@@ -24,4 +24,4 @@ namespace forms::shared
     std::set<std::string, std::less<>> allowed_currencies_;
   };
 
-} // namespace forms::shared
+}

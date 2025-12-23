@@ -14,7 +14,7 @@ public:
 
 private:
   void DisplayResults(const dto::CandlestickQuery &query,
-                      const services::CandlestickResult &result, ActionContext &context) const;
+                      const services::CandlestickSummaryResult &result, ActionContext &context) const;
 
   std::shared_ptr<services::TradingService> trading_service_;
 };

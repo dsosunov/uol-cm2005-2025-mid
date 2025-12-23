@@ -25,3 +25,7 @@ add_subdirectory(tests)
 
 # Support for Visual Studio folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# Copy data files to binary directory
+file(GLOB DATA_FILES "${PROJECT_SOURCE_DIR}/data/*.csv")
+file(COPY ${DATA_FILES} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data)
