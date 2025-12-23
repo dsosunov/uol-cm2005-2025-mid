@@ -1,11 +1,9 @@
-#pragma once
-
+﻿#pragma once
 #include <any>
 #include <memory>
 #include <stdexcept>
 #include <typeindex>
 #include <unordered_map>
-
 class ServiceNotRegisteredException : public std::runtime_error
 {
 public:
@@ -14,18 +12,15 @@ public:
     {
     }
 };
-
 class ServiceContainer
 {
 public:
     ServiceContainer();
-
     template <typename T>
     void Register(std::shared_ptr<T> instance)
     {
         services_[std::type_index(typeid(T))] = instance;
     }
-
     template <typename T>
     std::shared_ptr<T> Resolve() const
     {
@@ -36,7 +31,6 @@ public:
         }
         return std::any_cast<std::shared_ptr<T>>(it->second);
     }
-
 private:
     std::unordered_map<std::type_index, std::any> services_;
 };

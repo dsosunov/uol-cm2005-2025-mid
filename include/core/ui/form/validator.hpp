@@ -1,10 +1,8 @@
-#pragma once
+﻿#pragma once
 #include <optional>
 #include <string>
-
 #include "core/ui/form/form_context.hpp"
 #include "core/ui/form/validation_result.hpp"
-
 namespace form
 {
     class Validator
@@ -15,5 +13,4 @@ namespace form
                                           const FormContext &context) const = 0;
         virtual std::optional<std::string> GetHint() const { return std::nullopt; }
     };
-
 }

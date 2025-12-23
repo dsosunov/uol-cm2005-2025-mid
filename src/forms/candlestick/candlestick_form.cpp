@@ -1,21 +1,18 @@
-#include "forms/candlestick/candlestick_form.hpp"
-
+﻿#include "forms/candlestick/candlestick_form.hpp"
 #include "core/ui/form/contextual_data_source.hpp"
+#include "core/ui/form/form_builder_utils.hpp"
 #include "forms/candlestick/fields/asks_bids_field.hpp"
 #include "forms/candlestick/fields/currency_pair_field.hpp"
 #include "forms/candlestick/fields/end_date_field.hpp"
 #include "forms/candlestick/fields/start_date_field.hpp"
 #include "forms/candlestick/fields/timeframe_field.hpp"
-
 namespace candlestick
 {
-
   CandlestickForm::CandlestickForm(std::shared_ptr<form::FormInputProvider> input_provider,
                                    std::shared_ptr<Output> output,
                                    std::shared_ptr<CandlestickFormDataProvider> data_provider)
       : form::Form(SetupFormLayout(std::move(data_provider)),
                    input_provider, output) {}
-
   std::vector<std::shared_ptr<form::Field>> CandlestickForm::SetupFormLayout(
       std::shared_ptr<CandlestickFormDataProvider> data_provider)
   {
@@ -34,15 +31,12 @@ namespace candlestick
               timeframe.value_or(""),
               start_date.value_or(""));
         });
-
     std::vector<std::shared_ptr<form::Field>> fields;
-    fields.push_back(std::make_shared<CurrencyPairField>(data_provider->GetAvailableProducts()));
-    fields.push_back(std::make_shared<AsksBidsField>());
-    fields.push_back(std::make_shared<TimeframeField>());
-    fields.push_back(std::make_shared<StartDateField>(start_date_source));
-    fields.push_back(std::make_shared<EndDateField>(end_date_source));
-
+    form::AddField<CurrencyPairField>(fields, data_provider->GetAvailableProducts());
+    form::AddField<AsksBidsField>(fields);
+    form::AddField<TimeframeField>(fields);
+    form::AddField<StartDateField>(fields, start_date_source);
+    form::AddField<EndDateField>(fields, end_date_source);
     return fields;
   }
-
 }

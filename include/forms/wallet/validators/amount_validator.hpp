@@ -1,14 +1,11 @@
-#pragma once
+﻿#pragma once
 #include <optional>
 #include <string>
-
 #include "core/ui/form/form_context.hpp"
 #include "core/ui/form/validation_result.hpp"
 #include "core/ui/form/validator.hpp"
-
 namespace wallet_forms
 {
-
     class AmountValidator : public form::Validator
     {
     public:
@@ -16,5 +13,4 @@ namespace wallet_forms
                                         const form::FormContext &context) const override;
         std::optional<std::string> GetHint() const override;
     };
-
 }

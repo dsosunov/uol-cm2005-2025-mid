@@ -1,6 +1,5 @@
-#pragma once
+﻿#pragma once
 #include <string>
-
 class Output {
  public:
   virtual ~Output() = default;

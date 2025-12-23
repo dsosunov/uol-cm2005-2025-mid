@@ -1,19 +1,20 @@
-#pragma once
-#include <memory>
-
-#include "core/actions/action_context.hpp"
-#include "core/actions/menu_action.hpp"
-#include "dto/user_registration.hpp"
+﻿#pragma once
+#include "core/actions/form_based_action.hpp"
 #include "services/user_service.hpp"
-
-class UserRegisterAction : public MenuAction
+#include "dto/user_registration.hpp"
+#include "forms/user/registration_form.hpp"
+#include <memory>
+class UserRegisterAction : public actions::FormBasedAction<user_forms::RegistrationForm, dto::UserRegistration, utils::ServiceResult<services::User>>
 {
 public:
   explicit UserRegisterAction(std::shared_ptr<services::UserService> user_service);
-  void Execute(ActionContext &context) override;
+
+protected:
+  user_forms::RegistrationForm CreateForm(ActionContext &context) override;
+  utils::ServiceResult<services::User> ExecuteService(const dto::UserRegistration &data, ActionContext &context) override;
+  void DisplayResults(const utils::ServiceResult<services::User> &result, const dto::UserRegistration &data, ActionContext &context) override;
+  const char *GetOperationName() const override { return "Registration"; }
 
 private:
-  void DisplayResults(const services::RegistrationResult &result, ActionContext &context) const;
-
   std::shared_ptr<services::UserService> user_service_;
 };

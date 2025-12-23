@@ -1,46 +1,29 @@
 #include "actions/user/user_register_action.hpp"
-
+#include "core/actions/action_helper.hpp"
 #include <format>
-
-#include "forms/user/registration_form.hpp"
-
 UserRegisterAction::UserRegisterAction(std::shared_ptr<services::UserService> user_service)
     : user_service_(std::move(user_service))
 {
 }
-
-void UserRegisterAction::Execute(ActionContext &context)
+user_forms::RegistrationForm UserRegisterAction::CreateForm(ActionContext &context)
 {
-  dto::UserRegistration data;
-  user_forms::RegistrationForm form(context.form_input_provider, context.output);
-
-  if (auto result = form.Read(data); result == form::FormReadResult::kCancelled)
-  {
-    context.output->WriteLine("");
-    context.output->WriteLine("Registration cancelled by user.");
-    return;
-  }
-  auto result = user_service_->RegisterUser(data.full_name, data.email, data.password);
-  DisplayResults(result, context);
+  return user_forms::RegistrationForm(context.form_input_provider, context.output);
 }
-
-void UserRegisterAction::DisplayResults(const services::RegistrationResult &result,
-                                        ActionContext &context) const
+utils::ServiceResult<services::User> UserRegisterAction::ExecuteService(const dto::UserRegistration &data, ActionContext &context)
 {
-  context.output->WriteLine("");
-  if (result.success)
-  {
-    context.output->WriteLine("=== Registration Successful ===");
-    if (result.user.has_value())
-    {
-      context.output->WriteLine(std::format("Full Name: {}", result.user->full_name));
-      context.output->WriteLine(std::format("Email: {}", result.user->email));
-      context.output->WriteLine(std::format("Username: {}", result.user->username));
-    }
-  }
-  else
-  {
-    context.output->WriteLine("=== Registration Failed ===");
-    context.output->WriteLine(std::format("Error: {}", result.message));
-  }
+  return user_service_->RegisterUser(data.full_name, data.email, data.password);
+}
+void UserRegisterAction::DisplayResults(const utils::ServiceResult<services::User> &result, const dto::UserRegistration &data, ActionContext &context)
+{
+  actions::ActionHelper::DisplayResult(
+      result.success, GetOperationName(), result.message, context,
+      [&]()
+      {
+        if (result.data.has_value())
+        {
+          context.output->WriteLine(std::format("Full Name: {}", result.data->full_name));
+          context.output->WriteLine(std::format("Email: {}", result.data->email));
+          context.output->WriteLine(std::format("Username: {}", result.data->username));
+        }
+      });
 }

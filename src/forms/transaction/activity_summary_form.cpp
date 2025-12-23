@@ -1,18 +1,15 @@
-#include "forms/transaction/activity_summary_form.hpp"
-
+﻿#include "forms/transaction/activity_summary_form.hpp"
 #include "core/ui/form/contextual_data_source.hpp"
+#include "core/ui/form/form_builder_utils.hpp"
 #include "forms/transaction/fields/end_date_field.hpp"
 #include "forms/transaction/fields/start_date_field.hpp"
 #include "forms/transaction/fields/timeframe_field.hpp"
-
 namespace transaction_forms
 {
-
   ActivitySummaryForm::ActivitySummaryForm(std::shared_ptr<form::FormInputProvider> input_provider,
                                            std::shared_ptr<Output> output,
                                            std::shared_ptr<ActivitySummaryFormDataProvider> data_provider)
       : form::Form(SetupFormLayout(std::move(data_provider)), input_provider, output) {}
-
   std::vector<std::shared_ptr<form::Field>> ActivitySummaryForm::SetupFormLayout(
       std::shared_ptr<ActivitySummaryFormDataProvider> data_provider)
   {
@@ -31,12 +28,10 @@ namespace transaction_forms
               timeframe.value_or(""),
               start_date.value_or(""));
         });
-
     std::vector<std::shared_ptr<form::Field>> fields;
-    fields.push_back(std::make_shared<TimeframeField>());
-    fields.push_back(std::make_shared<StartDateField>(start_date_source));
-    fields.push_back(std::make_shared<EndDateField>(end_date_source));
+    form::AddField<TimeframeField>(fields);
+    form::AddField<StartDateField>(fields, start_date_source);
+    form::AddField<EndDateField>(fields, end_date_source);
     return fields;
   }
-
 }

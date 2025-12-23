@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "core/utils/time_utils.hpp"
 #include "dto/constants.hpp"
 #include <memory>
@@ -6,15 +6,12 @@
 #include <string>
 #include <string_view>
 #include <vector>
-
 namespace persistence
 {
     class TransactionDataAdapter;
 }
-
 namespace services
 {
-
     struct Transaction
     {
         int id;
@@ -25,14 +22,12 @@ namespace services
         utils::TimePoint timestamp;
         int user_id;
     };
-
     struct ActivityStats
     {
         int total_transactions;
         double total_volume;
         double average_transaction_size;
     };
-
     class TransactionsService
     {
     public:
@@ -48,7 +43,6 @@ namespace services
                                          const std::optional<utils::TimePoint> &end_date,
                                          std::optional<int> user_id = std::nullopt) const;
         bool AddTransaction(const Transaction &transaction);
-
     private:
         std::vector<Transaction> transactions_ = {
             {1, "USD/EUR", "Buy", 100.00, 0.95, utils::ParseTimestamp("2025-12-22 10:30").value(), 1},
@@ -61,5 +55,4 @@ namespace services
         std::shared_ptr<persistence::TransactionDataAdapter> adapter_;
         int GetEffectiveUserId(std::optional<int> user_id) const;
     };
-
 }

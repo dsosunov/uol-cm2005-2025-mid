@@ -1,16 +1,9 @@
-#include "forms/user/fields/new_password_field.hpp"
-
-#include "core/ui/form/binders/field_binders.hpp"
+﻿#include "forms/user/fields/new_password_field.hpp"
 #include "dto/user_reset.hpp"
-#include "forms/user/validators/user_validators.hpp"
-
+#include "forms/shared/fields/password_field.hpp"
 namespace user_forms
 {
-
     NewPasswordField::NewPasswordField()
-        : form::TextField(
-              "new_password", "New password",
-              form::SimpleFieldBinder<dto::UserReset, std::string>(&dto::UserReset::new_password),
-              std::make_shared<PasswordValidator>()) {}
-
+        : forms::shared::PasswordField<dto::UserReset>(
+              "new_password", "New password", &dto::UserReset::new_password) {}
 }

@@ -1,16 +1,13 @@
-#pragma once
+﻿#pragma once
 #include <set>
 #include <string>
-
-#include "core/ui/form/fields/text_field.hpp"
-
+#include "dto/transaction_query.hpp"
+#include "forms/shared/fields/product_pair_field.hpp"
 namespace transaction_forms
 {
-
-  class ProductPairField : public form::TextField
+  class ProductPairField : public forms::shared::ProductPairField<dto::TransactionQuery>
   {
   public:
     explicit ProductPairField(std::set<std::string, std::less<>> allowed_currencies);
   };
-
 }

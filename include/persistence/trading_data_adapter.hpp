@@ -1,40 +1,26 @@
-#pragma once
-#include "core/data/csv_reader.hpp"
-#include "core/data/csv_writer.hpp"
-#include "core/utils/time_utils.hpp"
+﻿#pragma once
+#include "persistence/base_data_adapter.hpp"
 #include "dto/constants.hpp"
 #include <functional>
 #include <memory>
-
 namespace services
 {
     struct OrderRecord;
 }
-
 namespace persistence
 {
-    // Pure transformer: CsvRecord <-> OrderRecord
-    class TradingDataAdapter
+    class TradingDataAdapter : public BaseDataAdapter<services::OrderRecord>
     {
     public:
         explicit TradingDataAdapter(std::shared_ptr<data::CsvReader> reader);
-
-        // Stream records filtered by order type
         void ReadWithProcessor(dto::OrderType order_type, std::function<void(const services::OrderRecord &)> processor) const;
-
-        // Stream all records without filtering
         void ReadWithProcessor(std::function<void(const services::OrderRecord &)> processor) const;
+        static bool WriteAll(data::CsvWriter &writer, const std::vector<services::OrderRecord> &records);
 
-        // Write records
-        static bool WriteAll(data::CsvWriter &writer,
-                             const std::vector<services::OrderRecord> &records);
+    protected:
+        std::optional<services::OrderRecord> TransformToEntity(const data::CsvRecord &record) const override;
 
     private:
-        std::shared_ptr<data::CsvReader> reader_;
-
-        // Pure transformation
-        static std::optional<services::OrderRecord> TransformToOrderRecord(const data::CsvRecord &record);
         static data::CsvRecord TransformFromOrderRecord(const services::OrderRecord &order);
     };
-
 }

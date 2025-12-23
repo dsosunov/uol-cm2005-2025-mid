@@ -1,16 +1,13 @@
 #include "actions/generation/auto_generate_trades_action.hpp"
-
-#include <format>
-
+#include "core/utils/output_formatter.hpp"
 #include "core/ui/form/fields/text_field.hpp"
 #include "core/ui/form/form_context.hpp"
-
+#include <format>
 AutoGenerateTradesAction::AutoGenerateTradesAction(
     std::shared_ptr<services::TradingService> trading_service)
     : trading_service_(std::move(trading_service))
 {
 }
-
 void AutoGenerateTradesAction::Execute(ActionContext &context)
 {
   context.output->WriteLine("");
@@ -20,12 +17,9 @@ void AutoGenerateTradesAction::Execute(ActionContext &context)
   context.output->WriteLine("Press Enter to confirm, or type 'cancel' to abort...");
   form::TextField confirmField(
       "confirm", "Confirm",
-      [](const std::any &, const std::string &, const form::FormContext &)
-      {
-      },
+      [](const std::any &, const std::string &, const form::FormContext &) {},
       nullptr);
   form::FormContext emptyContext;
-
   if (auto inputOpt = context.form_input_provider->ReadField(confirmField, emptyContext);
       !inputOpt || *inputOpt == "cancel")
   {
@@ -34,28 +28,25 @@ void AutoGenerateTradesAction::Execute(ActionContext &context)
     return;
   }
   auto result = trading_service_->GenerateTrades(10);
-
   context.output->WriteLine("");
   if (result.success)
   {
-    context.output->WriteLine("=== Generating Trades ===");
+    context.output->WriteLine(utils::OutputFormatter::SuccessHeader("Trade Generation"));
     context.output->WriteLine(
-        std::format("Generated {} trades successfully:", result.trades_generated));
-
-    for (const auto &[pair, count] : result.trades_by_pair)
+        std::format("Generated {} trades successfully:", result.data->trades_generated));
+    for (const auto &[pair, count] : result.data->trades_by_pair)
     {
       if (count > 0)
       {
         context.output->WriteLine(std::format("  - {} x {}", count, pair));
       }
     }
-
     context.output->WriteLine("");
-    context.output->WriteLine(std::format("Total volume: ${:.2f}", result.total_volume));
+    context.output->WriteLine(std::format("Total volume: ${:.2f}", result.data->total_volume));
   }
   else
   {
-    context.output->WriteLine("=== Trade Generation Failed ===");
+    context.output->WriteLine(utils::OutputFormatter::FailureHeader("Trade Generation"));
     context.output->WriteLine(std::format("Error: {}", result.message));
   }
 }

@@ -1,23 +1,19 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <string_view>
-
 namespace dto
 {
-
   enum class Timeframe
   {
     Daily,
     Monthly,
     Yearly
   };
-
   enum class OrderType
   {
     Asks,
     Bids
   };
-
   inline std::string_view TimeframeToString(Timeframe timeframe)
   {
     switch (timeframe)
@@ -32,7 +28,6 @@ namespace dto
       return "";
     }
   }
-
   inline std::string_view OrderTypeToString(OrderType order_type)
   {
     switch (order_type)
@@ -45,5 +40,4 @@ namespace dto
       return "";
     }
   }
-
 }

@@ -1,23 +1,23 @@
-#pragma once
-#include <memory>
-
-#include "core/actions/action_context.hpp"
-#include "core/actions/menu_action.hpp"
-#include "dto/wallet_operation.hpp"
+﻿#pragma once
+#include "core/actions/form_based_action.hpp"
 #include "services/wallet_service.hpp"
 #include "services/trading_service.hpp"
-
-class WalletWithdrawAction : public MenuAction
+#include "dto/wallet_operation.hpp"
+#include "forms/wallet/wallet_operation_form.hpp"
+#include <memory>
+class WalletWithdrawAction : public actions::FormBasedAction<wallet_forms::WalletOperationForm, dto::WalletOperation, utils::ServiceResult<double>>
 {
 public:
   explicit WalletWithdrawAction(std::shared_ptr<services::WalletService> wallet_service,
                                 std::shared_ptr<services::TradingService> trading_service);
-  void Execute(ActionContext &context) override;
+
+protected:
+  wallet_forms::WalletOperationForm CreateForm(ActionContext &context) override;
+  utils::ServiceResult<double> ExecuteService(const dto::WalletOperation &data, ActionContext &context) override;
+  void DisplayResults(const utils::ServiceResult<double> &result, const dto::WalletOperation &data, ActionContext &context) override;
+  const char *GetOperationName() const override { return "Withdrawal"; }
 
 private:
-  void DisplayResults(const services::OperationResult &result, const std::string &currency,
-                      ActionContext &context) const;
-
   std::shared_ptr<services::WalletService> wallet_service_;
   std::shared_ptr<services::TradingService> trading_service_;
 };

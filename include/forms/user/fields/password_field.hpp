@@ -1,11 +1,11 @@
-#pragma once
-#include "core/ui/form/fields/text_field.hpp"
-
-namespace user_forms {
-
-class PasswordField : public form::TextField {
- public:
-  explicit PasswordField();
-};
-
+﻿#pragma once
+#include "forms/shared/fields/password_field.hpp"
+#include "dto/user_registration.hpp"
+namespace user_forms
+{
+  class PasswordField : public forms::shared::PasswordField<dto::UserRegistration>
+  {
+  public:
+    explicit PasswordField();
+  };
 }

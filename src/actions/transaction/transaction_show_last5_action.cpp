@@ -1,21 +1,16 @@
 #include "actions/transaction/transaction_show_last5_action.hpp"
-
-#include <format>
-
+#include "core/utils/output_formatter.hpp"
 #include "core/utils/time_utils.hpp"
-
+#include <format>
 TransactionShowLast5Action::TransactionShowLast5Action(
     std::shared_ptr<services::TransactionsService> transactions_service)
     : transactions_service_(std::move(transactions_service))
 {
 }
-
 void TransactionShowLast5Action::Execute(ActionContext &context)
 {
-  context.output->WriteLine("");
-  context.output->WriteLine("=== Last 5 Transactions ===");
+  context.output->WriteLine(utils::OutputFormatter::SectionHeader("Last 5 Transactions"));
   auto transactions = transactions_service_->GetLastTransactions(5);
-
   if (transactions.empty())
   {
     context.output->WriteLine("No transactions found.");

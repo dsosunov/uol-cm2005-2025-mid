@@ -1,30 +1,20 @@
-#pragma once
+﻿#pragma once
+#include "core/utils/service_result.hpp"
 #include <map>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
-
 namespace data
 {
     class CsvWriter;
 }
-
 namespace persistence
 {
     class WalletDataAdapter;
 }
-
 namespace services
 {
-
-    struct OperationResult
-    {
-        bool success;
-        std::string message;
-        double new_balance;
-    };
-
     class WalletService
     {
     public:
@@ -36,10 +26,10 @@ namespace services
         double GetBalance(std::string_view currency,
                           std::optional<int> user_id = std::nullopt) const;
         double GetTotalBalanceInUSD(std::optional<int> user_id = std::nullopt) const;
-        OperationResult Deposit(std::string_view currency, double amount,
-                                std::optional<int> user_id = std::nullopt);
-        OperationResult Withdraw(std::string_view currency, double amount,
-                                 std::optional<int> user_id = std::nullopt);
+        utils::ServiceResult<double> Deposit(std::string_view currency, double amount,
+                                             std::optional<int> user_id = std::nullopt);
+        utils::ServiceResult<double> Withdraw(std::string_view currency, double amount,
+                                              std::optional<int> user_id = std::nullopt);
 
     private:
         std::map<int, std::map<std::string, double, std::less<>>> balances_;
@@ -49,5 +39,4 @@ namespace services
         int GetEffectiveUserId(std::optional<int> user_id) const;
         void SaveBalances(int user_id);
     };
-
 }

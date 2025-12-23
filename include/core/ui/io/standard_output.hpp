@@ -1,8 +1,6 @@
-#pragma once
+﻿#pragma once
 #include <string>
-
 #include "core/ui/io/output.hpp"
-
 class StandardOutput : public Output {
  public:
   StandardOutput();

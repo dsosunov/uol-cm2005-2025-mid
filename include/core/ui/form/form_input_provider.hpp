@@ -1,7 +1,6 @@
-#pragma once
+﻿#pragma once
 #include <optional>
 #include <string>
-
 namespace form
 {
     class Field;
@@ -12,5 +11,4 @@ namespace form
         virtual ~FormInputProvider() = default;
         virtual std::optional<std::string> ReadField(const Field &field, const FormContext &context) = 0;
     };
-
 }

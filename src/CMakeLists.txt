@@ -22,6 +22,10 @@ set(SOURCES
     core/data/csv_reader.cpp
     core/data/csv_writer.cpp
     core/utils/time_utils.cpp
+    core/utils/output_formatter.cpp
+    core/utils/service_utils.cpp
+    core/utils/date_filter.cpp
+    core/actions/action_helper.cpp
     service_container.cpp
     core/ui/io/standard_input.cpp
     core/ui/io/standard_output.cpp
@@ -35,9 +39,14 @@ set(SOURCES
     core/ui/form/form_context.cpp
     core/ui/form/data_source.cpp
     core/ui/form/static_data_source.cpp
+    core/ui/form/validator_factory.cpp
     core/ui/form/fields/text_field.cpp
     core/ui/form/fields/selection_field.cpp
     forms/shared/validators/currency_pair_validator.cpp
+    forms/shared/fields/timeframe_field.cpp
+    forms/shared/fields/date_fields.cpp
+    forms/shared/fields/password_field.cpp
+    forms/shared/fields/product_pair_field.cpp
     forms/candlestick/fields/currency_pair_field.cpp
     forms/candlestick/fields/asks_bids_field.cpp
     forms/candlestick/fields/timeframe_field.cpp

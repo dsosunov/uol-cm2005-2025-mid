@@ -1,6 +1,5 @@
-#pragma once
+﻿#pragma once
 #include <string>
-
 class Input {
  public:
   virtual ~Input() = default;

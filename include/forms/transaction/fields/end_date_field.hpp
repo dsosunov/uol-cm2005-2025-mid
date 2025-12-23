@@ -1,14 +1,13 @@
-#pragma once
+﻿#pragma once
 #include <memory>
-
 #include "core/ui/form/data_source.hpp"
-#include "core/ui/form/fields/selection_field.hpp"
-
-namespace transaction_forms {
-
-class EndDateField : public form::SelectionField {
- public:
-  explicit EndDateField(std::shared_ptr<form::DataSource> data_source);
-};
-
+#include "forms/shared/fields/date_fields.hpp"
+#include "dto/activity_summary.hpp"
+namespace transaction_forms
+{
+  class EndDateField : public forms::shared::EndDateField<dto::ActivitySummary>
+  {
+  public:
+    explicit EndDateField(std::shared_ptr<form::DataSource> data_source);
+  };
 }

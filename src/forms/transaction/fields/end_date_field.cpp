@@ -1,14 +1,9 @@
-#include "forms/transaction/fields/end_date_field.hpp"
-
-#include "core/ui/form/binders/field_binders.hpp"
+﻿#include "forms/transaction/fields/end_date_field.hpp"
+#include "forms/shared/fields/date_fields.hpp"
 #include "dto/activity_summary.hpp"
-
 namespace transaction_forms
 {
-
     EndDateField::EndDateField(std::shared_ptr<form::DataSource> data_source)
-        : form::SelectionField("end_date", "Select end date", std::move(data_source),
-                               form::DateFieldBinder<dto::ActivitySummary>(
-                                   &dto::ActivitySummary::end_date)) {}
-
+        : forms::shared::EndDateField<dto::ActivitySummary>(
+              std::move(data_source), &dto::ActivitySummary::end_date) {}
 }

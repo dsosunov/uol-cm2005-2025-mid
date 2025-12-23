@@ -1,6 +1,4 @@
-#pragma once
-
-// Convenience header that includes all user validators
+﻿#pragma once
 #include "email_or_username_validator.hpp"
 #include "email_validator.hpp"
 #include "full_name_validator.hpp"

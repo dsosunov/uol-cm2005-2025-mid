@@ -1,15 +1,12 @@
-#pragma once
+﻿#pragma once
 #include <algorithm>
 #include <any>
 #include <cctype>
 #include <functional>
 #include <string>
-
 #include "core/ui/form/form_context.hpp"
-
 namespace forms::shared
 {
-
   template <typename DTO>
   class CurrencyPairBinder
   {
@@ -18,7 +15,6 @@ namespace forms::shared
                     const form::FormContext &) const
     {
       auto &dto = std::any_cast<std::reference_wrapper<DTO>>(target).get();
-
       size_t pos = value.find('/');
       if (pos != std::string_view::npos)
       {
@@ -26,11 +22,9 @@ namespace forms::shared
         std::string quote(value.substr(pos + 1));
         std::transform(base.begin(), base.end(), base.begin(), ::toupper);
         std::transform(quote.begin(), quote.end(), quote.begin(), ::toupper);
-
         dto.currency_base = base;
         dto.currency_quote = quote;
       }
     }
   };
-
 }

@@ -1,11 +1,10 @@
-#pragma once
+﻿#pragma once
 #include <memory>
-
 #include "core/actions/action_context.hpp"
 #include "core/actions/menu_action.hpp"
+#include "core/utils/service_result.hpp"
 #include "dto/user_reset.hpp"
 #include "services/user_service.hpp"
-
 class UserResetAction : public MenuAction
 {
 public:
@@ -13,8 +12,7 @@ public:
   void Execute(ActionContext &context) override;
 
 private:
-  void DisplayResults(const services::ResetResult &result, const std::string &account,
+  void DisplayResults(const utils::ServiceResult<void> &result, const std::string &account,
                       ActionContext &context) const;
-
   std::shared_ptr<services::UserService> user_service_;
 };

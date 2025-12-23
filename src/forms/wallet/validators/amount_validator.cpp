@@ -1,11 +1,8 @@
-#include "forms/wallet/validators/amount_validator.hpp"
-
+﻿#include "forms/wallet/validators/amount_validator.hpp"
 #include <cctype>
 #include <stdexcept>
-
 namespace wallet_forms
 {
-
   form::ValidationResult AmountValidator::Validate(const std::string &value,
                                                    const form::FormContext &context) const
   {
@@ -13,14 +10,11 @@ namespace wallet_forms
     {
       return form::ValidationResult::Invalid("Amount cannot be empty");
     }
-
     bool has_decimal = false;
     bool has_digit = false;
     size_t decimal_places = 0;
-
     for (char c : value)
     {
-
       if (std::isdigit(c))
       {
         has_digit = true;
@@ -42,17 +36,14 @@ namespace wallet_forms
         return form::ValidationResult::Invalid("Amount must be a valid number");
       }
     }
-
     if (!has_digit)
     {
       return form::ValidationResult::Invalid("Amount must contain at least one digit");
     }
-
     if (decimal_places > 2)
     {
       return form::ValidationResult::Invalid("Amount can have at most 2 decimal places");
     }
-
     try
     {
       double amount = std::stod(value);
@@ -69,13 +60,10 @@ namespace wallet_forms
     {
       return form::ValidationResult::Invalid("Invalid amount format");
     }
-
     return form::ValidationResult::Valid();
   }
-
   std::optional<std::string> AmountValidator::GetHint() const
   {
     return "Enter a positive number with up to 8 decimal places";
   }
-
 }
