@@ -1,6 +1,15 @@
 #include "actions/generation/auto_generate_trades_action.hpp"
+
+#include <format>
+
 #include "core/ui/form/fields/text_field.hpp"
 #include "core/ui/form/form_context.hpp"
+
+AutoGenerateTradesAction::AutoGenerateTradesAction(
+    std::shared_ptr<services::TradingService> trading_service)
+    : trading_service_(std::move(trading_service))
+{
+}
 
 void AutoGenerateTradesAction::Execute(ActionContext &context)
 {
@@ -11,27 +20,47 @@ void AutoGenerateTradesAction::Execute(ActionContext &context)
   context.output->WriteLine("Press Enter to confirm, or type 'cancel' to abort...");
 
   // Create a simple TextField for reading confirmation
-  form::TextField confirmField("confirm", "Confirm", [](const std::any &, const std::string &, const form::FormContext &)
-                               {
-                                 // Not implemented yet
-                               },
-                               nullptr);
+  form::TextField confirmField(
+      "confirm", "Confirm",
+      [](const std::any &, const std::string &, const form::FormContext &)
+      {
+        // Not implemented yet
+      },
+      nullptr);
   form::FormContext emptyContext;
 
-  if (auto inputOpt = context.form_input_provider->ReadField(confirmField, emptyContext); !inputOpt || *inputOpt == "cancel")
+  if (auto inputOpt = context.form_input_provider->ReadField(confirmField, emptyContext);
+      !inputOpt || *inputOpt == "cancel")
   {
     context.output->WriteLine("");
     context.output->WriteLine("Auto-generation cancelled.");
     return;
   }
 
+  // Use service to generate trades
+  auto result = trading_service_->GenerateTrades(10);
+
   context.output->WriteLine("");
-  context.output->WriteLine("=== Generating Trades ===");
-  context.output->WriteLine("Generated 10 trades successfully:");
-  context.output->WriteLine("  - 3 x USD/EUR");
-  context.output->WriteLine("  - 2 x GBP/USD");
-  context.output->WriteLine("  - 3 x USD/JPY");
-  context.output->WriteLine("  - 2 x EUR/GBP");
-  context.output->WriteLine("");
-  context.output->WriteLine("Total volume: $50,000.00");
+  if (result.success)
+  {
+    context.output->WriteLine("=== Generating Trades ===");
+    context.output->WriteLine(
+        std::format("Generated {} trades successfully:", result.trades_generated));
+
+    for (const auto &[pair, count] : result.trades_by_pair)
+    {
+      if (count > 0)
+      {
+        context.output->WriteLine(std::format("  - {} x {}", count, pair));
+      }
+    }
+
+    context.output->WriteLine("");
+    context.output->WriteLine(std::format("Total volume: ${:.2f}", result.total_volume));
+  }
+  else
+  {
+    context.output->WriteLine("=== Trade Generation Failed ===");
+    context.output->WriteLine(std::format("Error: {}", result.message));
+  }
 }

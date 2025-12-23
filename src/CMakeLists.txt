@@ -11,6 +11,11 @@ set(SOURCES
     actions/transaction/transaction_show_by_pair_action.cpp
     actions/transaction/transaction_activity_summary_action.cpp
     actions/generation/auto_generate_trades_action.cpp
+    services/user_service.cpp
+    services/wallet_service.cpp
+    services/transactions_service.cpp
+    services/trading_service.cpp
+    core/service_container.cpp
     core/ui/io/standard_input.cpp
     core/ui/io/standard_output.cpp
     core/ui/menu/menu_node.cpp
@@ -25,13 +30,13 @@ set(SOURCES
     core/ui/form/fields/text_field.cpp
     core/ui/form/fields/selection_field.cpp
     forms/shared/validators/currency_pair_validator.cpp
-    forms/shared/validators/date_validator.cpp
     forms/candlestick/fields/currency_pair_field.cpp
     forms/candlestick/fields/asks_bids_field.cpp
     forms/candlestick/fields/timeframe_field.cpp
     forms/candlestick/fields/start_date_field.cpp
     forms/candlestick/fields/end_date_field.cpp
     forms/candlestick/candlestick_form.cpp
+    forms/candlestick/candlestick_form_data_provider.cpp
     forms/user/validators/email_validator.cpp
     forms/user/validators/username_validator.cpp
     forms/user/validators/password_validator.cpp
@@ -58,6 +63,7 @@ set(SOURCES
     forms/transaction/fields/end_date_field.cpp
     forms/transaction/product_pair_form.cpp
     forms/transaction/activity_summary_form.cpp
+    forms/transaction/activity_summary_form_data_provider.cpp
 )
 
 # Create library for testing (without main.cpp)

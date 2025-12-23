@@ -16,7 +16,8 @@ namespace transaction_forms
     {
     public:
         ProductPairForm(std::shared_ptr<form::FormInputProvider> input_provider,
-                        std::shared_ptr<Output> output, const std::set<std::string, std::less<>> &allowed_currencies);
+                        std::shared_ptr<Output> output,
+                        const std::set<std::string, std::less<>> &allowed_currencies);
 
     private:
         static std::vector<std::shared_ptr<form::Field>> SetupFormLayout(

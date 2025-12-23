@@ -1,11 +1,34 @@
 #include "actions/transaction/transaction_show_last5_action.hpp"
 
+#include <format>
+
+TransactionShowLast5Action::TransactionShowLast5Action(
+    std::shared_ptr<services::TransactionsService> transactions_service)
+    : transactions_service_(std::move(transactions_service))
+{
+}
+
 void TransactionShowLast5Action::Execute(ActionContext &context)
 {
   context.output->WriteLine("");
-  context.output->WriteLine("1. USD/EUR - Buy  - 100.00 @ 0.95 - 2025-12-22 10:30");
-  context.output->WriteLine("2. GBP/USD - Sell - 50.00  @ 1.28 - 2025-12-22 09:15");
-  context.output->WriteLine("3. USD/JPY - Buy  - 200.00 @ 150.5 - 2025-12-21 15:45");
-  context.output->WriteLine("4. EUR/GBP - Sell - 75.00  @ 0.85 - 2025-12-21 12:20");
-  context.output->WriteLine("5. CAD/USD - Buy  - 150.00 @ 0.73 - 2025-12-20 16:00");
+  context.output->WriteLine("=== Last 5 Transactions ===");
+
+  // Get last 5 transactions from service
+  auto transactions = transactions_service_->GetLastTransactions(5);
+
+  if (transactions.empty())
+  {
+    context.output->WriteLine("No transactions found.");
+  }
+  else
+  {
+    int index = 1;
+    for (const auto &transaction : transactions)
+    {
+      context.output->WriteLine(
+          std::format("{}. {} - {} - {:.2f} @ {:.4f} - {}", index++, transaction.product_pair,
+                      transaction.type, transaction.amount, transaction.price,
+                      transaction.timestamp));
+    }
+  }
 }

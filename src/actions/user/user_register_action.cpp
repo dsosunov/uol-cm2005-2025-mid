@@ -4,6 +4,11 @@
 
 #include "forms/user/registration_form.hpp"
 
+UserRegisterAction::UserRegisterAction(std::shared_ptr<services::UserService> user_service)
+    : user_service_(std::move(user_service))
+{
+}
+
 void UserRegisterAction::Execute(ActionContext &context)
 {
   dto::UserRegistration data;
@@ -16,14 +21,28 @@ void UserRegisterAction::Execute(ActionContext &context)
     return;
   }
 
-  DisplayResults(data, context);
+  // Use service to register user
+  auto result = user_service_->RegisterUser(data.full_name, data.email, data.password);
+  DisplayResults(result, context);
 }
 
-void UserRegisterAction::DisplayResults(const dto::UserRegistration &data, ActionContext &context) const
+void UserRegisterAction::DisplayResults(const services::RegistrationResult &result,
+                                        ActionContext &context) const
 {
   context.output->WriteLine("");
-  context.output->WriteLine("=== Registration Successful ===");
-  context.output->WriteLine(std::format("Full Name: {}", data.full_name));
-  context.output->WriteLine(std::format("Email: {}", data.email));
-  context.output->WriteLine(std::format("Password: {}", std::string(data.password.length(), '*')));
+  if (result.success)
+  {
+    context.output->WriteLine("=== Registration Successful ===");
+    if (result.user.has_value())
+    {
+      context.output->WriteLine(std::format("Full Name: {}", result.user->full_name));
+      context.output->WriteLine(std::format("Email: {}", result.user->email));
+      context.output->WriteLine(std::format("Username: {}", result.user->username));
+    }
+  }
+  else
+  {
+    context.output->WriteLine("=== Registration Failed ===");
+    context.output->WriteLine(std::format("Error: {}", result.message));
+  }
 }

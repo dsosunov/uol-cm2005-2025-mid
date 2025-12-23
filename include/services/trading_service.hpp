@@ -1,0 +1,84 @@
+#pragma once
+#include <map>
+#include <optional>
+#include <set>
+#include <string>
+#include <vector>
+
+namespace services
+{
+
+    struct CandlestickData
+    {
+        std::string timestamp;
+        double open;
+        double high;
+        double low;
+        double close;
+        double volume;
+    };
+
+    struct CandlestickResult
+    {
+        std::vector<CandlestickData> data;
+        std::string product_pair;
+        std::string timeframe;
+        bool success;
+        std::string message;
+    };
+
+    struct GenerationResult
+    {
+        bool success;
+        int trades_generated;
+        std::map<std::string, int> trades_by_pair;
+        double total_volume;
+        std::string message;
+    };
+
+    /**
+     * @brief Options for querying date samples with server-side filtering
+     * Enables lazy loading by only fetching needed data from source
+     */
+    struct DateQueryOptions
+    {
+        std::optional<std::string> start_date; // Filter: date >= start_date
+        std::optional<std::string> end_date;   // Filter: date <= end_date
+        std::optional<int> limit;              // Max results to return (pagination)
+        int offset = 0;                        // Skip N results (pagination)
+    };
+
+    class TradingService
+    {
+    public:
+        TradingService();
+        ~TradingService() = default;
+
+        // Market data operations
+        CandlestickResult GetCandlestickData(const std::string &currency_base,
+                                             const std::string &currency_quote,
+                                             const std::string &asks_bids,
+                                             const std::string &timeframe,
+                                             const std::string &start_date,
+                                             const std::string &end_date) const;
+
+        // Trade generation
+        GenerationResult GenerateTrades(int count);
+
+        // Utility
+        std::set<std::string, std::less<>> GetAvailableCurrencies() const;
+
+        /**
+         * @brief Get date samples with server-side filtering (lazy loading)
+         * @param timeframe "daily", "monthly", or "yearly"
+         * @param options Query filters (start_date, end_date, limit, offset)
+         * @return Filtered date strings (only requested subset, not all data)
+         */
+        std::vector<std::string> GetDateSamples(const std::string &timeframe,
+                                                const DateQueryOptions &options) const;
+
+    private:
+        std::set<std::string, std::less<>> available_currencies_;
+    };
+
+} // namespace services

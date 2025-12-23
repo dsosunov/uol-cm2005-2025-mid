@@ -1,8 +1,6 @@
 #include "forms/transaction/activity_summary_form.hpp"
 
 #include "core/ui/form/contextual_data_source.hpp"
-#include "dto/activity_summary.hpp"
-#include "dto/constants.hpp"
 #include "forms/transaction/fields/end_date_field.hpp"
 #include "forms/transaction/fields/start_date_field.hpp"
 #include "forms/transaction/fields/timeframe_field.hpp"
@@ -11,37 +9,30 @@ namespace transaction_forms
 {
 
   ActivitySummaryForm::ActivitySummaryForm(std::shared_ptr<form::FormInputProvider> input_provider,
-                                           std::shared_ptr<Output> output)
-      : form::Form(SetupFormLayout(), input_provider, output) {}
+                                           std::shared_ptr<Output> output,
+                                           std::shared_ptr<ActivitySummaryFormDataProvider> data_provider)
+      : form::Form(SetupFormLayout(std::move(data_provider)), input_provider, output) {}
 
-  std::vector<std::shared_ptr<form::Field>> ActivitySummaryForm::SetupFormLayout()
+  std::vector<std::shared_ptr<form::Field>> ActivitySummaryForm::SetupFormLayout(
+      std::shared_ptr<ActivitySummaryFormDataProvider> data_provider)
   {
+    // Start date: ContextualDataSource queries context, calls provider method
     auto start_date_source = std::make_shared<form::ContextualDataSource>(
-        [](const form::FormContext &form_context)
+        [data_provider](const form::FormContext &form_context)
         {
-          if (auto timeframe = form_context.GetValue("timeframe"); timeframe && *timeframe == dto::timeframe::MONTHLY)
-          {
-            return dto::sample_dates::GetMonthlySamples();
-          }
-          else if (timeframe && *timeframe == dto::timeframe::YEARLY)
-          {
-            return dto::sample_dates::GetYearlySamples();
-          }
-          return dto::sample_dates::GetDailySamples();
+          auto timeframe = form_context.GetValue("timeframe");
+          return data_provider->GetStartDates(timeframe ? *timeframe : "");
         });
 
+    // End date: ContextualDataSource queries context (timeframe + start_date), calls provider method
     auto end_date_source = std::make_shared<form::ContextualDataSource>(
-        [](const form::FormContext &form_context)
+        [data_provider](const form::FormContext &form_context)
         {
-          if (auto timeframe = form_context.GetValue("timeframe"); timeframe && *timeframe == dto::timeframe::MONTHLY)
-          {
-            return dto::sample_dates::GetMonthlySamples();
-          }
-          else if (timeframe && *timeframe == dto::timeframe::YEARLY)
-          {
-            return dto::sample_dates::GetYearlySamples();
-          }
-          return dto::sample_dates::GetDailySamples();
+          auto timeframe = form_context.GetValue("timeframe");
+          auto start_date = form_context.GetValue("start_date");
+          return data_provider->GetEndDates(
+              timeframe ? *timeframe : "",
+              start_date ? *start_date : "");
         });
 
     std::vector<std::shared_ptr<form::Field>> fields;

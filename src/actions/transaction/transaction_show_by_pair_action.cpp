@@ -1,19 +1,26 @@
 #include "actions/transaction/transaction_show_by_pair_action.hpp"
 
 #include <format>
-#include <set>
 
 #include "forms/transaction/product_pair_form.hpp"
 
-static const std::set<std::string, std::less<>> kAllowedCurrencies = {"USD", "CAD", "EUR", "GBP",
-                                                                      "JPY", "AUD", "CHF", "CNY"};
+TransactionShowByPairAction::TransactionShowByPairAction(
+    std::shared_ptr<services::TransactionsService> transactions_service,
+    std::shared_ptr<services::TradingService> trading_service)
+    : transactions_service_(std::move(transactions_service)),
+      trading_service_(std::move(trading_service))
+{
+}
 
 void TransactionShowByPairAction::Execute(ActionContext &context)
 {
+  // Controller: Prepare data from service
+  auto allowed_currencies = trading_service_->GetAvailableCurrencies();
 
   dto::TransactionQuery data;
+  // Pass prepared data to view (form)
   transaction_forms::ProductPairForm form(context.form_input_provider, context.output,
-                                          kAllowedCurrencies);
+                                          allowed_currencies);
 
   if (auto result = form.Read(data); result == form::FormReadResult::kCancelled)
   {
@@ -22,15 +29,30 @@ void TransactionShowByPairAction::Execute(ActionContext &context)
     return;
   }
 
-  DisplayResults(data, context);
+  // Get transactions by product pair from service
+  auto transactions = transactions_service_->GetTransactionsByPair(data.product_pair);
+  DisplayResults(data.product_pair, transactions, context);
 }
 
-void TransactionShowByPairAction::DisplayResults(const dto::TransactionQuery &data,
-                                                 ActionContext &context) const
+void TransactionShowByPairAction::DisplayResults(
+    const std::string &product_pair, const std::vector<services::Transaction> &transactions,
+    ActionContext &context) const
 {
   context.output->WriteLine("");
-  context.output->WriteLine(std::format("=== Transactions for {} ===", data.product_pair));
-  context.output->WriteLine("1. Buy  - 100.00 @ 1.25 - 2025-12-22 10:30");
-  context.output->WriteLine("2. Sell - 50.00  @ 1.26 - 2025-12-21 09:15");
-  context.output->WriteLine("3. Buy  - 200.00 @ 1.24 - 2025-12-20 15:45");
+  context.output->WriteLine(std::format("=== Transactions for {} ===", product_pair));
+
+  if (transactions.empty())
+  {
+    context.output->WriteLine("No transactions found for this product pair.");
+  }
+  else
+  {
+    int index = 1;
+    for (const auto &transaction : transactions)
+    {
+      context.output->WriteLine(
+          std::format("{}. {} - {:.2f} @ {:.4f} - {}", index++, transaction.type,
+                      transaction.amount, transaction.price, transaction.timestamp));
+    }
+  }
 }

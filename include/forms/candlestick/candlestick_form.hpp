@@ -6,8 +6,7 @@
 #include <vector>
 
 #include "core/ui/form/form.hpp"
-#include "core/ui/form/form_input_provider.hpp"
-#include "core/ui/io/output.hpp"
+#include "forms/candlestick/candlestick_form_data_provider.hpp"
 
 namespace candlestick
 {
@@ -16,11 +15,12 @@ namespace candlestick
     {
     public:
         CandlestickForm(std::shared_ptr<form::FormInputProvider> input_provider,
-                        std::shared_ptr<Output> output, const std::set<std::string, std::less<>> &allowed_currencies);
+                        std::shared_ptr<Output> output,
+                        std::shared_ptr<CandlestickFormDataProvider> data_provider);
 
     private:
         static std::vector<std::shared_ptr<form::Field>> SetupFormLayout(
-            const std::set<std::string, std::less<>> &allowed_currencies);
+            std::shared_ptr<CandlestickFormDataProvider> data_provider);
     };
 
 } // namespace candlestick

@@ -4,6 +4,11 @@
 
 #include "forms/user/login_form.hpp"
 
+UserLoginAction::UserLoginAction(std::shared_ptr<services::UserService> user_service)
+    : user_service_(std::move(user_service))
+{
+}
+
 void UserLoginAction::Execute(ActionContext &context)
 {
   dto::UserLogin data;
@@ -16,13 +21,27 @@ void UserLoginAction::Execute(ActionContext &context)
     return;
   }
 
-  DisplayResults(data, context);
+  // Use service to login user
+  auto result = user_service_->LoginUser(data.username, data.password);
+  DisplayResults(result, context);
 }
 
-void UserLoginAction::DisplayResults(const dto::UserLogin &data, ActionContext &context) const
+void UserLoginAction::DisplayResults(const services::LoginResult &result,
+                                     ActionContext &context) const
 {
   context.output->WriteLine("");
-  context.output->WriteLine("=== Login Successful ===");
-  context.output->WriteLine(std::format("Username: {}", data.username));
-  context.output->WriteLine("Welcome back!");
+  if (result.success)
+  {
+    context.output->WriteLine("=== Login Successful ===");
+    if (result.user.has_value())
+    {
+      context.output->WriteLine(std::format("Welcome back, {}!", result.user->full_name));
+      context.output->WriteLine(std::format("Username: {}", result.user->username));
+    }
+  }
+  else
+  {
+    context.output->WriteLine("=== Login Failed ===");
+    context.output->WriteLine(std::format("Error: {}", result.message));
+  }
 }
