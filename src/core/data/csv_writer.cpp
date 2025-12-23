@@ -13,13 +13,7 @@ namespace data
     }
     CsvWriter::~CsvWriter() noexcept
     {
-        try
-        {
-            Flush();
-        }
-        catch (const std::exception &)
-        {
-        }
+        Flush();
     }
 
     CsvWriter::CsvWriter(CsvWriter &&other) noexcept
@@ -37,13 +31,7 @@ namespace data
     {
         if (this != &other)
         {
-            try
-            {
-                Flush();
-            }
-            catch (const std::exception &)
-            {
-            }
+            Flush();
             file_path_ = std::move(other.file_path_);
             append_mode_ = other.append_mode_;
             buffer_size_ = other.buffer_size_;
@@ -69,14 +57,8 @@ namespace data
     }
     bool CsvWriter::WriteAll(const std::vector<CsvRecord> &records)
     {
-        for (const auto &record : records)
-        {
-            if (!Write(record))
-            {
-                return false;
-            }
-        }
-        return true;
+        return std::ranges::all_of(records, [this](const auto &record)
+                                   { return Write(record); });
     }
     bool CsvWriter::Flush()
     {

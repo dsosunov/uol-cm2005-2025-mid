@@ -17,22 +17,13 @@ namespace persistence
         }
         reader_->ReadWithProcessor([&balances, user_id](const data::CsvRecord &record)
                                    {
-            try
+            if (int record_user_id = std::stoi(record.order_type); record_user_id != user_id)
             {
-                if (int record_user_id = std::stoi(record.order_type); record_user_id != user_id)
-                {
-                    return;
-                }
-                std::string currency = record.product;
-                double balance = std::stod(record.amount);
-                balances[currency] = balance;
+                return;
             }
-            catch (const std::invalid_argument &)
-            {
-            }
-            catch (const std::out_of_range &)
-            {
-            } });
+            std::string currency = record.product;
+            double balance = std::stod(record.amount);
+            balances[currency] = balance; });
         return balances;
     }
     bool WalletDataAdapter::WriteBalances(data::CsvWriter &writer, int user_id,

@@ -7,27 +7,26 @@
 #include <algorithm>
 namespace services
 {
-    TradingService::TradingService(std::shared_ptr<persistence::TradingDataAdapter> adapter)
-        : adapter_(adapter)
+    namespace
     {
-    }
-    utils::ServiceResult<std::vector<CandlestickData>> TradingService::GetCandlestickData(std::string_view currency_base,
-                                                                                          std::string_view currency_quote,
-                                                                                          dto::OrderType order_type,
-                                                                                          [[maybe_unused]] dto::Timeframe timeframe,
-                                                                                          const std::optional<utils::TimePoint> &start_date,
-                                                                                          const std::optional<utils::TimePoint> &end_date) const
-    {
-        std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
-        std::map<utils::TimePoint, CandlestickData> candlestick_map;
-        utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
-        adapter_->ReadWithProcessor(order_type, [&product_pair, &date_filter, &candlestick_map](const OrderRecord &order)
-                                    {
+        struct PeriodStats
+        {
+            double min_price = std::numeric_limits<double>::max();
+            double max_price = std::numeric_limits<double>::lowest();
+            double total_volume = 0.0;
+            int count = 0;
+        };
+
+        void ProcessCandlestickOrder(const OrderRecord &order,
+                                     std::string_view product_pair,
+                                     const utils::DateFilter &date_filter,
+                                     std::map<utils::TimePoint, CandlestickData> &candlestick_map)
+        {
             if (order.product_pair != product_pair)
                 return;
             if (!date_filter.IsInRange(order.timestamp))
                 return;
-            auto& candle = candlestick_map[order.timestamp];
+            auto &candle = candlestick_map[order.timestamp];
             if (candle.timestamp == utils::TimePoint{})
             {
                 candle.timestamp = order.timestamp;
@@ -43,39 +42,15 @@ namespace services
                 candle.low = std::min(candle.low, order.price);
                 candle.close = order.price;
             }
-            candle.volume += order.amount; });
-        if (candlestick_map.empty())
-        {
-            return utils::ServiceResult<std::vector<CandlestickData>>::Failure("No data found for the specified currency pair and date range");
+            candle.volume += order.amount;
         }
-        std::vector<CandlestickData> candlesticks;
-        candlesticks.reserve(candlestick_map.size());
-        for (const auto &[timestamp, candle] : candlestick_map)
+
+        void ProcessSummaryOrder(const OrderRecord &order,
+                                 std::string_view product_pair,
+                                 const utils::DateFilter &date_filter,
+                                 dto::Timeframe timeframe,
+                                 std::map<std::string, PeriodStats, std::less<>> &aggregated_data)
         {
-            candlesticks.push_back(candle);
-        }
-        return utils::ServiceResult<std::vector<CandlestickData>>::Success(candlesticks, "Data retrieved from CSV");
-    }
-    utils::ServiceResult<CandlestickSummaryData> TradingService::GetCandlestickSummary(
-        std::string_view currency_base,
-        std::string_view currency_quote,
-        dto::OrderType order_type,
-        dto::Timeframe timeframe,
-        const std::optional<utils::TimePoint> &start_date,
-        const std::optional<utils::TimePoint> &end_date) const
-    {
-        std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
-        struct PeriodStats
-        {
-            double min_price = std::numeric_limits<double>::max();
-            double max_price = std::numeric_limits<double>::lowest();
-            double total_volume = 0.0;
-            int count = 0;
-        };
-        std::map<std::string, PeriodStats, std::less<>> aggregated_data;
-        utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
-        adapter_->ReadWithProcessor(order_type, [&product_pair, &date_filter, &aggregated_data, &timeframe](const OrderRecord &order)
-                                    {
             if (order.product_pair != product_pair)
             {
                 return;
@@ -102,7 +77,51 @@ namespace services
             stats.min_price = std::min(stats.min_price, order.price);
             stats.max_price = std::max(stats.max_price, order.price);
             stats.total_volume += order.amount;
-            stats.count++; });
+            stats.count++;
+        }
+    }
+
+    TradingService::TradingService(std::shared_ptr<persistence::TradingDataAdapter> adapter)
+        : adapter_(adapter)
+    {
+    }
+    utils::ServiceResult<std::vector<CandlestickData>> TradingService::GetCandlestickData(std::string_view currency_base,
+                                                                                          std::string_view currency_quote,
+                                                                                          dto::OrderType order_type,
+                                                                                          [[maybe_unused]] dto::Timeframe timeframe,
+                                                                                          const std::optional<utils::TimePoint> &start_date,
+                                                                                          const std::optional<utils::TimePoint> &end_date) const
+    {
+        std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
+        std::map<utils::TimePoint, CandlestickData> candlestick_map;
+        utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
+        adapter_->ReadWithProcessor(order_type, [&](const OrderRecord &order)
+                                    { ProcessCandlestickOrder(order, product_pair, date_filter, candlestick_map); });
+        if (candlestick_map.empty())
+        {
+            return utils::ServiceResult<std::vector<CandlestickData>>::Failure("No data found for the specified currency pair and date range");
+        }
+        std::vector<CandlestickData> candlesticks;
+        candlesticks.reserve(candlestick_map.size());
+        for (const auto &[timestamp, candle] : candlestick_map)
+        {
+            candlesticks.push_back(candle);
+        }
+        return utils::ServiceResult<std::vector<CandlestickData>>::Success(candlesticks, "Data retrieved from CSV");
+    }
+    utils::ServiceResult<CandlestickSummaryData> TradingService::GetCandlestickSummary(
+        std::string_view currency_base,
+        std::string_view currency_quote,
+        dto::OrderType order_type,
+        dto::Timeframe timeframe,
+        const std::optional<utils::TimePoint> &start_date,
+        const std::optional<utils::TimePoint> &end_date) const
+    {
+        std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
+        std::map<std::string, PeriodStats, std::less<>> aggregated_data;
+        utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
+        adapter_->ReadWithProcessor(order_type, [&](const OrderRecord &order)
+                                    { ProcessSummaryOrder(order, product_pair, date_filter, timeframe, aggregated_data); });
         if (aggregated_data.empty())
         {
             return utils::ServiceResult<CandlestickSummaryData>::Failure("No data found for the specified currency pair and date range");
@@ -156,7 +175,7 @@ namespace services
         dto::Timeframe timeframe,
         const DateQueryOptions &options) const
     {
-        std::set<std::string> unique_dates;
+        std::set<std::string, std::less<>> unique_dates;
         adapter_->ReadWithProcessor([&unique_dates, &options, &timeframe](const OrderRecord &order)
                                     {
             if (options.start_date.has_value() && order.timestamp < *options.start_date)

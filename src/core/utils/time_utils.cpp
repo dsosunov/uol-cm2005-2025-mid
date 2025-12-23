@@ -52,12 +52,17 @@ namespace utils
             return std::nullopt;
         }
         tm.tm_isdst = -1;
-        std::time_t time = std::mktime(&tm);
-        if (time == -1)
+
+        auto ymd = std::chrono::year{tm.tm_year + 1900} / std::chrono::month{static_cast<unsigned>(tm.tm_mon + 1)} / std::chrono::day{static_cast<unsigned>(tm.tm_mday)};
+        auto hms = std::chrono::hours{tm.tm_hour} + std::chrono::minutes{tm.tm_min} + std::chrono::seconds{tm.tm_sec};
+        auto days = std::chrono::sys_days{ymd};
+
+        if (!ymd.ok())
         {
             return std::nullopt;
         }
-        return std::chrono::system_clock::from_time_t(time);
+
+        return std::chrono::time_point_cast<std::chrono::microseconds>(days + hms);
     }
     std::string FormatDate(const TimePoint &tp)
     {
