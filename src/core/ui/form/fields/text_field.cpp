@@ -1,12 +1,10 @@
 #include "core/ui/form/fields/text_field.hpp"
 
-#include "core/ui/form/form_input_provider.hpp"
-
 namespace form
 {
 
   TextField::TextField(std::string name, std::string prompt, ValueBinder binder,
-                       FieldValidator validator)
+                       std::shared_ptr<Validator> validator)
       : name_(std::move(name)),
         prompt_(std::move(prompt)),
         binder_(std::move(binder)),
@@ -16,18 +14,21 @@ namespace form
 
   const std::string &TextField::GetPrompt() const { return prompt_; }
 
-  std::optional<std::string> TextField::ReadInput(FormInputProvider &input_provider,
-                                                  const FormContext &context) const
+  std::optional<std::string> TextField::GetValidationHint() const
   {
-    // FormInputProvider handles cancellation detection and returns nullopt if cancelled
-    return input_provider.ReadText(prompt_);
+    // Auto-extract hint from validator if available
+    if (validator_)
+    {
+      return validator_->GetHint();
+    }
+    return std::nullopt;
   }
 
   ValidationResult TextField::Validate(const std::string &value, const FormContext &context) const
   {
     if (validator_)
     {
-      return validator_(value, context);
+      return validator_->Validate(value, context);
     }
     return ValidationResult::Valid();
   }

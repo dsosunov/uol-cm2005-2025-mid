@@ -38,24 +38,44 @@ namespace form
   template <typename T>
   FormReadResult Form::Read(T &target)
   {
-    // FormInputProvider knows how to cancel and communicates it to the user
-    input_provider_->DisplayCancellationInstructions();
+    // Form owns all display and flow control
+    output_->WriteLine("Type 'cancel' to abort at any time");
+    output_->WriteLine("");
 
     context_.Clear();
     std::any target_any = std::ref(target);
 
     for (const auto &field : fields_)
     {
-      // Field delegates to FormInputProvider which handles cancellation detection
-      auto value_opt = field->ReadInput(*input_provider_, context_);
+      // Form displays validation hint
+      auto hint = field->GetValidationHint();
+      if (hint)
+      {
+        output_->WriteLine("[" + *hint + "]");
+      }
 
-      if (!value_opt)
+      // Form displays prompt
+      output_->Write(field->GetPrompt() + ": ");
+
+      // Provider adapts based on field type, receives context for data sources
+      auto valueOpt = input_provider_->ReadField(*field, context_);
+
+      // Check if provider returned no input (error/unknown field type)
+      if (!valueOpt)
+      {
+        output_->WriteLine("Error: Failed to read input");
+        return FormReadResult::kCancelled;
+      }
+
+      std::string value = *valueOpt;
+
+      // Form checks cancellation
+      if (value == "cancel" || value == "Cancel" || value == "CANCEL")
       {
         return FormReadResult::kCancelled;
       }
 
-      const std::string &value = *value_opt;
-
+      // Form validates
       auto validation = field->Validate(value, context_);
       if (!validation.is_valid)
       {

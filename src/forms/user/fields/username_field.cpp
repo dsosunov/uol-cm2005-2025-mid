@@ -4,12 +4,13 @@
 #include "dto/user_login.hpp"
 #include "forms/user/validators/user_validators.hpp"
 
-namespace user_forms {
+namespace user_forms
+{
 
-UsernameField::UsernameField()
-    : form::TextField(
-          "username", "Enter username",
-          form::SimpleFieldBinder<dto::UserLogin, std::string>(&dto::UserLogin::username),
-          UsernameValidator()) {}
+    UsernameField::UsernameField()
+        : form::TextField(
+              "username", "Username",
+              form::SimpleFieldBinder<dto::UserLogin, std::string>(&dto::UserLogin::username),
+              std::make_shared<UsernameValidator>()) {} // Hint auto-extracted!
 
-}  // namespace user_forms
+} // namespace user_forms

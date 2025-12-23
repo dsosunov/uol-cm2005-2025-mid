@@ -4,6 +4,8 @@ out/
 bin/
 lib/
 
+.scannerwork
+
 # CMake
 CMakeCache.txt
 CMakeFiles/

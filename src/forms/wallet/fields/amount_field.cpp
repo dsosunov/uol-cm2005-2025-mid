@@ -4,12 +4,13 @@
 #include "dto/wallet_operation.hpp"
 #include "forms/wallet/validators/amount_validator.hpp"
 
-namespace wallet_forms {
+namespace wallet_forms
+{
 
-AmountField::AmountField()
-    : form::TextField(
-          "amount", "Enter amount",
-          form::SimpleFieldBinder<dto::WalletOperation, std::string>(&dto::WalletOperation::amount),
-          AmountValidator()) {}
+    AmountField::AmountField()
+        : form::TextField(
+              "amount", "Amount",
+              form::SimpleFieldBinder<dto::WalletOperation, std::string>(&dto::WalletOperation::amount),
+              std::make_shared<AmountValidator>()) {}
 
-}  // namespace wallet_forms
+} // namespace wallet_forms

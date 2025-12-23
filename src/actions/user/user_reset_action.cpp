@@ -4,8 +4,6 @@
 
 void UserResetAction::Execute(ActionContext &context)
 {
-  context.output->WriteLine("=== Reset / Remind Password ===");
-
   dto::UserReset data;
   user_forms::ResetForm form(context.form_input_provider, context.output);
 

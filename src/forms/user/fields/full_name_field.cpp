@@ -4,12 +4,13 @@
 #include "dto/user_registration.hpp"
 #include "forms/user/validators/user_validators.hpp"
 
-namespace user_forms {
+namespace user_forms
+{
 
-FullNameField::FullNameField()
-    : form::TextField("full_name", "Enter full name",
-                      form::SimpleFieldBinder<dto::UserRegistration, std::string>(
-                          &dto::UserRegistration::full_name),
-                      FullNameValidator()) {}
+    FullNameField::FullNameField()
+        : form::TextField("full_name", "Full name",
+                          form::SimpleFieldBinder<dto::UserRegistration, std::string>(
+                              &dto::UserRegistration::full_name),
+                          std::make_shared<FullNameValidator>()) {}
 
-}  // namespace user_forms
+} // namespace user_forms

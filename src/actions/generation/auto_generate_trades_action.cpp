@@ -1,17 +1,25 @@
 #include "actions/generation/auto_generate_trades_action.hpp"
+#include "core/ui/form/fields/text_field.hpp"
+#include "core/ui/form/form_context.hpp"
 
 void AutoGenerateTradesAction::Execute(ActionContext &context)
 {
-  context.output->WriteLine("=== Auto-Generate Trades ===");
   context.output->WriteLine("");
   context.output->WriteLine("This action will automatically generate sample trades");
   context.output->WriteLine("based on current market conditions.");
   context.output->WriteLine("");
   context.output->WriteLine("Press Enter to confirm, or type 'cancel' to abort...");
 
-  auto input = context.form_input_provider->ReadText("Confirm");
+  // Create a simple TextField for reading confirmation
+  form::TextField confirmField("confirm", "Confirm", [](std::any &, const std::string &, const form::FormContext &)
+                               {
+                                 // Not implemented yet
+                               },
+                               nullptr);
+  form::FormContext emptyContext;
+  auto inputOpt = context.form_input_provider->ReadField(confirmField, emptyContext);
 
-  if (input == "cancel")
+  if (!inputOpt || *inputOpt == "cancel")
   {
     context.output->WriteLine("");
     context.output->WriteLine("Auto-generation cancelled.");

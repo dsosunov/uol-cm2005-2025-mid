@@ -5,26 +5,36 @@ MenuEngine::MenuEngine(std::unique_ptr<MenuNode> root, std::shared_ptr<MenuRende
     : root_(std::move(root)),
       renderer_(std::move(renderer)),
       input_(std::move(input)),
-      context_(std::move(context)) {
+      context_(std::move(context))
+{
   stack_.push_back(root_.get());
 }
 
-void MenuEngine::Run() {
-  while (true) {
-    auto* current = stack_.back();
+void MenuEngine::Run()
+{
+  while (true)
+  {
+    auto *current = stack_.back();
 
     renderer_->RenderMenu(*current);
-    MenuNode* selected = input_->ReadSelection(*current);
+    MenuNode *selected = input_->ReadSelection(*current);
 
-    if (!selected) {
+    if (!selected)
+    {
       return;
     }
 
-    if (selected->HasChildren()) {
+    if (selected->HasChildren())
+    {
       stack_.push_back(selected);
-    } else if (selected->HasAction()) {
+    }
+    else if (selected->HasAction())
+    {
+      renderer_->RenderActionHeader(*selected);
       selected->ExecuteAction(*context_);
-    } else {
+    }
+    else
+    {
       stack_.pop_back();
     }
   }

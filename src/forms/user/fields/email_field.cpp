@@ -4,12 +4,13 @@
 #include "dto/user_registration.hpp"
 #include "forms/user/validators/user_validators.hpp"
 
-namespace user_forms {
+namespace user_forms
+{
 
-EmailField::EmailField()
-    : form::TextField("email", "Enter email address",
-                      form::SimpleFieldBinder<dto::UserRegistration, std::string>(
-                          &dto::UserRegistration::email),
-                      EmailValidator()) {}
+    EmailField::EmailField()
+        : form::TextField("email", "Email",
+                          form::SimpleFieldBinder<dto::UserRegistration, std::string>(
+                              &dto::UserRegistration::email),
+                          std::make_shared<EmailValidator>()) {} // Hint auto-extracted!
 
-}  // namespace user_forms
+} // namespace user_forms

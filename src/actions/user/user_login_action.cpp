@@ -4,8 +4,6 @@
 
 void UserLoginAction::Execute(ActionContext &context)
 {
-  context.output->WriteLine("=== User Login ===");
-
   dto::UserLogin data;
   user_forms::LoginForm form(context.form_input_provider, context.output);
 

@@ -4,12 +4,13 @@
 #include "dto/user_registration.hpp"
 #include "forms/user/validators/user_validators.hpp"
 
-namespace user_forms {
+namespace user_forms
+{
 
-PasswordField::PasswordField()
-    : form::TextField("password", "Enter password",
-                      form::SimpleFieldBinder<dto::UserRegistration, std::string>(
-                          &dto::UserRegistration::password),
-                      PasswordValidator()) {}
+    PasswordField::PasswordField()
+        : form::TextField("password", "Password",
+                          form::SimpleFieldBinder<dto::UserRegistration, std::string>(
+                              &dto::UserRegistration::password),
+                          std::make_shared<PasswordValidator>()) {}
 
-}  // namespace user_forms
+} // namespace user_forms

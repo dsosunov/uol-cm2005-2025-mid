@@ -4,8 +4,6 @@
 
 void TransactionActivitySummaryAction::Execute(ActionContext &context)
 {
-  context.output->WriteLine("=== Activity Summary ===");
-
   dto::ActivitySummary data;
   transaction_forms::ActivitySummaryForm form(context.form_input_provider, context.output);
 

@@ -4,12 +4,13 @@
 #include "dto/wallet_operation.hpp"
 #include "forms/wallet/validators/currency_validator.hpp"
 
-namespace wallet_forms {
+namespace wallet_forms
+{
 
-CurrencyField::CurrencyField(std::set<std::string> allowed_currencies)
-    : form::TextField("currency", "Enter currency code (e.g., USD)",
-                      form::SimpleFieldBinder<dto::WalletOperation, std::string>(
-                          &dto::WalletOperation::currency),
-                      CurrencyValidator(std::move(allowed_currencies))) {}
+    CurrencyField::CurrencyField(std::set<std::string> allowed_currencies)
+        : form::TextField("currency", "Currency",
+                          form::SimpleFieldBinder<dto::WalletOperation, std::string>(
+                              &dto::WalletOperation::currency),
+                          std::make_shared<CurrencyValidator>(std::move(allowed_currencies))) {}
 
-}  // namespace wallet_forms
+} // namespace wallet_forms

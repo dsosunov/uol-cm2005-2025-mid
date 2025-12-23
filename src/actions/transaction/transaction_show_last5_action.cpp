@@ -2,7 +2,6 @@
 
 void TransactionShowLast5Action::Execute(ActionContext &context)
 {
-  context.output->WriteLine("=== Last 5 Transactions ===");
   context.output->WriteLine("");
   context.output->WriteLine("1. USD/EUR - Buy  - 100.00 @ 0.95 - 2025-12-22 10:30");
   context.output->WriteLine("2. GBP/USD - Sell - 50.00  @ 1.28 - 2025-12-22 09:15");

@@ -4,12 +4,13 @@
 #include "dto/user_reset.hpp"
 #include "forms/user/validators/user_validators.hpp"
 
-namespace user_forms {
+namespace user_forms
+{
 
-NewPasswordField::NewPasswordField()
-    : form::TextField(
-          "new_password", "Enter new password",
-          form::SimpleFieldBinder<dto::UserReset, std::string>(&dto::UserReset::new_password),
-          PasswordValidator()) {}
+    NewPasswordField::NewPasswordField()
+        : form::TextField(
+              "new_password", "New password",
+              form::SimpleFieldBinder<dto::UserReset, std::string>(&dto::UserReset::new_password),
+              std::make_shared<PasswordValidator>()) {}
 
-}  // namespace user_forms
+} // namespace user_forms

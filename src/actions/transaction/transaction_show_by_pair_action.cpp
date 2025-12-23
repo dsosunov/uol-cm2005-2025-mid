@@ -9,7 +9,6 @@ static const std::set<std::string> kAllowedCurrencies = {"USD", "CAD", "EUR", "G
 
 void TransactionShowByPairAction::Execute(ActionContext &context)
 {
-  context.output->WriteLine("=== Show Transactions by Product Pair ===");
 
   dto::TransactionQuery data;
   transaction_forms::ProductPairForm form(context.form_input_provider, context.output,

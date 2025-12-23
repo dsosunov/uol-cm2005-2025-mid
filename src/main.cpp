@@ -51,7 +51,7 @@ int main()
   auto menuInput = std::make_shared<MenuInput>(input, renderer);
 
   auto formInputProvider =
-      std::make_shared<form::MenuFormInputProvider>(input, output, renderer, menuInput);
+      std::make_shared<form::MenuFormInputProvider>(input, renderer, menuInput);
 
   auto context = std::make_shared<ActionContext>(output, formInputProvider);
 

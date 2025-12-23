@@ -6,15 +6,16 @@
 #include "core/ui/form/validation_result.hpp"
 #include "core/ui/form/validator.hpp"
 
-namespace wallet_forms
+namespace user_forms
 {
 
-    class AmountValidator : public form::Validator
+    class EmailValidator : public form::Validator
     {
     public:
         form::ValidationResult Validate(const std::string &value,
                                         const form::FormContext &context) const override;
+
         std::optional<std::string> GetHint() const override;
     };
 
-} // namespace wallet_forms
+} // namespace user_forms

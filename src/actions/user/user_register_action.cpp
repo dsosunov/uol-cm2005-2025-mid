@@ -4,8 +4,6 @@
 
 void UserRegisterAction::Execute(ActionContext &context)
 {
-  context.output->WriteLine("=== User Registration ===");
-
   dto::UserRegistration data;
   user_forms::RegistrationForm form(context.form_input_provider, context.output);
 

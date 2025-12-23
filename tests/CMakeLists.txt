@@ -10,23 +10,27 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-# Test executable (placeholder - add actual test files when ready)
-# add_executable(menu_tests test_menu.cpp)
+# Test executable
+add_executable(menu_tests
+    test_full_name_validator.cpp
+    test_username_validator.cpp
+)
 
-# Link against gtest
-# target_link_libraries(menu_tests
-#     gtest_main
-#     gtest
-# )
+# Link against gtest and the MenuSystemLib library
+target_link_libraries(menu_tests
+    gtest_main
+    gtest
+    MenuSystemLib
+)
 
 # Include directories
-# target_include_directories(menu_tests PRIVATE
-#     ${PROJECT_SOURCE_DIR}/include
-# )
+target_include_directories(menu_tests PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+)
 
 # Add tests to CTest
-# include(GoogleTest)
-# gtest_discover_tests(menu_tests)
+include(GoogleTest)
+gtest_discover_tests(menu_tests)
 
 # Set folder for IDE
 # set_target_properties(menu_tests PROPERTIES FOLDER "Tests")

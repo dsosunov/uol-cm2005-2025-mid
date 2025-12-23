@@ -4,15 +4,18 @@
 
 MenuRenderer::MenuRenderer(std::shared_ptr<Output> output) : output_(std::move(output)) {}
 
-void MenuRenderer::RenderMenu(const MenuNode& current) const {
-  if (!current.IsRoot()) {
+void MenuRenderer::RenderMenu(const MenuNode &current) const
+{
+  if (!current.IsRoot())
+  {
     RenderBreadcrumbs(current);
   }
 
   output_->WriteLine("=== " + current.Title() + " ===");
 
-  const auto& items = current.Children();
-  for (size_t i = 0; i < items.size(); ++i) {
+  const auto &items = current.Children();
+  for (size_t i = 0; i < items.size(); ++i)
+  {
     output_->WriteLine(std::to_string(i + 1) + ") " + items[i]->Title());
   }
 
@@ -20,20 +23,29 @@ void MenuRenderer::RenderMenu(const MenuNode& current) const {
   output_->Write("Select option (0-" + std::to_string(items.size()) + "): ");
 }
 
+void MenuRenderer::RenderActionHeader(const MenuNode &node) const
+{
+  output_->WriteLine("=== " + node.Title() + " ===");
+}
+
 void MenuRenderer::RenderInvalidChoice() const { output_->WriteLine("Invalid choice."); }
 
-void MenuRenderer::RenderBreadcrumbs(const MenuNode& current) const {
-  std::vector<const MenuNode*> path;
-  const MenuNode* node = &current;
+void MenuRenderer::RenderBreadcrumbs(const MenuNode &current) const
+{
+  std::vector<const MenuNode *> path;
+  const MenuNode *node = &current;
 
-  while (node) {
+  while (node)
+  {
     path.push_back(node);
     node = node->Parent();
   }
 
   std::string breadcrumb;
-  for (auto it = path.rbegin(); it != path.rend(); ++it) {
-    if (it != path.rbegin()) {
+  for (auto it = path.rbegin(); it != path.rend(); ++it)
+  {
+    if (it != path.rbegin())
+    {
       breadcrumb += " > ";
     }
     breadcrumb += (*it)->Title();

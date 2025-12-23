@@ -1,25 +1,25 @@
 #pragma once
 #include <optional>
 #include <string>
-#include <vector>
 
 namespace form
 {
+    class Field;
+    class FormContext;
 
+    /// Pure adapter for reading field values.
+    /// Provider introspects field type and adapts reading mechanism accordingly.
+    /// Does NOT display prompts, hints, or check cancellation - Form owns that.
     class FormInputProvider
     {
     public:
         virtual ~FormInputProvider() = default;
 
-        /// Displays cancellation instructions once at the start of form input
-        virtual void DisplayCancellationInstructions() = 0;
-
-        /// Reads text input. Returns nullopt if user cancels.
-        virtual std::optional<std::string> ReadText(const std::string &prompt) = 0;
-
-        /// Reads selection input. Returns nullopt if user cancels.
-        virtual std::optional<std::string> ReadSelection(const std::string &title,
-                                                         const std::vector<std::string> &options) = 0;
+        /// Reads field value based on field type.
+        /// Returns nullopt if no input (error/unknown field type).
+        /// Returns empty string for valid empty input.
+        /// Context needed for evaluating dynamic data sources in SelectionField.
+        virtual std::optional<std::string> ReadField(const Field &field, const FormContext &context) = 0;
     };
 
 } // namespace form

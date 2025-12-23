@@ -4,12 +4,13 @@
 #include "dto/user_reset.hpp"
 #include "forms/user/validators/user_validators.hpp"
 
-namespace user_forms {
+namespace user_forms
+{
 
-EmailOrUsernameField::EmailOrUsernameField()
-    : form::TextField(
-          "email_or_username", "Enter email or username",
-          form::SimpleFieldBinder<dto::UserReset, std::string>(&dto::UserReset::email_or_username),
-          EmailOrUsernameValidator()) {}
+    EmailOrUsernameField::EmailOrUsernameField()
+        : form::TextField(
+              "email_or_username", "Email or username",
+              form::SimpleFieldBinder<dto::UserReset, std::string>(&dto::UserReset::email_or_username),
+              std::make_shared<EmailOrUsernameValidator>()) {}
 
-}  // namespace user_forms
+} // namespace user_forms

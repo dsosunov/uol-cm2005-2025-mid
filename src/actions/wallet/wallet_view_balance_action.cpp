@@ -2,7 +2,6 @@
 
 void WalletViewBalanceAction::Execute(ActionContext &context)
 {
-  context.output->WriteLine("=== Wallet Balance ===");
   context.output->WriteLine("");
   context.output->WriteLine("USD: $1,234.56");
   context.output->WriteLine("EUR: €987.65");

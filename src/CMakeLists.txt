@@ -32,7 +32,11 @@ set(SOURCES
     forms/candlestick/fields/start_date_field.cpp
     forms/candlestick/fields/end_date_field.cpp
     forms/candlestick/candlestick_form.cpp
-    forms/user/validators/user_validators.cpp
+    forms/user/validators/email_validator.cpp
+    forms/user/validators/username_validator.cpp
+    forms/user/validators/password_validator.cpp
+    forms/user/validators/full_name_validator.cpp
+    forms/user/validators/email_or_username_validator.cpp
     forms/user/fields/full_name_field.cpp
     forms/user/fields/email_field.cpp
     forms/user/fields/password_field.cpp
@@ -54,11 +58,24 @@ set(SOURCES
     forms/transaction/fields/end_date_field.cpp
     forms/transaction/product_pair_form.cpp
     forms/transaction/activity_summary_form.cpp
-    main.cpp
 )
 
+# Create library for testing (without main.cpp)
+add_library(MenuSystemLib STATIC ${SOURCES})
+
+# Include directories for library
+target_include_directories(MenuSystemLib PUBLIC
+    ${PROJECT_SOURCE_DIR}/include
+)
+
+# Set folder for IDE
+set_target_properties(MenuSystemLib PROPERTIES FOLDER "Application")
+
 # Create executable
-add_executable(MenuSystem ${SOURCES})
+add_executable(MenuSystem main.cpp)
+
+# Link executable to library
+target_link_libraries(MenuSystem PRIVATE MenuSystemLib)
 
 # Include directories
 target_include_directories(MenuSystem PRIVATE

@@ -9,8 +9,6 @@ static const std::set<std::string> kAllowedCurrencies = {"USD", "CAD", "EUR", "G
 
 void CandlestickSummaryAction::Execute(ActionContext &context)
 {
-  context.output->WriteLine("=== Candlestick Summary ===");
-
   dto::CandlestickQuery query;
   candlestick::CandlestickForm form(context.form_input_provider, context.output,
                                     kAllowedCurrencies);
