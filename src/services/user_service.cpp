@@ -3,7 +3,7 @@
 namespace services
 {
 
-    UserService::UserService() : next_user_id_(4)
+    UserService::UserService()
     {
         // Pre-populate with some test users
         users_.emplace_back(1, "John Doe", "john@example.com", "john_doe");

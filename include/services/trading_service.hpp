@@ -79,7 +79,7 @@ namespace services
                                                 const DateQueryOptions &options) const;
 
     private:
-        std::set<std::string, std::less<>> available_currencies_;
+        std::set<std::string, std::less<>> available_currencies_ = {"USD", "CAD", "EUR", "GBP", "JPY", "AUD", "CHF", "CNY"};
     };
 
 } // namespace services

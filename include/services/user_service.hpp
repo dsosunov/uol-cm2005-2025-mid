@@ -57,7 +57,7 @@ namespace services
     private:
         std::vector<User> users_;
         std::optional<User> current_user_;
-        int next_user_id_;
+        int next_user_id_ = 4;
     };
 
 } // namespace services

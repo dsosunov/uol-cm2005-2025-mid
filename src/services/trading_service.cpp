@@ -4,7 +4,6 @@ namespace services
 {
 
     TradingService::TradingService()
-        : available_currencies_({"USD", "CAD", "EUR", "GBP", "JPY", "AUD", "CHF", "CNY"})
     {
     }
 
