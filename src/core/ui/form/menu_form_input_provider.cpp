@@ -47,7 +47,7 @@ namespace form
     auto menu = builder.Build();
 
     renderer_->RenderMenu(*menu);
-    MenuNode *selected = menu_input_->ReadSelection(*menu);
+    const MenuNode *selected = menu_input_->ReadSelection(*menu);
 
     if (!selected || selected == menu.get())
     {

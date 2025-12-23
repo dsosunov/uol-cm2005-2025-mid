@@ -14,9 +14,7 @@ void WalletDepositAction::Execute(ActionContext &context)
   wallet_forms::WalletOperationForm form(context.form_input_provider, context.output,
                                          kAllowedCurrencies);
 
-  form::FormReadResult result = form.Read(data);
-
-  if (result == form::FormReadResult::kCancelled)
+  if (auto result = form.Read(data); result == form::FormReadResult::kCancelled)
   {
     context.output->WriteLine("");
     context.output->WriteLine("Deposit cancelled by user.");

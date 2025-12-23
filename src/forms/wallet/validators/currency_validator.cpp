@@ -11,7 +11,7 @@ namespace wallet_forms
   form::ValidationResult CurrencyValidator::Validate(const std::string &value,
                                                      const form::FormContext &context) const
   {
-    if (allowed_currencies_.find(value) == allowed_currencies_.end())
+    if (!allowed_currencies_.contains(value))
     {
       return form::ValidationResult::Invalid(std::format("Unknown currency: {}", value));
     }

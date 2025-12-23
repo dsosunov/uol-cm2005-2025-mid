@@ -14,9 +14,7 @@ void CandlestickSummaryAction::Execute(ActionContext &context)
   candlestick::CandlestickForm form(context.form_input_provider, context.output,
                                     kAllowedCurrencies);
 
-  form::FormReadResult result = form.Read(query);
-
-  if (result == form::FormReadResult::kCancelled)
+  if (auto result = form.Read(query); result == form::FormReadResult::kCancelled)
   {
     context.output->WriteLine("");
     context.output->WriteLine("Query cancelled by user.");

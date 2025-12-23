@@ -15,9 +15,7 @@ void TransactionShowByPairAction::Execute(ActionContext &context)
   transaction_forms::ProductPairForm form(context.form_input_provider, context.output,
                                           kAllowedCurrencies);
 
-  form::FormReadResult result = form.Read(data);
-
-  if (result == form::FormReadResult::kCancelled)
+  if (auto result = form.Read(data); result == form::FormReadResult::kCancelled)
   {
     context.output->WriteLine("");
     context.output->WriteLine("Query cancelled by user.");

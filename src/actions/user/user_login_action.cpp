@@ -9,9 +9,7 @@ void UserLoginAction::Execute(ActionContext &context)
   dto::UserLogin data;
   user_forms::LoginForm form(context.form_input_provider, context.output);
 
-  form::FormReadResult result = form.Read(data);
-
-  if (result == form::FormReadResult::kCancelled)
+  if (auto result = form.Read(data); result == form::FormReadResult::kCancelled)
   {
     context.output->WriteLine("");
     context.output->WriteLine("Login cancelled by user.");

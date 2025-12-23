@@ -17,8 +17,7 @@ namespace user_forms
             return form::ValidationResult::Invalid("Invalid email format");
         }
 
-        size_t dot_pos = value.find('.', at_pos);
-        if (dot_pos == std::string::npos || dot_pos == value.length() - 1)
+        if (size_t dot_pos = value.find('.', at_pos); dot_pos == std::string::npos || dot_pos == value.length() - 1)
         {
             return form::ValidationResult::Invalid("Invalid email format");
         }

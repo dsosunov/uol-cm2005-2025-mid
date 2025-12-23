@@ -14,7 +14,7 @@ void MenuEngine::Run()
 {
   while (true)
   {
-    auto *current = stack_.back();
+    const auto *current = stack_.back();
 
     renderer_->RenderMenu(*current);
     MenuNode *selected = input_->ReadSelection(*current);
