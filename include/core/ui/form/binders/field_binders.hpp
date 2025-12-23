@@ -20,6 +20,7 @@ namespace form
       auto &obj = std::any_cast<std::reference_wrapper<T>>(target).get();
       obj.*member_ptr_ = value;
     }
+
   private:
     MemberPtr member_ptr_;
   };
@@ -41,6 +42,7 @@ namespace form
         obj.*member_ptr_ = utils::ParseTimestamp(value);
       }
     }
+
   private:
     MemberPtr member_ptr_;
   };
@@ -52,16 +54,18 @@ namespace form
     explicit TimeframeFieldBinder(MemberPtr member_ptr) : member_ptr_(member_ptr) {}
     void operator()(std::any &target, const std::string &value, const FormContext &) const
     {
+      using enum dto::Timeframe;
       auto &obj = std::any_cast<std::reference_wrapper<T>>(target).get();
       if (value == "daily")
-        obj.*member_ptr_ = dto::Timeframe::Daily;
+        obj.*member_ptr_ = Daily;
       else if (value == "monthly")
-        obj.*member_ptr_ = dto::Timeframe::Monthly;
+        obj.*member_ptr_ = Monthly;
       else if (value == "yearly")
-        obj.*member_ptr_ = dto::Timeframe::Yearly;
+        obj.*member_ptr_ = Yearly;
       else
         throw std::invalid_argument("Invalid timeframe value: " + value);
     }
+
   private:
     MemberPtr member_ptr_;
   };
@@ -81,6 +85,7 @@ namespace form
       else
         throw std::invalid_argument("Invalid order type value: " + value);
     }
+
   private:
     MemberPtr member_ptr_;
   };

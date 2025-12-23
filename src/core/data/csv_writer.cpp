@@ -1,4 +1,5 @@
 ﻿#include "core/data/csv_writer.hpp"
+#include <algorithm>
 namespace data
 {
     CsvWriter::CsvWriter(const std::filesystem::path &file_path, bool append, size_t buffer_size)
@@ -16,7 +17,7 @@ namespace data
         {
             Flush();
         }
-        catch (...)
+        catch (const std::exception &)
         {
         }
     }
@@ -40,7 +41,7 @@ namespace data
             {
                 Flush();
             }
-            catch (...)
+            catch (const std::exception &)
             {
             }
             file_path_ = std::move(other.file_path_);

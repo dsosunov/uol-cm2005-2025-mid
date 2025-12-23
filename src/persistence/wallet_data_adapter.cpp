@@ -19,8 +19,7 @@ namespace persistence
                                    {
             try
             {
-                int record_user_id = std::stoi(record.order_type);
-                if (record_user_id != user_id)
+                if (int record_user_id = std::stoi(record.order_type); record_user_id != user_id)
                 {
                     return;
                 }
@@ -28,7 +27,10 @@ namespace persistence
                 double balance = std::stod(record.amount);
                 balances[currency] = balance;
             }
-            catch (...)
+            catch (const std::invalid_argument &)
+            {
+            }
+            catch (const std::out_of_range &)
             {
             } });
         return balances;

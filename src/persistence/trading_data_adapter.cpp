@@ -70,7 +70,11 @@ namespace persistence
             order.amount = std::stod(clean_amount);
             return order;
         }
-        catch (...)
+        catch (const std::invalid_argument &)
+        {
+            return std::nullopt;
+        }
+        catch (const std::out_of_range &)
         {
             return std::nullopt;
         }

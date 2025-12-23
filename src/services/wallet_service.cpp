@@ -28,7 +28,7 @@ namespace services
     std::map<std::string, double, std::less<>> WalletService::GetBalances(std::optional<int> user_id) const
     {
         int effective_id = GetEffectiveUserId(user_id);
-        if (reader_ && balances_.find(effective_id) == balances_.end())
+        if (reader_ && !balances_.contains(effective_id))
         {
             balances_[effective_id] = reader_->ReadBalances(effective_id);
         }
@@ -106,7 +106,7 @@ namespace services
     }
     void WalletService::SaveBalances(int user_id)
     {
-        if (writer_ && balances_.find(user_id) != balances_.end())
+        if (writer_ && balances_.contains(user_id))
         {
             persistence::WalletDataAdapter::WriteBalances(*writer_, user_id, balances_[user_id]);
         }

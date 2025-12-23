@@ -30,7 +30,11 @@ namespace persistence
         {
             txn.user_id = std::stoi(record.order_type);
         }
-        catch (...)
+        catch (const std::invalid_argument &)
+        {
+            txn.user_id = 0;
+        }
+        catch (const std::out_of_range &)
         {
             txn.user_id = 0;
         }
@@ -70,7 +74,11 @@ namespace persistence
             txn.amount = std::stod(clean_amount);
             return txn;
         }
-        catch (...)
+        catch (const std::invalid_argument &)
+        {
+            return std::nullopt;
+        }
+        catch (const std::out_of_range &)
         {
             return std::nullopt;
         }

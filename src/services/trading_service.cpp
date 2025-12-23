@@ -21,7 +21,7 @@ namespace services
         std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
         std::map<utils::TimePoint, CandlestickData> candlestick_map;
         utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
-        adapter_->ReadWithProcessor(order_type, [&product_pair, &date_filter, &candlestick_map, &timeframe](const OrderRecord &order)
+        adapter_->ReadWithProcessor(order_type, [&product_pair, &date_filter, &candlestick_map](const OrderRecord &order)
                                     {
             if (order.product_pair != product_pair)
                 return;

@@ -16,13 +16,14 @@ namespace dto
   };
   inline std::string_view TimeframeToString(Timeframe timeframe)
   {
+    using enum Timeframe;
     switch (timeframe)
     {
-    case Timeframe::Daily:
+    case Daily:
       return "daily";
-    case Timeframe::Monthly:
+    case Monthly:
       return "monthly";
-    case Timeframe::Yearly:
+    case Yearly:
       return "yearly";
     default:
       return "";

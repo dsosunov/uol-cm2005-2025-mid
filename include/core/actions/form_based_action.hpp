@@ -13,8 +13,7 @@ namespace actions
         {
             TData data;
             TForm form = CreateForm(context);
-            auto form_result = form.Read(data);
-            if (ActionHelper::HandleFormCancellation(form_result, GetOperationName(), context))
+            if (auto form_result = form.Read(data); ActionHelper::HandleFormCancellation(form_result, GetOperationName(), context))
             {
                 return;
             }
