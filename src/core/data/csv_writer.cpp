@@ -13,12 +13,14 @@ namespace data
     }
     CsvWriter::~CsvWriter() noexcept
     {
+        // added intentionally
         try
         {
             Flush();
         }
         catch (...)
         {
+            // expected
         }
     }
 
