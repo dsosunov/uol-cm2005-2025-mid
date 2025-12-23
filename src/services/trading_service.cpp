@@ -95,7 +95,7 @@ namespace services
         std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
         std::map<utils::TimePoint, CandlestickData> candlestick_map;
         utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
-        adapter_->ReadWithProcessor(order_type, [&](const OrderRecord &order)
+        adapter_->ReadWithProcessor(order_type, [&product_pair, &date_filter, &candlestick_map](const OrderRecord &order)
                                     { ProcessCandlestickOrder(order, product_pair, date_filter, candlestick_map); });
         if (candlestick_map.empty())
         {
@@ -120,7 +120,7 @@ namespace services
         std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
         std::map<std::string, PeriodStats, std::less<>> aggregated_data;
         utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
-        adapter_->ReadWithProcessor(order_type, [&](const OrderRecord &order)
+        adapter_->ReadWithProcessor(order_type, [&product_pair, &date_filter, &timeframe, &aggregated_data](const OrderRecord &order)
                                     { ProcessSummaryOrder(order, product_pair, date_filter, timeframe, aggregated_data); });
         if (aggregated_data.empty())
         {
