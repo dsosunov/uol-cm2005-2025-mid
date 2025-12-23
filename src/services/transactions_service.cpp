@@ -4,10 +4,6 @@
 namespace services
 {
 
-    TransactionsService::TransactionsService()
-    {
-    }
-
     int TransactionsService::GetEffectiveUserId(std::optional<int> user_id) const
     {
         return user_id.value_or(default_user_id_);

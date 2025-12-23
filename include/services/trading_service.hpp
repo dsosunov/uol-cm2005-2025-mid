@@ -52,7 +52,7 @@ namespace services
     class TradingService
     {
     public:
-        TradingService();
+        TradingService() = default;
         ~TradingService() = default;
 
         // Market data operations

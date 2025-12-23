@@ -3,10 +3,6 @@
 namespace services
 {
 
-    TradingService::TradingService()
-    {
-    }
-
     CandlestickResult TradingService::GetCandlestickData(std::string_view currency_base,
                                                          std::string_view currency_quote,
                                                          [[maybe_unused]] std::string_view asks_bids,

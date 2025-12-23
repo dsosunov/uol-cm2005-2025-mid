@@ -28,7 +28,7 @@ namespace services
     class TransactionsService
     {
     public:
-        TransactionsService();
+        TransactionsService() = default;
         ~TransactionsService() = default;
 
         // Query operations
