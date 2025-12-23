@@ -15,7 +15,7 @@ namespace forms::shared
   {
   public:
     void operator()(std::any &target, const std::string &value,
-                    const form::FormContext &context) const
+                    const form::FormContext &) const
     {
       auto &dto = std::any_cast<std::reference_wrapper<DTO>>(target).get();
 

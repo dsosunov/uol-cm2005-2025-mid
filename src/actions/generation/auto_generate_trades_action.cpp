@@ -11,7 +11,7 @@ void AutoGenerateTradesAction::Execute(ActionContext &context)
   context.output->WriteLine("Press Enter to confirm, or type 'cancel' to abort...");
 
   // Create a simple TextField for reading confirmation
-  form::TextField confirmField("confirm", "Confirm", [](std::any &, const std::string &, const form::FormContext &)
+  form::TextField confirmField("confirm", "Confirm", [](const std::any &, const std::string &, const form::FormContext &)
                                {
                                  // Not implemented yet
                                },

@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include "core/ui/form/form_context.hpp"
 #include "core/ui/form/validation_result.hpp"
@@ -17,12 +18,12 @@ namespace forms::shared
         std::optional<std::string> GetHint() const override;
 
     private:
-        form::ValidationResult ValidateNumericString(const std::string &str, const std::string &field_name) const;
-        form::ValidationResult ValidateDay(const std::string &day_str) const;
-        form::ValidationResult ValidateMonth(const std::string &month_str) const;
-        form::ValidationResult ValidateYear(const std::string &year_str) const;
-        form::ValidationResult ValidateDMYFormat(const std::string &value) const;
-        form::ValidationResult ValidateYMDFormat(const std::string &value) const;
+        form::ValidationResult ValidateNumericString(std::string_view str, std::string_view field_name) const;
+        form::ValidationResult ValidateDay(std::string_view day_str) const;
+        form::ValidationResult ValidateMonth(std::string_view month_str) const;
+        form::ValidationResult ValidateYear(std::string_view year_str) const;
+        form::ValidationResult ValidateDMYFormat(std::string_view value) const;
+        form::ValidationResult ValidateYMDFormat(std::string_view value) const;
     };
 
 } // namespace forms::shared

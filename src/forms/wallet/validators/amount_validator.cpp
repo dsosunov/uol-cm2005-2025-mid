@@ -18,9 +18,8 @@ namespace wallet_forms
     bool has_digit = false;
     size_t decimal_places = 0;
 
-    for (size_t i = 0; i < value.length(); ++i)
+    for (char c : value)
     {
-      char c = value[i];
 
       if (std::isdigit(c))
       {

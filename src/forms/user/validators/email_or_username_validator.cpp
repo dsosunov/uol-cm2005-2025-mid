@@ -14,7 +14,7 @@ namespace user_forms
             return form::ValidationResult::Invalid("Email or username cannot be empty");
         }
 
-        if (value.find('@') != std::string::npos)
+        if (value.contains('@'))
         {
             EmailValidator email_validator;
             return email_validator.Validate(value, context);
