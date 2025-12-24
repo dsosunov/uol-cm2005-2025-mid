@@ -23,7 +23,7 @@ form::ValidationResult CurrencyValidator::Validate(const std::string& value,
 
 std::optional<std::string> CurrencyValidator::GetHint() const
 {
-    return "Enter one of the supported currency codes";
+    return "Enter a currency code (USD, EUR, GBP, JPY, CAD, AUD, CHF, CNY)";
 }
 
 } // namespace wallet_forms

@@ -8,8 +8,9 @@
 #include <vector>
 
 class TransactionShowLast5Action
-    : public actions::FormBasedAction<shared_forms::EmptyForm, EmptyRequest,
-                                      utils::ServiceResult<std::vector<services::Transaction>>>
+    : public actions::FormBasedAction<
+          shared_forms::EmptyForm, EmptyRequest,
+          utils::ServiceResult<std::vector<services::WalletTransaction>>>
 {
   public:
     explicit TransactionShowLast5Action(
@@ -17,10 +18,11 @@ class TransactionShowLast5Action
 
   protected:
     shared_forms::EmptyForm CreateForm(ActionContext& context) override;
-    utils::ServiceResult<std::vector<services::Transaction>> ExecuteService(
+    utils::ServiceResult<std::vector<services::WalletTransaction>> ExecuteService(
         const EmptyRequest& data, ActionContext& context) override;
-    void DisplayResults(const utils::ServiceResult<std::vector<services::Transaction>>& result,
-                        const EmptyRequest& data, ActionContext& context) override;
+    void DisplayResults(
+        const utils::ServiceResult<std::vector<services::WalletTransaction>>& result,
+        const EmptyRequest& data, ActionContext& context) override;
     const char* GetOperationName() const override
     {
         return "Last 5 Transactions";

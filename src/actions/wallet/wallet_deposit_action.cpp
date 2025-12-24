@@ -2,20 +2,16 @@
 
 #include <format>
 
-WalletDepositAction::WalletDepositAction(std::shared_ptr<services::WalletService> wallet_service,
-                                         std::shared_ptr<services::TradingService> trading_service)
-    : wallet_service_(std::move(wallet_service)), trading_service_(std::move(trading_service))
+WalletDepositAction::WalletDepositAction(std::shared_ptr<services::WalletService> wallet_service)
+    : wallet_service_(std::move(wallet_service))
 {
 }
 
 wallet_forms::WalletOperationForm WalletDepositAction::CreateForm(ActionContext& context)
 {
-    auto result = trading_service_->GetAvailableProducts();
-    std::set<std::string, std::less<>> allowed_currencies;
-    if (result.success && result.data.has_value())
-    {
-        allowed_currencies = *result.data;
-    }
+    // Supported fiat currencies for wallet operations
+    std::set<std::string, std::less<>> allowed_currencies = {"USD", "EUR", "GBP", "JPY",
+                                                             "CAD", "AUD", "CHF", "CNY"};
     return wallet_forms::WalletOperationForm(context.form_input_provider, context.output,
                                              allowed_currencies);
 }

@@ -24,14 +24,14 @@ transaction_forms::ProductPairForm TransactionShowByPairAction::CreateForm(Actio
                                               allowed_currencies);
 }
 
-utils::ServiceResult<std::vector<services::Transaction>> TransactionShowByPairAction::
+utils::ServiceResult<std::vector<services::WalletTransaction>> TransactionShowByPairAction::
     ExecuteService(const dto::TransactionQuery& data, ActionContext& context)
 {
-    return transactions_service_->GetTransactionsByPair(data.product_pair);
+    return transactions_service_->GetTransactionsByCurrency(data.product_pair);
 }
 
 void TransactionShowByPairAction::DisplayResults(
-    const utils::ServiceResult<std::vector<services::Transaction>>& result,
+    const utils::ServiceResult<std::vector<services::WalletTransaction>>& result,
     const dto::TransactionQuery& data, ActionContext& context)
 {
     if (!result.success || !result.data.has_value())
@@ -54,8 +54,8 @@ void TransactionShowByPairAction::DisplayResults(
         int index = 1;
         for (const auto& transaction : transactions)
         {
-            WriteLine(std::format("{}. {} - {:.2f} @ {:.4f} - {}", index, transaction.type,
-                                  transaction.amount, transaction.price,
+            WriteLine(std::format("{}. {} - {:.2f} - {}", index, transaction.type,
+                                  transaction.amount,
                                   utils::FormatTimestamp(transaction.timestamp)),
                       context);
             ++index;

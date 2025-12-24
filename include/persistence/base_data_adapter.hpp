@@ -34,6 +34,20 @@ template <typename TEntity> class BaseDataAdapter
             }
         });
     }
+    void ReadReverseWithProcessor(std::function<void(const TEntity&)> processor) const
+    {
+        if (!IsValid())
+        {
+            return;
+        }
+        reader_->ReadReverseWithProcessor([this, &processor](const data::CsvRecord& csv_record) {
+            auto entity = TransformToEntity(csv_record);
+            if (entity.has_value())
+            {
+                processor(*entity);
+            }
+        });
+    }
     template <typename TPredicate>
     void ReadWithProcessor(TPredicate predicate,
                            std::function<void(const TEntity&)> processor) const

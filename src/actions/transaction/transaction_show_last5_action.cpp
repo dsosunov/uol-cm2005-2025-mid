@@ -15,14 +15,14 @@ shared_forms::EmptyForm TransactionShowLast5Action::CreateForm(ActionContext& co
     return shared_forms::EmptyForm();
 }
 
-utils::ServiceResult<std::vector<services::Transaction>> TransactionShowLast5Action::ExecuteService(
-    const EmptyRequest& data, ActionContext& context)
+utils::ServiceResult<std::vector<services::WalletTransaction>> TransactionShowLast5Action::
+    ExecuteService([[maybe_unused]] const EmptyRequest& data, ActionContext& context)
 {
     return transactions_service_->GetLastTransactions(5);
 }
 
 void TransactionShowLast5Action::DisplayResults(
-    const utils::ServiceResult<std::vector<services::Transaction>>& result,
+    const utils::ServiceResult<std::vector<services::WalletTransaction>>& result,
     const EmptyRequest& data, ActionContext& context)
 {
     if (!result.success || !result.data.has_value())
@@ -43,9 +43,9 @@ void TransactionShowLast5Action::DisplayResults(
         int index = 1;
         for (const auto& transaction : transactions)
         {
-            WriteLine(std::format("{}. {} - {} - {:.2f} @ {:.4f} - {}", index,
-                                  transaction.product_pair, transaction.type, transaction.amount,
-                                  transaction.price, utils::FormatTimestamp(transaction.timestamp)),
+            WriteLine(std::format("{}. {} - {} - {:.2f} - {}", index, transaction.currency,
+                                  transaction.type, transaction.amount,
+                                  utils::FormatTimestamp(transaction.timestamp)),
                       context);
             ++index;
         }

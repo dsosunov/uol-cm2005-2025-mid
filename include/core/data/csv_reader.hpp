@@ -16,8 +16,6 @@ struct CsvRecord
         return !fields.empty();
     }
 };
-using RecordFilter = std::function<bool(const CsvRecord&)>;
-template <typename T> using RecordTransform = std::function<T(const CsvRecord&)>;
 class CsvReader
 {
   public:
@@ -29,39 +27,7 @@ class CsvReader
     CsvReader& operator=(CsvReader&&) noexcept = default;
     bool IsOpen() const;
     const std::filesystem::path& GetFilePath() const;
-    std::vector<CsvRecord> ReadAll(const RecordFilter& filter = nullptr) const;
-    template <typename T>
-    std::vector<T> ReadAllTransformed(RecordTransform<T> transform,
-                                      const RecordFilter& filter = nullptr) const
-    {
-        std::vector<T> results;
-        results.reserve(100);
-        std::ifstream file(file_path_);
-        if (!file.is_open())
-        {
-            return results;
-        }
-        std::string line;
-        while (std::getline(file, line))
-        {
-            auto record_opt = ParseRecord(line);
-            if (!record_opt.has_value())
-            {
-                continue;
-            }
-            const auto& record = *record_opt;
-            if (filter != nullptr && !filter(record))
-            {
-                continue;
-            }
-            auto transformed = transform(record);
-            if (transformed.has_value())
-            {
-                results.push_back(std::move(*transformed));
-            }
-        }
-        return results;
-    }
+    bool FileExists() const;
     template <typename Func> void ReadWithProcessor(Func processor) const
     {
         std::ifstream file(file_path_);
@@ -79,8 +45,61 @@ class CsvReader
             }
         }
     }
-    size_t Count(const RecordFilter& filter = nullptr) const;
-    bool FileExists() const;
+    template <typename Func> void ReadReverseWithProcessor(Func processor) const
+    {
+        if (!FileExists())
+        {
+            return;
+        }
+
+        std::ifstream file(file_path_, std::ios::ate | std::ios::binary);
+        if (!file.is_open())
+        {
+            return;
+        }
+
+        std::streampos file_size = file.tellg();
+        if (file_size == 0)
+        {
+            return;
+        }
+
+        std::vector<std::string> lines;
+        std::streamoff pos = static_cast<std::streamoff>(file_size);
+
+        while (pos > 0)
+        {
+            --pos;
+            file.seekg(pos);
+
+            char ch;
+            file.get(ch);
+
+            if (ch == '\n' || pos == 0)
+            {
+                std::streamoff line_start = (ch == '\n' && pos > 0) ? pos + 1 : pos;
+                file.seekg(line_start);
+
+                std::string current_line;
+                std::getline(file, current_line);
+
+                if (!current_line.empty() || ch == '\n')
+                {
+                    lines.push_back(std::move(current_line));
+                }
+            }
+        }
+
+        // Process all lines in reverse order (last line first)
+        for (auto it = lines.rbegin(); it != lines.rend(); ++it)
+        {
+            auto record_opt = ParseRecord(*it);
+            if (record_opt.has_value())
+            {
+                processor(*record_opt);
+            }
+        }
+    }
 
   private:
     std::filesystem::path file_path_;

@@ -2,7 +2,6 @@
 #include "core/actions/form_based_action.hpp"
 #include "dto/wallet_operation.hpp"
 #include "forms/wallet/wallet_operation_form.hpp"
-#include "services/trading_service.hpp"
 #include "services/wallet_service.hpp"
 
 #include <memory>
@@ -12,8 +11,7 @@ class WalletDepositAction
                                       utils::ServiceResult<double>>
 {
   public:
-    explicit WalletDepositAction(std::shared_ptr<services::WalletService> wallet_service,
-                                 std::shared_ptr<services::TradingService> trading_service);
+    explicit WalletDepositAction(std::shared_ptr<services::WalletService> wallet_service);
 
   protected:
     wallet_forms::WalletOperationForm CreateForm(ActionContext& context) override;
@@ -28,5 +26,4 @@ class WalletDepositAction
 
   private:
     std::shared_ptr<services::WalletService> wallet_service_;
-    std::shared_ptr<services::TradingService> trading_service_;
 };

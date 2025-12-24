@@ -9,8 +9,9 @@
 #include <vector>
 
 class TransactionShowByPairAction
-    : public actions::FormBasedAction<transaction_forms::ProductPairForm, dto::TransactionQuery,
-                                      utils::ServiceResult<std::vector<services::Transaction>>>
+    : public actions::FormBasedAction<
+          transaction_forms::ProductPairForm, dto::TransactionQuery,
+          utils::ServiceResult<std::vector<services::WalletTransaction>>>
 {
   public:
     explicit TransactionShowByPairAction(
@@ -19,10 +20,11 @@ class TransactionShowByPairAction
 
   protected:
     transaction_forms::ProductPairForm CreateForm(ActionContext& context) override;
-    utils::ServiceResult<std::vector<services::Transaction>> ExecuteService(
+    utils::ServiceResult<std::vector<services::WalletTransaction>> ExecuteService(
         const dto::TransactionQuery& data, ActionContext& context) override;
-    void DisplayResults(const utils::ServiceResult<std::vector<services::Transaction>>& result,
-                        const dto::TransactionQuery& data, ActionContext& context) override;
+    void DisplayResults(
+        const utils::ServiceResult<std::vector<services::WalletTransaction>>& result,
+        const dto::TransactionQuery& data, ActionContext& context) override;
     const char* GetOperationName() const override
     {
         return "Transaction Query";

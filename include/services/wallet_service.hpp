@@ -7,22 +7,17 @@
 #include <string>
 #include <string_view>
 
-namespace data
-{
-class CsvWriter;
-}
 namespace persistence
 {
-class WalletDataAdapter;
+class TransactionDataAdapter;
 }
 namespace services
 {
 class WalletService
 {
   public:
-    WalletService();
-    WalletService(std::shared_ptr<persistence::WalletDataAdapter> reader,
-                  std::shared_ptr<data::CsvWriter> writer);
+    WalletService() = default;
+    explicit WalletService(std::shared_ptr<persistence::TransactionDataAdapter> adapter);
     ~WalletService() = default;
     utils::ServiceResult<std::map<std::string, double, std::less<>>> GetBalances(
         std::optional<int> user_id = std::nullopt) const;
@@ -36,11 +31,9 @@ class WalletService
                                           std::optional<int> user_id = std::nullopt);
 
   private:
-    mutable std::map<int, std::map<std::string, double, std::less<>>> balances_;
+    std::shared_ptr<persistence::TransactionDataAdapter> adapter_;
     int default_user_id_ = 1;
-    std::shared_ptr<persistence::WalletDataAdapter> reader_;
-    std::shared_ptr<data::CsvWriter> writer_;
     int GetEffectiveUserId(std::optional<int> user_id) const;
-    void SaveBalances(int user_id);
+    std::map<std::string, double, std::less<>> CalculateBalances(int user_id) const;
 };
 } // namespace services

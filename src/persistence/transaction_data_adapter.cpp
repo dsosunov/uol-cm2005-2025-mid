@@ -1,5 +1,6 @@
 ﻿#include "persistence/transaction_data_adapter.hpp"
 
+#include "core/data/csv_writer.hpp"
 #include "core/utils/time_utils.hpp"
 #include "services/transactions_service.hpp"
 
@@ -8,21 +9,23 @@
 namespace persistence
 {
 
-TransactionDataAdapter::TransactionDataAdapter(std::shared_ptr<data::CsvReader> reader)
-    : BaseDataAdapter<services::Transaction>(reader)
+TransactionDataAdapter::TransactionDataAdapter(std::shared_ptr<data::CsvReader> reader,
+                                               std::shared_ptr<data::CsvWriter> writer)
+    : BaseDataAdapter<services::WalletTransaction>(reader), writer_(writer)
 {
 }
 
-data::CsvRecord TransactionDataAdapter::TransformFromTransaction(const services::Transaction& txn)
+data::CsvRecord TransactionDataAdapter::TransformFromTransaction(
+    const services::WalletTransaction& txn)
 {
     data::CsvRecord record;
     record.fields.reserve(5);
 
     record.fields.emplace_back(utils::FormatTimestamp(txn.timestamp));
-    record.fields.emplace_back(txn.product_pair);
-    record.fields.emplace_back((txn.type == "Buy") ? "bid" : "ask");
-    record.fields.emplace_back(std::to_string(txn.price));
+    record.fields.emplace_back(txn.currency);
+    record.fields.emplace_back(txn.type);
     record.fields.emplace_back(std::to_string(txn.amount));
+    record.fields.emplace_back(std::to_string(txn.user_id));
 
     return record;
 }
@@ -34,14 +37,18 @@ std::string TransactionDataAdapter::CleanNumericField(const std::string& field)
     return cleaned;
 }
 
-bool TransactionDataAdapter::WriteAll(data::CsvWriter& writer,
-                                      const std::vector<services::Transaction>& transactions)
+bool TransactionDataAdapter::Add(const services::WalletTransaction& transaction)
 {
-    return BaseDataAdapter<services::Transaction>::WriteAll(writer, transactions,
-                                                            TransformFromTransaction);
+    if (!writer_)
+    {
+        return false;
+    }
+
+    auto record = TransformFromTransaction(transaction);
+    return writer_->Write(record) && writer_->Flush();
 }
 
-std::optional<services::Transaction> TransactionDataAdapter::TransformToEntity(
+std::optional<services::WalletTransaction> TransactionDataAdapter::TransformToEntity(
     const data::CsvRecord& record) const
 {
     if (record.fields.size() < 5)
@@ -49,59 +56,31 @@ std::optional<services::Transaction> TransactionDataAdapter::TransformToEntity(
         return std::nullopt;
     }
 
-    services::Transaction txn;
+    services::WalletTransaction txn;
 
-    try
-    {
-        txn.user_id = std::stoi(record.fields[2]);
-    }
-    catch (const std::invalid_argument&)
-    {
-        txn.user_id = 0;
-    }
-    catch (const std::out_of_range&)
-    {
-        txn.user_id = 0;
-    }
-
-    txn.id = 0;
-    txn.product_pair = record.fields[1];
-
+    // Parse timestamp
     auto parsed_time = utils::ParseTimestamp(record.fields[0]);
     if (!parsed_time.has_value())
     {
         return std::nullopt;
     }
-
     txn.timestamp = *parsed_time;
 
-    if (record.fields[2] == "bid")
-    {
-        txn.type = "Buy";
-    }
-    else if (record.fields[2] == "ask")
-    {
-        txn.type = "Sell";
-    }
-    else
-    {
-        txn.type = record.fields[2];
-    }
+    // Currency
+    txn.currency = record.fields[1];
 
+    // Type (Deposit or Withdraw)
+    txn.type = record.fields[2];
+
+    // Amount
     try
     {
-        std::string clean_price = CleanNumericField(record.fields[3]);
-        std::string clean_amount = CleanNumericField(record.fields[4]);
-
-        if (clean_price.empty() || clean_amount.empty())
+        std::string clean_amount = CleanNumericField(record.fields[3]);
+        if (clean_amount.empty())
         {
             return std::nullopt;
         }
-
-        txn.price = std::stod(clean_price);
         txn.amount = std::stod(clean_amount);
-
-        return txn;
     }
     catch (const std::invalid_argument&)
     {
@@ -111,6 +90,22 @@ std::optional<services::Transaction> TransactionDataAdapter::TransformToEntity(
     {
         return std::nullopt;
     }
+
+    // User ID
+    try
+    {
+        txn.user_id = std::stoi(record.fields[4]);
+    }
+    catch (const std::invalid_argument&)
+    {
+        txn.user_id = 0;
+    }
+    catch (const std::out_of_range&)
+    {
+        txn.user_id = 0;
+    }
+
+    return txn;
 }
 
 } // namespace persistence

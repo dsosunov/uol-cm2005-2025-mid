@@ -2,12 +2,14 @@
 
 #include "core/actions/action_context.hpp"
 #include "core/data/csv_reader.hpp"
+#include "core/data/csv_writer.hpp"
 #include "core/ui/form/menu_form_input_provider.hpp"
 #include "core/ui/io/standard_input.hpp"
 #include "core/ui/io/standard_output.hpp"
 #include "core/ui/menu/menu_input.hpp"
 #include "core/ui/menu/menu_renderer.hpp"
 #include "persistence/trading_data_adapter.hpp"
+#include "persistence/transaction_data_adapter.hpp"
 #include "persistence/user_data_adapter.hpp"
 #include "services/trading_service.hpp"
 #include "services/transactions_service.hpp"
@@ -24,9 +26,15 @@ ServiceContainer::ServiceContainer()
     auto user_adapter =
         std::make_shared<persistence::UserDataAdapter>(user_csv_reader, user_csv_writer);
 
+    // Transaction adapter shared by WalletService and TransactionsService
+    auto transaction_csv_reader = std::make_shared<data::CsvReader>("data/transactions.csv");
+    auto transaction_csv_writer = std::make_shared<data::CsvWriter>("data/transactions.csv", false);
+    auto transaction_adapter = std::make_shared<persistence::TransactionDataAdapter>(
+        transaction_csv_reader, transaction_csv_writer);
+
     Register(std::make_shared<services::UserService>(user_adapter));
-    Register(std::make_shared<services::WalletService>());
-    Register(std::make_shared<services::TransactionsService>());
+    Register(std::make_shared<services::WalletService>(transaction_adapter));
+    Register(std::make_shared<services::TransactionsService>(transaction_adapter));
     Register(std::make_shared<services::TradingService>(trading_adapter));
 
     auto output = std::make_shared<StandardOutput>();

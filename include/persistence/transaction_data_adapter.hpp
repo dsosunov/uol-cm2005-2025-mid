@@ -4,25 +4,30 @@
 #include <functional>
 #include <memory>
 
+namespace data
+{
+class CsvWriter;
+}
 namespace services
 {
-struct Transaction;
+struct WalletTransaction;
 }
 namespace persistence
 {
-class TransactionDataAdapter : public BaseDataAdapter<services::Transaction>
+class TransactionDataAdapter : public BaseDataAdapter<services::WalletTransaction>
 {
   public:
-    explicit TransactionDataAdapter(std::shared_ptr<data::CsvReader> reader);
-    static bool WriteAll(data::CsvWriter& writer,
-                         const std::vector<services::Transaction>& transactions);
+    TransactionDataAdapter(std::shared_ptr<data::CsvReader> reader,
+                           std::shared_ptr<data::CsvWriter> writer);
+    bool Add(const services::WalletTransaction& transaction);
 
   protected:
-    std::optional<services::Transaction> TransformToEntity(
+    std::optional<services::WalletTransaction> TransformToEntity(
         const data::CsvRecord& record) const override;
 
   private:
+    std::shared_ptr<data::CsvWriter> writer_;
     static std::string CleanNumericField(const std::string& field);
-    static data::CsvRecord TransformFromTransaction(const services::Transaction& txn);
+    static data::CsvRecord TransformFromTransaction(const services::WalletTransaction& txn);
 };
 } // namespace persistence
