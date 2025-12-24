@@ -18,8 +18,7 @@ void WalletDataAdapter::ProcessBalanceRecord(const data::CsvRecord& record, int 
 
     try
     {
-        int record_user_id = std::stoi(record.fields[2]);
-        if (record_user_id != user_id)
+        if (int record_user_id = std::stoi(record.fields[2]); record_user_id != user_id)
         {
             return;
         }

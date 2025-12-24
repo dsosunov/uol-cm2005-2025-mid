@@ -9,11 +9,13 @@ CsvWriter::CsvWriter(const std::filesystem::path& file_path, bool append, size_t
     : file_path_(file_path), append_mode_(append), buffer_size_(buffer_size)
 {
     buffer_.reserve(buffer_size_);
+
     if (file_path_.has_parent_path())
     {
         std::filesystem::create_directories(file_path_.parent_path());
     }
 }
+
 CsvWriter::~CsvWriter() noexcept
 {
     // added intentionally
@@ -41,14 +43,17 @@ CsvWriter& CsvWriter::operator=(CsvWriter&& other) noexcept
     if (this != &other)
     {
         Flush();
+
         file_path_ = std::move(other.file_path_);
         append_mode_ = other.append_mode_;
         buffer_size_ = other.buffer_size_;
         buffer_ = std::move(other.buffer_);
         has_flushed_ = other.has_flushed_;
+
         other.buffer_size_ = 0;
         other.has_flushed_ = false;
     }
+
     return *this;
 }
 
@@ -58,7 +63,9 @@ bool CsvWriter::Write(const CsvRecord& record)
     {
         return false;
     }
+
     buffer_.push_back(record);
+
     if (buffer_size_ > 0 && buffer_.size() >= buffer_size_)
     {
         return FlushInternal();
@@ -78,12 +85,14 @@ bool CsvWriter::Flush()
     {
         return true;
     }
+
     return FlushInternal();
 }
 
 bool CsvWriter::IsOpen() const
 {
     std::ofstream test_file(file_path_, std::ios::app);
+
     return test_file.is_open();
 }
 
@@ -108,6 +117,7 @@ bool CsvWriter::FlushInternal()
     {
         return true;
     }
+
     std::ios::openmode mode = std::ios::out;
     if (append_mode_ || has_flushed_)
     {
@@ -117,32 +127,36 @@ bool CsvWriter::FlushInternal()
     {
         mode |= std::ios::trunc;
     }
+
     std::ofstream file(file_path_, mode);
     if (!file.is_open())
     {
         return false;
     }
+
     for (const auto& record : buffer_)
     {
         file << FormatRecord(record) << '\n';
     }
+
     file.close();
     buffer_.clear();
     has_flushed_ = true;
+
     return true;
 }
 
 std::string CsvWriter::EscapeField(const std::string& field)
 {
-    bool needs_quoting =
-        field.contains(',') || field.contains('"') || field.contains('\n') || field.contains('\r');
-
-    if (!needs_quoting)
+    if (bool needs_quoting = field.contains(',') || field.contains('"') || field.contains('\n') ||
+                             field.contains('\r');
+        !needs_quoting)
     {
         return field;
     }
 
     std::string escaped = "\"";
+
     for (char c : field)
     {
         if (c == '"')
@@ -154,7 +168,9 @@ std::string CsvWriter::EscapeField(const std::string& field)
             escaped += c;
         }
     }
+
     escaped += '"';
+
     return escaped;
 }
 
@@ -167,10 +183,12 @@ std::string CsvWriter::FormatRecord(const CsvRecord& record)
 
     std::ostringstream oss;
     oss << EscapeField(record.fields[0]);
+
     for (size_t i = 1; i < record.fields.size(); ++i)
     {
         oss << ',' << EscapeField(record.fields[i]);
     }
+
     return oss.str();
 }
 } // namespace data
