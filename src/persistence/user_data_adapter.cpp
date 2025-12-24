@@ -87,7 +87,11 @@ namespace persistence
             user.username = record.fields[3];
             user.password_hash = std::stoull(record.fields[4]);
         }
-        catch (...)
+        catch (const std::invalid_argument &)
+        {
+            return std::nullopt;
+        }
+        catch (const std::out_of_range &)
         {
             return std::nullopt;
         }

@@ -23,8 +23,7 @@ namespace persistence
             }
             try
             {
-                int record_user_id = std::stoi(record.fields[2]);
-                if (record_user_id != user_id)
+                if (int record_user_id = std::stoi(record.fields[2]); record_user_id != user_id)
                 {
                     return;
                 }
@@ -32,8 +31,13 @@ namespace persistence
                 double balance = std::stod(record.fields[4]);
                 balances[currency] = balance;
             }
-            catch (...)
+            catch (const std::invalid_argument &)
             {
+                // Skip malformed records
+            }
+            catch (const std::out_of_range &)
+            {
+                // Skip records with out-of-range values
             } });
         return balances;
     }
@@ -44,11 +48,11 @@ namespace persistence
         {
             data::CsvRecord record;
             record.fields.reserve(5);
-            record.fields.push_back("");
-            record.fields.push_back(currency);
-            record.fields.push_back(std::to_string(user_id));
-            record.fields.push_back("0");
-            record.fields.push_back(std::to_string(balance));
+            record.fields.emplace_back("");
+            record.fields.emplace_back(currency);
+            record.fields.emplace_back(std::to_string(user_id));
+            record.fields.emplace_back("0");
+            record.fields.emplace_back(std::to_string(balance));
             if (!writer.Write(record))
             {
                 return false;

@@ -1,6 +1,7 @@
 ﻿#include "services/user_service.hpp"
 #include "persistence/user_data_adapter.hpp"
 #include <functional>
+#include <format>
 namespace services
 {
     UserService::UserService(std::shared_ptr<persistence::UserDataAdapter> adapter)
@@ -20,7 +21,8 @@ namespace services
         int suffix = 1;
         while (adapter_->ExistsByUsername(username))
         {
-            username = original_username + std::to_string(suffix++);
+            username = std::format("{}{}", original_username, suffix);
+            ++suffix;
         }
         UserRecord new_record{0, std::string(full_name), std::string(email),
                               username, HashPassword(password)};

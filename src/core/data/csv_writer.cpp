@@ -129,13 +129,13 @@ namespace data
         {
             return "";
         }
-        auto escape_field = [](const std::string &field) -> std::string
+        auto escape_field = [](const std::string &field)
         {
-            bool needs_quoting = field.find(',') != std::string::npos ||
-                                 field.find('"') != std::string::npos ||
-                                 field.find('\n') != std::string::npos ||
-                                 field.find('\r') != std::string::npos;
-            if (!needs_quoting)
+            if (bool needs_quoting = field.contains(',') ||
+                                     field.contains('"') ||
+                                     field.contains('\n') ||
+                                     field.contains('\r');
+                !needs_quoting)
             {
                 return field;
             }

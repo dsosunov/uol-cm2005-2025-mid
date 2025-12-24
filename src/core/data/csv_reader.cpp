@@ -93,7 +93,7 @@ namespace data
             {
                 if (!record.fields.empty() || pos > 0)
                 {
-                    record.fields.push_back("");
+                    record.fields.emplace_back("");
                 }
                 break;
             }

@@ -16,11 +16,11 @@ namespace persistence
                                                                 {
             data::CsvRecord record;
             record.fields.reserve(5);
-            record.fields.push_back(utils::FormatTimestamp(txn.timestamp));
-            record.fields.push_back(txn.product_pair);
-            record.fields.push_back((txn.type == "Buy") ? "bid" : "ask");
-            record.fields.push_back(std::to_string(txn.price));
-            record.fields.push_back(std::to_string(txn.amount));
+            record.fields.emplace_back(utils::FormatTimestamp(txn.timestamp));
+            record.fields.emplace_back(txn.product_pair);
+            record.fields.emplace_back((txn.type == "Buy") ? "bid" : "ask");
+            record.fields.emplace_back(std::to_string(txn.price));
+            record.fields.emplace_back(std::to_string(txn.amount));
             return record; });
     }
     std::optional<services::Transaction> TransactionDataAdapter::TransformToEntity(
