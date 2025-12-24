@@ -27,7 +27,6 @@ void UserRegisterAction::DisplayResults(const utils::ServiceResult<services::Use
             {
                 context.output->WriteLine(std::format("Full Name: {}", result.data->full_name));
                 context.output->WriteLine(std::format("Email: {}", result.data->email));
-                context.output->WriteLine(std::format("Username: {}", result.data->username));
             }
         });
 }

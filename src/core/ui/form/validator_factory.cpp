@@ -11,12 +11,6 @@ std::shared_ptr<Validator> ValidatorFactory::Email()
     return instance;
 }
 
-std::shared_ptr<Validator> ValidatorFactory::Username()
-{
-    static auto instance = std::make_shared<user_forms::UsernameValidator>();
-    return instance;
-}
-
 std::shared_ptr<Validator> ValidatorFactory::Password()
 {
     static auto instance = std::make_shared<user_forms::PasswordValidator>();
@@ -26,12 +20,6 @@ std::shared_ptr<Validator> ValidatorFactory::Password()
 std::shared_ptr<Validator> ValidatorFactory::FullName()
 {
     static auto instance = std::make_shared<user_forms::FullNameValidator>();
-    return instance;
-}
-
-std::shared_ptr<Validator> ValidatorFactory::EmailOrUsername()
-{
-    static auto instance = std::make_shared<user_forms::EmailOrUsernameValidator>();
     return instance;
 }
 

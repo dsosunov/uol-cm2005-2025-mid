@@ -20,8 +20,8 @@ void UserResetAction::Execute(ActionContext& context)
     {
         return;
     }
-    auto result = user_service_->ResetPassword(data.email_or_username, data.new_password);
-    DisplayResults(result, data.email_or_username, context);
+    auto result = user_service_->ResetPassword(data.email, data.new_password);
+    DisplayResults(result, data.email, context);
 }
 void UserResetAction::DisplayResults(const utils::ServiceResult<void>& result,
                                      const std::string& account, ActionContext& context) const

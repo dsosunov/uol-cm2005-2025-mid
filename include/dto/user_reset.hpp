@@ -4,7 +4,7 @@ namespace dto
 {
 struct UserReset
 {
-    std::string email_or_username;
+    std::string email;
     std::string new_password;
 };
 } // namespace dto

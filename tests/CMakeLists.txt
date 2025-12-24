@@ -13,7 +13,6 @@ FetchContent_MakeAvailable(googletest)
 # Test executable
 add_executable(menu_tests
     test_full_name_validator.cpp
-    test_username_validator.cpp
 )
 
 # Link against gtest and the MenuSystemLib library

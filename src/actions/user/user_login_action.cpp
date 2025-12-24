@@ -16,7 +16,7 @@ user_forms::LoginForm UserLoginAction::CreateForm(ActionContext& context)
 utils::ServiceResult<services::User> UserLoginAction::ExecuteService(const dto::UserLogin& data,
                                                                      ActionContext& context)
 {
-    return user_service_->LoginUser(data.username, data.password);
+    return user_service_->LoginUser(data.email, data.password);
 }
 void UserLoginAction::DisplayResults(const utils::ServiceResult<services::User>& result,
                                      const dto::UserLogin& data, ActionContext& context)
@@ -26,7 +26,6 @@ void UserLoginAction::DisplayResults(const utils::ServiceResult<services::User>&
             if (result.data.has_value())
             {
                 context.output->WriteLine(std::format("Welcome back, {}!", result.data->full_name));
-                context.output->WriteLine(std::format("Username: {}", result.data->username));
             }
         });
 }

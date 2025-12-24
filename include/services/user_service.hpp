@@ -18,14 +18,12 @@ struct User
     int id;
     std::string full_name;
     std::string email;
-    std::string username;
 };
 struct UserRecord
 {
     int id;
     std::string full_name;
     std::string email;
-    std::string username;
     size_t password_hash;
 };
 class UserService
@@ -35,8 +33,8 @@ class UserService
     ~UserService() = default;
     utils::ServiceResult<User> RegisterUser(std::string_view full_name, std::string_view email,
                                             std::string_view password) const;
-    utils::ServiceResult<User> LoginUser(std::string_view username, std::string_view password);
-    utils::ServiceResult<void> ResetPassword(std::string_view email_or_username,
+    utils::ServiceResult<User> LoginUser(std::string_view email, std::string_view password);
+    utils::ServiceResult<void> ResetPassword(std::string_view email,
                                              std::string_view new_password) const;
     std::optional<User> GetCurrentUser() const;
     void Logout();

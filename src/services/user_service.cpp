@@ -22,18 +22,7 @@ utils::ServiceResult<User> UserService::RegisterUser(std::string_view full_name,
         return utils::ServiceResult<User>::Failure("Email already registered");
     }
 
-    std::string username(email.substr(0, email.find('@')));
-    std::string original_username = username;
-    int suffix = 1;
-
-    while (adapter_->ExistsByUsername(username))
-    {
-        username = std::format("{}{}", original_username, suffix);
-        ++suffix;
-    }
-
-    UserRecord new_record{0, std::string(full_name), std::string(email), username,
-                          HashPassword(password)};
+    UserRecord new_record{0, std::string(full_name), std::string(email), HashPassword(password)};
 
     if (!adapter_->Insert(new_record))
     {
@@ -43,16 +32,10 @@ utils::ServiceResult<User> UserService::RegisterUser(std::string_view full_name,
     return utils::ServiceResult<User>::Success(ToUser(new_record), "Registration successful");
 }
 
-utils::ServiceResult<User> UserService::LoginUser(std::string_view username,
-                                                  std::string_view password)
+utils::ServiceResult<User> UserService::LoginUser(std::string_view email, std::string_view password)
 {
     size_t password_hash = HashPassword(password);
-    auto user_record = adapter_->FindByUsername(username);
-
-    if (!user_record)
-    {
-        user_record = adapter_->FindByEmail(username);
-    }
+    auto user_record = adapter_->FindByEmail(email);
 
     if (!user_record)
     {
@@ -69,15 +52,10 @@ utils::ServiceResult<User> UserService::LoginUser(std::string_view username,
     return utils::ServiceResult<User>::Success(*current_user_, "Login successful");
 }
 
-utils::ServiceResult<void> UserService::ResetPassword(std::string_view email_or_username,
+utils::ServiceResult<void> UserService::ResetPassword(std::string_view email,
                                                       std::string_view new_password) const
 {
-    auto user_record = adapter_->FindByUsername(email_or_username);
-
-    if (!user_record)
-    {
-        user_record = adapter_->FindByEmail(email_or_username);
-    }
+    auto user_record = adapter_->FindByEmail(email);
 
     if (!user_record)
     {
@@ -116,7 +94,7 @@ size_t UserService::HashPassword(std::string_view password)
 
 User UserService::ToUser(const UserRecord& record)
 {
-    return User{record.id, record.full_name, record.email, record.username};
+    return User{record.id, record.full_name, record.email};
 }
 
 } // namespace services
