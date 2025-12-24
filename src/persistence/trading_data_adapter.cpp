@@ -34,13 +34,17 @@ namespace persistence
     std::optional<services::OrderRecord> TradingDataAdapter::TransformToEntity(
         const data::CsvRecord &record) const
     {
+        if (record.fields.size() < 5)
+        {
+            return std::nullopt;
+        }
         services::OrderRecord order;
-        order.product_pair = record.product;
-        if (record.order_type == "ask")
+        order.product_pair = record.fields[1];
+        if (record.fields[2] == "ask")
         {
             order.order_type = dto::OrderType::Asks;
         }
-        else if (record.order_type == "bid")
+        else if (record.fields[2] == "bid")
         {
             order.order_type = dto::OrderType::Bids;
         }
@@ -48,7 +52,7 @@ namespace persistence
         {
             return std::nullopt;
         }
-        auto parsed_time = utils::ParseTimestamp(record.timestamp);
+        auto parsed_time = utils::ParseTimestamp(record.fields[0]);
         if (!parsed_time.has_value())
         {
             return std::nullopt;
@@ -56,10 +60,10 @@ namespace persistence
         order.timestamp = *parsed_time;
         try
         {
-            std::string clean_price = record.price;
+            std::string clean_price = record.fields[3];
             std::erase_if(clean_price, [](char c)
                           { return !std::isdigit(c) && c != '.' && c != '-'; });
-            std::string clean_amount = record.amount;
+            std::string clean_amount = record.fields[4];
             std::erase_if(clean_amount, [](char c)
                           { return !std::isdigit(c) && c != '.' && c != '-'; });
             if (clean_price.empty() || clean_amount.empty())
@@ -83,16 +87,17 @@ namespace persistence
         const services::OrderRecord &order)
     {
         data::CsvRecord record;
-        record.timestamp = utils::FormatTimestamp(order.timestamp);
-        record.product = order.product_pair;
+        record.fields.reserve(5);
+        record.fields.push_back(utils::FormatTimestamp(order.timestamp));
+        record.fields.push_back(order.product_pair);
         std::string order_type_str{dto::OrderTypeToString(order.order_type)};
         if (!order_type_str.empty() && order_type_str.back() == 's')
         {
             order_type_str.pop_back();
         }
-        record.order_type = order_type_str;
-        record.price = std::to_string(order.price);
-        record.amount = std::to_string(order.amount);
+        record.fields.push_back(order_type_str);
+        record.fields.push_back(std::to_string(order.price));
+        record.fields.push_back(std::to_string(order.amount));
         return record;
     }
 }

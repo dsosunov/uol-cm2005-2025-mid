@@ -1,13 +1,21 @@
 ﻿#pragma once
-#include "core/data/csv_types.hpp"
 #include <filesystem>
 #include <fstream>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 namespace data
 {
+    struct CsvRecord
+    {
+        std::vector<std::string> fields;
+        bool IsValid() const { return !fields.empty(); }
+    };
+    using RecordFilter = std::function<bool(const CsvRecord &)>;
+    template <typename T>
+    using RecordTransform = std::function<T(const CsvRecord &)>;
     class CsvReader
     {
     public:
@@ -34,7 +42,7 @@ namespace data
             std::string line;
             while (std::getline(file, line))
             {
-                auto record_opt = CsvRecord::Parse(line);
+                auto record_opt = ParseRecord(line);
                 if (!record_opt.has_value())
                 {
                     continue;
@@ -63,7 +71,7 @@ namespace data
             std::string line;
             while (std::getline(file, line))
             {
-                auto record_opt = CsvRecord::Parse(line);
+                auto record_opt = ParseRecord(line);
                 if (record_opt.has_value())
                 {
                     processor(*record_opt);
@@ -75,5 +83,6 @@ namespace data
 
     private:
         std::filesystem::path file_path_;
+        static std::optional<CsvRecord> ParseRecord(std::string_view line);
     };
 }

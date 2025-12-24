@@ -17,13 +17,24 @@ namespace persistence
         }
         reader_->ReadWithProcessor([&balances, user_id](const data::CsvRecord &record)
                                    {
-            if (int record_user_id = std::stoi(record.order_type); record_user_id != user_id)
+            if (record.fields.size() < 5)
             {
                 return;
             }
-            std::string currency = record.product;
-            double balance = std::stod(record.amount);
-            balances[currency] = balance; });
+            try
+            {
+                int record_user_id = std::stoi(record.fields[2]);
+                if (record_user_id != user_id)
+                {
+                    return;
+                }
+                std::string currency = record.fields[1];
+                double balance = std::stod(record.fields[4]);
+                balances[currency] = balance;
+            }
+            catch (...)
+            {
+            } });
         return balances;
     }
     bool WalletDataAdapter::WriteBalances(data::CsvWriter &writer, int user_id,
@@ -32,11 +43,12 @@ namespace persistence
         for (const auto &[currency, balance] : balances)
         {
             data::CsvRecord record;
-            record.timestamp = "";
-            record.product = currency;
-            record.order_type = std::to_string(user_id);
-            record.price = "0";
-            record.amount = std::to_string(balance);
+            record.fields.reserve(5);
+            record.fields.push_back("");
+            record.fields.push_back(currency);
+            record.fields.push_back(std::to_string(user_id));
+            record.fields.push_back("0");
+            record.fields.push_back(std::to_string(balance));
             if (!writer.Write(record))
             {
                 return false;

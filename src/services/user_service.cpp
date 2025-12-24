@@ -1,63 +1,72 @@
 ﻿#include "services/user_service.hpp"
+#include "persistence/user_data_adapter.hpp"
+#include <functional>
 namespace services
 {
-    UserService::UserService()
+    UserService::UserService(std::shared_ptr<persistence::UserDataAdapter> adapter)
+        : adapter_(std::move(adapter))
     {
-        users_.emplace_back(1, "John Doe", "john@example.com", "john_doe");
-        users_.emplace_back(2, "Jane Smith", "jane@example.com", "jane_smith");
-        users_.emplace_back(3, "Bob Wilson", "bob@example.com", "bob_wilson");
     }
     utils::ServiceResult<User> UserService::RegisterUser(std::string_view full_name,
                                                          std::string_view email,
-                                                         [[maybe_unused]] std::string_view password)
+                                                         std::string_view password)
     {
-        for (const auto &user : users_)
+        if (adapter_->ExistsByEmail(email))
         {
-            if (user.email == email)
-            {
-                return utils::ServiceResult<User>::Failure("Email already registered");
-            }
+            return utils::ServiceResult<User>::Failure("Email already registered");
         }
         std::string username(email.substr(0, email.find('@')));
-        for (const auto &user : users_)
+        std::string original_username = username;
+        int suffix = 1;
+        while (adapter_->ExistsByUsername(username))
         {
-            if (user.username == username)
-            {
-                username += std::to_string(next_user_id_);
-                break;
-            }
+            username = original_username + std::to_string(suffix++);
         }
-        User new_user{next_user_id_++, std::string(full_name), std::string(email), username};
-        users_.emplace_back(new_user);
-        return utils::ServiceResult<User>::Success(new_user, "Registration successful");
+        UserRecord new_record{0, std::string(full_name), std::string(email),
+                              username, HashPassword(password)};
+        if (!adapter_->Insert(new_record))
+        {
+            return utils::ServiceResult<User>::Failure("Failed to save user");
+        }
+        return utils::ServiceResult<User>::Success(ToUser(new_record), "Registration successful");
     }
     utils::ServiceResult<User> UserService::LoginUser(std::string_view username, std::string_view password)
     {
-        for (const auto &user : users_)
+        size_t password_hash = HashPassword(password);
+        auto user_record = adapter_->FindByUsername(username);
+        if (!user_record)
         {
-            if (user.username == username || user.email == username)
-            {
-                if (!password.empty())
-                {
-                    current_user_ = user;
-                    return utils::ServiceResult<User>::Success(user, "Login successful");
-                }
-                return utils::ServiceResult<User>::Failure("Invalid password");
-            }
+            user_record = adapter_->FindByEmail(username);
         }
-        return utils::ServiceResult<User>::Failure("User not found");
+        if (!user_record)
+        {
+            return utils::ServiceResult<User>::Failure("User not found");
+        }
+        if (user_record->password_hash != password_hash)
+        {
+            return utils::ServiceResult<User>::Failure("Invalid password");
+        }
+        current_user_ = ToUser(*user_record);
+        return utils::ServiceResult<User>::Success(*current_user_, "Login successful");
     }
     utils::ServiceResult<void> UserService::ResetPassword(std::string_view email_or_username,
-                                                          [[maybe_unused]] std::string_view new_password) const
+                                                          std::string_view new_password)
     {
-        for (const auto &user : users_)
+        auto user_record = adapter_->FindByUsername(email_or_username);
+        if (!user_record)
         {
-            if (user.username == email_or_username || user.email == email_or_username)
-            {
-                return utils::ServiceResult<void>::Success("Password reset successful");
-            }
+            user_record = adapter_->FindByEmail(email_or_username);
         }
-        return utils::ServiceResult<void>::Failure("User not found");
+        if (!user_record)
+        {
+            return utils::ServiceResult<void>::Failure("User not found");
+        }
+        user_record->password_hash = HashPassword(new_password);
+        if (!adapter_->Update(*user_record))
+        {
+            return utils::ServiceResult<void>::Failure("Failed to save password");
+        }
+        return utils::ServiceResult<void>::Success("Password reset successful");
     }
     std::optional<User> UserService::GetCurrentUser() const
     {
@@ -70,5 +79,13 @@ namespace services
     bool UserService::IsLoggedIn() const
     {
         return current_user_.has_value();
+    }
+    size_t UserService::HashPassword(std::string_view password)
+    {
+        return std::hash<std::string_view>{}(password);
+    }
+    User UserService::ToUser(const UserRecord &record)
+    {
+        return User{record.id, record.full_name, record.email, record.username};
     }
 }

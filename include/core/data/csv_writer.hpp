@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "core/data/csv_types.hpp"
+#include "core/data/csv_reader.hpp"
 #include <filesystem>
 #include <fstream>
 #include <memory>
@@ -31,5 +31,6 @@ namespace data
         std::vector<CsvRecord> buffer_;
         bool has_flushed_ = false;
         bool FlushInternal();
+        static std::string FormatRecord(const CsvRecord &record);
     };
 }

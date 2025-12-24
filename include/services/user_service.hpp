@@ -5,6 +5,10 @@
 #include <string>
 #include <string_view>
 #include <vector>
+namespace persistence
+{
+    class UserDataAdapter;
+}
 namespace services
 {
     struct User
@@ -14,23 +18,32 @@ namespace services
         std::string email;
         std::string username;
     };
+    struct UserRecord
+    {
+        int id;
+        std::string full_name;
+        std::string email;
+        std::string username;
+        size_t password_hash;
+    };
     class UserService
     {
     public:
-        UserService();
+        explicit UserService(std::shared_ptr<persistence::UserDataAdapter> adapter);
         ~UserService() = default;
         utils::ServiceResult<User> RegisterUser(std::string_view full_name, std::string_view email,
                                                 std::string_view password);
         utils::ServiceResult<User> LoginUser(std::string_view username, std::string_view password);
         utils::ServiceResult<void> ResetPassword(std::string_view email_or_username,
-                                                 std::string_view new_password) const;
+                                                 std::string_view new_password);
         std::optional<User> GetCurrentUser() const;
         void Logout();
         bool IsLoggedIn() const;
 
     private:
-        std::vector<User> users_;
+        std::shared_ptr<persistence::UserDataAdapter> adapter_;
         std::optional<User> current_user_;
-        int next_user_id_ = 4;
+        static size_t HashPassword(std::string_view password);
+        static User ToUser(const UserRecord &record);
     };
 }

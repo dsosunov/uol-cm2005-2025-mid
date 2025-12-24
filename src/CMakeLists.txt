@@ -15,10 +15,10 @@ set(SOURCES
     services/wallet_service.cpp
     services/transactions_service.cpp
     services/trading_service.cpp
+    persistence/user_data_adapter.cpp
     persistence/trading_data_adapter.cpp
     persistence/transaction_data_adapter.cpp
     persistence/wallet_data_adapter.cpp
-    core/data/csv_types.cpp
     core/data/csv_reader.cpp
     core/data/csv_writer.cpp
     core/utils/time_utils.cpp

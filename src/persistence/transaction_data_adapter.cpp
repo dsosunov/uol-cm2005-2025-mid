@@ -15,20 +15,25 @@ namespace persistence
                                                                 [](const services::Transaction &txn)
                                                                 {
             data::CsvRecord record;
-            record.timestamp = utils::FormatTimestamp(txn.timestamp);
-            record.product = txn.product_pair;
-            record.order_type = (txn.type == "Buy") ? "bid" : "ask";
-            record.price = std::to_string(txn.price);
-            record.amount = std::to_string(txn.amount);
+            record.fields.reserve(5);
+            record.fields.push_back(utils::FormatTimestamp(txn.timestamp));
+            record.fields.push_back(txn.product_pair);
+            record.fields.push_back((txn.type == "Buy") ? "bid" : "ask");
+            record.fields.push_back(std::to_string(txn.price));
+            record.fields.push_back(std::to_string(txn.amount));
             return record; });
     }
     std::optional<services::Transaction> TransactionDataAdapter::TransformToEntity(
         const data::CsvRecord &record) const
     {
+        if (record.fields.size() < 5)
+        {
+            return std::nullopt;
+        }
         services::Transaction txn;
         try
         {
-            txn.user_id = std::stoi(record.order_type);
+            txn.user_id = std::stoi(record.fields[2]);
         }
         catch (const std::invalid_argument &)
         {
@@ -39,31 +44,31 @@ namespace persistence
             txn.user_id = 0;
         }
         txn.id = 0;
-        txn.product_pair = record.product;
-        auto parsed_time = utils::ParseTimestamp(record.timestamp);
+        txn.product_pair = record.fields[1];
+        auto parsed_time = utils::ParseTimestamp(record.fields[0]);
         if (!parsed_time.has_value())
         {
             return std::nullopt;
         }
         txn.timestamp = *parsed_time;
-        if (record.order_type == "bid")
+        if (record.fields[2] == "bid")
         {
             txn.type = "Buy";
         }
-        else if (record.order_type == "ask")
+        else if (record.fields[2] == "ask")
         {
             txn.type = "Sell";
         }
         else
         {
-            txn.type = record.order_type;
+            txn.type = record.fields[2];
         }
         try
         {
-            std::string clean_price = record.price;
+            std::string clean_price = record.fields[3];
             std::erase_if(clean_price, [](char c)
                           { return !std::isdigit(c) && c != '.' && c != '-'; });
-            std::string clean_amount = record.amount;
+            std::string clean_amount = record.fields[4];
             std::erase_if(clean_amount, [](char c)
                           { return !std::isdigit(c) && c != '.' && c != '-'; });
             if (clean_price.empty() || clean_amount.empty())

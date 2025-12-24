@@ -1,5 +1,6 @@
 ﻿#include "core/data/csv_writer.hpp"
 #include <algorithm>
+#include <sstream>
 namespace data
 {
     CsvWriter::CsvWriter(const std::filesystem::path &file_path, bool append, size_t buffer_size)
@@ -115,11 +116,50 @@ namespace data
         }
         for (const auto &record : buffer_)
         {
-            file << record.ToCsvLine() << '\n';
+            file << FormatRecord(record) << '\n';
         }
         file.close();
         buffer_.clear();
         has_flushed_ = true;
         return true;
+    }
+    std::string CsvWriter::FormatRecord(const CsvRecord &record)
+    {
+        if (record.fields.empty())
+        {
+            return "";
+        }
+        auto escape_field = [](const std::string &field) -> std::string
+        {
+            bool needs_quoting = field.find(',') != std::string::npos ||
+                                 field.find('"') != std::string::npos ||
+                                 field.find('\n') != std::string::npos ||
+                                 field.find('\r') != std::string::npos;
+            if (!needs_quoting)
+            {
+                return field;
+            }
+            std::string escaped = "\"";
+            for (char c : field)
+            {
+                if (c == '"')
+                {
+                    escaped += "\"\"";
+                }
+                else
+                {
+                    escaped += c;
+                }
+            }
+            escaped += '"';
+            return escaped;
+        };
+        std::ostringstream oss;
+        oss << escape_field(record.fields[0]);
+        for (size_t i = 1; i < record.fields.size(); ++i)
+        {
+            oss << ',' << escape_field(record.fields[i]);
+        }
+        return oss.str();
     }
 }
