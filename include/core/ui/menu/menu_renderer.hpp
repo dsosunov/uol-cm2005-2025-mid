@@ -14,5 +14,5 @@ class MenuRenderer
 
   private:
     std::shared_ptr<Output> output_;
-    void RenderBreadcrumbs(const MenuNode& current) const;
+    std::string BuildBreadcrumbPath(const MenuNode& current) const;
 };

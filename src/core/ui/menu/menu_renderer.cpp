@@ -11,12 +11,19 @@ MenuRenderer::MenuRenderer(std::shared_ptr<Output> output) : output_(std::move(o
 
 void MenuRenderer::RenderMenu(const MenuNode& current) const
 {
+    output_->WriteLine("");
+
+    std::string title;
     if (!current.IsRoot())
     {
-        RenderBreadcrumbs(current);
+        title = BuildBreadcrumbPath(current);
+    }
+    else
+    {
+        title = current.Title();
     }
 
-    output_->WriteLine(utils::OutputFormatter::SectionHeader(current.Title()));
+    output_->WriteLine(utils::OutputFormatter::SectionHeader(title));
 
     const auto& items = current.Children();
     for (size_t i = 0; i < items.size(); ++i)
@@ -25,12 +32,13 @@ void MenuRenderer::RenderMenu(const MenuNode& current) const
     }
 
     output_->WriteLine(std::format("0) {}", current.IsRoot() ? "Exit" : "Back"));
+    output_->WriteLine("───────────────────────────────────────");
     output_->Write(std::format("Select option (0-{}): ", items.size()));
 }
 
 void MenuRenderer::RenderActionHeader(const MenuNode& node) const
 {
-    output_->WriteLine(utils::OutputFormatter::SectionHeader(node.Title()));
+    // Action header removed - form prompts provide sufficient context
 }
 
 void MenuRenderer::RenderInvalidChoice() const
@@ -38,7 +46,7 @@ void MenuRenderer::RenderInvalidChoice() const
     output_->WriteLine("Invalid choice.");
 }
 
-void MenuRenderer::RenderBreadcrumbs(const MenuNode& current) const
+std::string MenuRenderer::BuildBreadcrumbPath(const MenuNode& current) const
 {
     std::vector<const MenuNode*> path;
     const MenuNode* node = &current;
@@ -59,5 +67,5 @@ void MenuRenderer::RenderBreadcrumbs(const MenuNode& current) const
         breadcrumb += (*it)->Title();
     }
 
-    output_->WriteLine(breadcrumb);
+    return breadcrumb;
 }

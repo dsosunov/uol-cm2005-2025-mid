@@ -32,9 +32,11 @@ void WalletWithdrawAction::DisplayResults(const utils::ServiceResult<double>& re
         {
             WriteLine(std::format("New Balance: {:.2f}", *result.data), context);
         }
+        DisplayResultFooter(context);
     }
     else
     {
         DisplayFailureHeader(result.message, context);
+        DisplayResultFooter(context);
     }
 }

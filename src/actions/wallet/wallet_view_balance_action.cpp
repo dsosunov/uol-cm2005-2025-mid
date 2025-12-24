@@ -56,4 +56,5 @@ void WalletViewBalanceAction::DisplayResults(
             WriteLine(std::format("Total (USD equivalent): ${:.2f}", *total_result.data), context);
         }
     }
+    DisplayResultFooter(context);
 }

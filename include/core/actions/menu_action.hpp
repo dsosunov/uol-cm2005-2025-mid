@@ -34,13 +34,11 @@ struct MenuAction
     // Result display - simple headers (automatically use GetOperationName)
     void DisplaySuccessHeader(ActionContext& context) const
     {
-        context.output->WriteLine("");
         context.output->WriteLine(utils::OutputFormatter::SuccessHeader(GetOperationName()));
     }
 
     void DisplayFailureHeader(std::string_view message, ActionContext& context) const
     {
-        context.output->WriteLine("");
         context.output->WriteLine(utils::OutputFormatter::FailureHeader(GetOperationName()));
         if (!message.empty())
         {
@@ -62,6 +60,12 @@ struct MenuAction
 
     void WriteEmptyLine(ActionContext& context) const
     {
+        context.output->WriteLine("");
+    }
+
+    void DisplayResultFooter(ActionContext& context) const
+    {
+        context.output->WriteLine("===========================");
         context.output->WriteLine("");
     }
 };

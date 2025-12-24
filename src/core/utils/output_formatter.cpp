@@ -11,16 +11,16 @@ std::string OutputFormatter::SectionHeader(std::string_view title)
 
 std::string OutputFormatter::SuccessHeader(std::string_view operation)
 {
-    return std::format("=== {} Successful ===", operation);
+    return std::format("\n=== {} ===", operation);
 }
 
 std::string OutputFormatter::FailureHeader(std::string_view operation)
 {
-    return std::format("=== {} Failed ===", operation);
+    return std::format("\n=== {} ===", operation);
 }
 
 std::string OutputFormatter::CancellationMessage(std::string_view operation)
 {
-    return std::format("{} cancelled by user.", operation);
+    return std::format("\n[CANCELLED] {}", operation);
 }
 } // namespace utils

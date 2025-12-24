@@ -33,7 +33,8 @@ class Form
 };
 template <typename T> FormReadResult Form::Read(T& target)
 {
-    output_->WriteLine("Type 'cancel' to abort at any time");
+    output_->WriteLine("");
+    output_->WriteLine("(Type 'cancel' to abort)");
     output_->WriteLine("");
     context_.Clear();
     std::any target_any = std::ref(target);
