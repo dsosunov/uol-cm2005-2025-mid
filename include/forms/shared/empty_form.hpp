@@ -10,7 +10,7 @@ class EmptyForm
   public:
     EmptyForm() = default;
 
-    form::FormReadResult Read(EmptyRequest& data)
+    form::FormReadResult Read(const EmptyRequest&) const
     {
         // No input needed
         return form::FormReadResult::kSuccess;

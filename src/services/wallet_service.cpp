@@ -124,9 +124,9 @@ utils::ServiceResult<double> WalletService::Withdraw(std::string_view currency, 
 
     int effective_id = GetEffectiveUserId(user_id);
 
-    auto balance_result = GetBalance(currency, user_id);
-    if (!balance_result.success || !balance_result.data.has_value() ||
-        *balance_result.data < amount)
+    if (auto balance_result = GetBalance(currency, user_id); !balance_result.success ||
+                                                             !balance_result.data.has_value() ||
+                                                             *balance_result.data < amount)
     {
         return utils::ServiceResult<double>::Failure("Insufficient balance");
     }

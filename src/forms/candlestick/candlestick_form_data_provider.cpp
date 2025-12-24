@@ -5,6 +5,7 @@
 
 namespace candlestick
 {
+
 CandlestickFormDataProvider::CandlestickFormDataProvider(
     std::shared_ptr<services::TradingService> trading_service)
     : trading_service_(std::move(trading_service))
@@ -13,13 +14,14 @@ CandlestickFormDataProvider::CandlestickFormDataProvider(
 
 std::set<std::string, std::less<>> CandlestickFormDataProvider::GetAvailableProducts() const
 {
-    auto result = trading_service_->GetAvailableProducts();
-    if (result.success && result.data.has_value())
+    if (auto result = trading_service_->GetAvailableProducts();
+        result.success && result.data.has_value())
     {
         return *result.data;
     }
     return {};
 }
+
 std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider::GetStartDates(
     std::string_view timeframe) const
 {
@@ -28,6 +30,7 @@ std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider
     options.limit = 100;
 
     dto::Timeframe timeframe_enum = Daily;
+
     if (timeframe == "monthly")
         timeframe_enum = Monthly;
     else if (timeframe == "yearly")
@@ -48,6 +51,7 @@ std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider
     }
     return pairs;
 }
+
 std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider::GetEndDates(
     std::string_view timeframe, std::string_view start_date) const
 {
@@ -82,6 +86,7 @@ std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider
     }
     return pairs;
 }
+
 std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider::
     GetDatesByTimeframe(std::string_view timeframe) const
 {

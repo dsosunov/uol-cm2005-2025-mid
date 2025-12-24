@@ -28,6 +28,6 @@ class FormBasedAction : public MenuAction
     virtual TResult ExecuteService(const TData& data, ActionContext& context) = 0;
     virtual void DisplayResults(const TResult& result, const TData& data,
                                 ActionContext& context) = 0;
-    virtual const char* GetOperationName() const = 0;
+    const char* GetOperationName() const override = 0;
 };
 } // namespace actions
