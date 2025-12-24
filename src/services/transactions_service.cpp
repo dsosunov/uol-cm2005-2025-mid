@@ -20,8 +20,8 @@ int TransactionsService::GetEffectiveUserId(std::optional<int> user_id) const
     return ServiceUtils::GetEffectiveUserId(user_id, default_user_id_);
 }
 
-std::vector<Transaction> TransactionsService::GetLastTransactions(int count,
-                                                                  std::optional<int> user_id) const
+utils::ServiceResult<std::vector<Transaction>> TransactionsService::GetLastTransactions(
+    int count, std::optional<int> user_id) const
 {
     int effective_id = GetEffectiveUserId(user_id);
     std::vector<Transaction> result;
@@ -46,10 +46,10 @@ std::vector<Transaction> TransactionsService::GetLastTransactions(int count,
         }
     }
 
-    return result;
+    return {true, "Transactions retrieved successfully", result};
 }
 
-std::vector<Transaction> TransactionsService::GetTransactionsByPair(
+utils::ServiceResult<std::vector<Transaction>> TransactionsService::GetTransactionsByPair(
     std::string_view product_pair, std::optional<int> user_id) const
 {
     int effective_id = GetEffectiveUserId(user_id);
@@ -75,10 +75,10 @@ std::vector<Transaction> TransactionsService::GetTransactionsByPair(
         }
     }
 
-    return result;
+    return {true, "Transactions retrieved successfully", result};
 }
 
-ActivityStats TransactionsService::GetActivitySummary(
+utils::ServiceResult<ActivityStats> TransactionsService::GetActivitySummary(
     [[maybe_unused]] dto::Timeframe timeframe,
     [[maybe_unused]] const std::optional<utils::TimePoint>& start_date,
     [[maybe_unused]] const std::optional<utils::TimePoint>& end_date,
@@ -99,17 +99,18 @@ ActivityStats TransactionsService::GetActivitySummary(
 
     double average = (total > 0) ? (total_volume / total) : 0.0;
 
-    return {total, total_volume, average};
+    return {true, "Activity summary retrieved successfully",
+            ActivityStats{total, total_volume, average}};
 }
 
-bool TransactionsService::AddTransaction(const Transaction& transaction)
+utils::ServiceResult<void> TransactionsService::AddTransaction(const Transaction& transaction)
 {
     Transaction new_transaction = transaction;
     new_transaction.id = next_transaction_id_++;
 
     transactions_.push_back(new_transaction);
 
-    return true;
+    return {true, "Transaction added successfully"};
 }
 
 } // namespace services

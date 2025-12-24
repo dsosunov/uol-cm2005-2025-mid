@@ -72,19 +72,24 @@ utils::ServiceResult<void> UserService::ResetPassword(std::string_view email,
     return utils::ServiceResult<void>::Success("Password reset successful");
 }
 
-std::optional<User> UserService::GetCurrentUser() const
+utils::ServiceResult<User> UserService::GetCurrentUser() const
 {
-    return current_user_;
+    if (current_user_.has_value())
+    {
+        return {true, "Current user retrieved successfully", *current_user_};
+    }
+    return utils::ServiceResult<User>::Failure("No user logged in");
 }
 
-void UserService::Logout()
+utils::ServiceResult<void> UserService::Logout()
 {
     current_user_ = std::nullopt;
+    return {true, "Logout successful"};
 }
 
-bool UserService::IsLoggedIn() const
+utils::ServiceResult<bool> UserService::IsLoggedIn() const
 {
-    return current_user_.has_value();
+    return {true, "Login status retrieved successfully", current_user_.has_value()};
 }
 
 size_t UserService::HashPassword(std::string_view password)

@@ -1,5 +1,4 @@
 #pragma once
-#include "core/actions/action_helper.hpp"
 #include "core/actions/menu_action.hpp"
 #include "core/utils/service_result.hpp"
 
@@ -16,7 +15,7 @@ class FormBasedAction : public MenuAction
         TData data;
         TForm form = CreateForm(context);
         if (auto form_result = form.Read(data);
-            ActionHelper::HandleFormCancellation(form_result, GetOperationName(), context))
+            HandleFormCancellation(form_result, GetOperationName(), context))
         {
             return;
         }

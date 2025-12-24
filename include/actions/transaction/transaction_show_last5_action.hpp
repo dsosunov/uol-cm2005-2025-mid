@@ -1,16 +1,30 @@
 ﻿#pragma once
-#include "core/actions/action_context.hpp"
-#include "core/actions/menu_action.hpp"
+#include "core/actions/form_based_action.hpp"
+#include "dto/empty_request.hpp"
+#include "forms/shared/empty_form.hpp"
 #include "services/transactions_service.hpp"
 
 #include <memory>
+#include <vector>
 
-class TransactionShowLast5Action : public MenuAction
+class TransactionShowLast5Action
+    : public actions::FormBasedAction<shared_forms::EmptyForm, EmptyRequest,
+                                      utils::ServiceResult<std::vector<services::Transaction>>>
 {
   public:
     explicit TransactionShowLast5Action(
         std::shared_ptr<services::TransactionsService> transactions_service);
-    void Execute(ActionContext& context) override;
+
+  protected:
+    shared_forms::EmptyForm CreateForm(ActionContext& context) override;
+    utils::ServiceResult<std::vector<services::Transaction>> ExecuteService(
+        const EmptyRequest& data, ActionContext& context) override;
+    void DisplayResults(const utils::ServiceResult<std::vector<services::Transaction>>& result,
+                        const EmptyRequest& data, ActionContext& context) override;
+    const char* GetOperationName() const override
+    {
+        return "Last 5 Transactions";
+    }
 
   private:
     std::shared_ptr<services::TransactionsService> transactions_service_;

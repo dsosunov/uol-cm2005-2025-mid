@@ -1,7 +1,5 @@
 #include "actions/wallet/wallet_view_balance_action.hpp"
 
-#include "core/utils/output_formatter.hpp"
-
 #include <format>
 
 WalletViewBalanceAction::WalletViewBalanceAction(
@@ -10,14 +8,33 @@ WalletViewBalanceAction::WalletViewBalanceAction(
 {
 }
 
-void WalletViewBalanceAction::Execute(ActionContext& context)
+shared_forms::EmptyForm WalletViewBalanceAction::CreateForm(ActionContext& context)
 {
-    context.output->WriteLine(utils::OutputFormatter::SectionHeader("Wallet Balances"));
+    return shared_forms::EmptyForm();
+}
 
-    auto balances = wallet_service_->GetBalances();
+utils::ServiceResult<std::map<std::string, double, std::less<>>> WalletViewBalanceAction::
+    ExecuteService(const EmptyRequest& data, ActionContext& context)
+{
+    return wallet_service_->GetBalances();
+}
+
+void WalletViewBalanceAction::DisplayResults(
+    const utils::ServiceResult<std::map<std::string, double, std::less<>>>& result,
+    const EmptyRequest& data, ActionContext& context)
+{
+    if (!result.success || !result.data.has_value())
+    {
+        DisplayFailureHeader(result.message, context);
+        return;
+    }
+
+    const auto& balances = *result.data;
+    DisplaySuccessHeader(context);
+
     if (balances.empty())
     {
-        context.output->WriteLine("No balances available.");
+        WriteLine("No balances available.", context);
     }
     else
     {
@@ -30,10 +47,13 @@ void WalletViewBalanceAction::Execute(ActionContext& context)
                 symbol = "£";
             else if (currency == "JPY")
                 symbol = "¥";
-            context.output->WriteLine(std::format("{}: {}{:.2f}", currency, symbol, amount));
+            WriteLine(std::format("{}: {}{:.2f}", currency, symbol, amount), context);
         }
-        context.output->WriteLine("");
-        double total_usd = wallet_service_->GetTotalBalanceInUSD();
-        context.output->WriteLine(std::format("Total (USD equivalent): ${:.2f}", total_usd));
+        WriteEmptyLine(context);
+        auto total_result = wallet_service_->GetTotalBalanceInUSD();
+        if (total_result.success && total_result.data.has_value())
+        {
+            WriteLine(std::format("Total (USD equivalent): ${:.2f}", *total_result.data), context);
+        }
     }
 }

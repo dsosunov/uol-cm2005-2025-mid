@@ -24,7 +24,13 @@ std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormData
     else if (timeframe == "yearly")
         timeframe_enum = Yearly;
 
-    auto dates = trading_service_->GetDateSamples(timeframe_enum, options);
+    auto date_result = trading_service_->GetDateSamples(timeframe_enum, options);
+    if (!date_result.success || !date_result.data.has_value())
+    {
+        return {};
+    }
+
+    const auto& dates = *date_result.data;
 
     std::vector<OptionPair> pairs;
     pairs.reserve(dates.size());
@@ -61,7 +67,13 @@ std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormData
     else if (timeframe == "yearly")
         timeframe_enum = dto::Timeframe::Yearly;
 
-    auto dates = trading_service_->GetDateSamples(timeframe_enum, options);
+    auto date_result = trading_service_->GetDateSamples(timeframe_enum, options);
+    if (!date_result.success || !date_result.data.has_value())
+    {
+        return {};
+    }
+
+    const auto& dates = *date_result.data;
 
     std::vector<OptionPair> pairs;
     pairs.reserve(dates.size());

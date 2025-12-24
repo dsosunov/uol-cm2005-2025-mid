@@ -31,7 +31,7 @@ int WalletService::GetEffectiveUserId(std::optional<int> user_id) const
     return ServiceUtils::GetEffectiveUserId(user_id, default_user_id_);
 }
 
-std::map<std::string, double, std::less<>> WalletService::GetBalances(
+utils::ServiceResult<std::map<std::string, double, std::less<>>> WalletService::GetBalances(
     std::optional<int> user_id) const
 {
     int effective_id = GetEffectiveUserId(user_id);
@@ -43,13 +43,14 @@ std::map<std::string, double, std::less<>> WalletService::GetBalances(
 
     if (auto it = balances_.find(effective_id); it != balances_.end())
     {
-        return it->second;
+        return {true, "Balances retrieved successfully", it->second};
     }
 
-    return {};
+    return {true, "No balances found", {}};
 }
 
-double WalletService::GetBalance(std::string_view currency, std::optional<int> user_id) const
+utils::ServiceResult<double> WalletService::GetBalance(std::string_view currency,
+                                                       std::optional<int> user_id) const
 {
     int effective_id = GetEffectiveUserId(user_id);
 
@@ -59,14 +60,14 @@ double WalletService::GetBalance(std::string_view currency, std::optional<int> u
 
         if (currency_it != user_it->second.end())
         {
-            return currency_it->second;
+            return {true, "Balance retrieved successfully", currency_it->second};
         }
     }
 
-    return 0.0;
+    return {true, "No balance found for currency", 0.0};
 }
 
-double WalletService::GetTotalBalanceInUSD(std::optional<int> user_id) const
+utils::ServiceResult<double> WalletService::GetTotalBalanceInUSD(std::optional<int> user_id) const
 {
     std::map<std::string, double, std::less<>> rates = {
         {"USD", 1.0},  {"EUR", 1.09}, {"GBP", 1.27}, {"JPY", 0.0067},
@@ -77,7 +78,7 @@ double WalletService::GetTotalBalanceInUSD(std::optional<int> user_id) const
 
     if (user_it == balances_.end())
     {
-        return 0.0;
+        return {true, "No balances found", 0.0};
     }
 
     double total_usd = 0.0;
@@ -92,7 +93,7 @@ double WalletService::GetTotalBalanceInUSD(std::optional<int> user_id) const
         }
     }
 
-    return total_usd;
+    return {true, "Total balance calculated successfully", total_usd};
 }
 
 utils::ServiceResult<double> WalletService::Deposit(std::string_view currency, double amount,
@@ -123,7 +124,9 @@ utils::ServiceResult<double> WalletService::Withdraw(std::string_view currency, 
 
     int effective_id = GetEffectiveUserId(user_id);
 
-    if (double current_balance = GetBalance(currency, user_id); current_balance < amount)
+    auto balance_result = GetBalance(currency, user_id);
+    if (!balance_result.success || !balance_result.data.has_value() ||
+        *balance_result.data < amount)
     {
         return utils::ServiceResult<double>::Failure("Insufficient balance");
     }

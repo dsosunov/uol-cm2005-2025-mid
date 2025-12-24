@@ -1,23 +1,33 @@
 ﻿#pragma once
-#include "core/actions/action_context.hpp"
-#include "core/actions/menu_action.hpp"
+#include "core/actions/form_based_action.hpp"
 #include "dto/activity_summary.hpp"
+#include "forms/transaction/activity_summary_form.hpp"
 #include "services/trading_service.hpp"
 #include "services/transactions_service.hpp"
 
 #include <memory>
 
-class TransactionActivitySummaryAction : public MenuAction
+class TransactionActivitySummaryAction
+    : public actions::FormBasedAction<transaction_forms::ActivitySummaryForm, dto::ActivitySummary,
+                                      utils::ServiceResult<services::ActivityStats>>
 {
   public:
     explicit TransactionActivitySummaryAction(
         std::shared_ptr<services::TransactionsService> transactions_service,
         std::shared_ptr<services::TradingService> trading_service);
-    void Execute(ActionContext& context) override;
+
+  protected:
+    transaction_forms::ActivitySummaryForm CreateForm(ActionContext& context) override;
+    utils::ServiceResult<services::ActivityStats> ExecuteService(const dto::ActivitySummary& data,
+                                                                 ActionContext& context) override;
+    void DisplayResults(const utils::ServiceResult<services::ActivityStats>& result,
+                        const dto::ActivitySummary& data, ActionContext& context) override;
+    const char* GetOperationName() const override
+    {
+        return "Activity Summary";
+    }
 
   private:
-    void DisplayResults(const dto::ActivitySummary& query, const services::ActivityStats& stats,
-                        ActionContext& context) const;
     std::shared_ptr<services::TransactionsService> transactions_service_;
     std::shared_ptr<services::TradingService> trading_service_;
 };

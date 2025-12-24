@@ -1,7 +1,5 @@
 #include "actions/user/user_register_action.hpp"
 
-#include "core/actions/action_helper.hpp"
-
 #include <format>
 
 UserRegisterAction::UserRegisterAction(std::shared_ptr<services::UserService> user_service)
@@ -21,12 +19,17 @@ utils::ServiceResult<services::User> UserRegisterAction::ExecuteService(
 void UserRegisterAction::DisplayResults(const utils::ServiceResult<services::User>& result,
                                         const dto::UserRegistration& data, ActionContext& context)
 {
-    actions::ActionHelper::DisplayResult(
-        result.success, GetOperationName(), result.message, context, [&result, &context]() {
-            if (result.data.has_value())
-            {
-                context.output->WriteLine(std::format("Full Name: {}", result.data->full_name));
-                context.output->WriteLine(std::format("Email: {}", result.data->email));
-            }
-        });
+    if (result.success)
+    {
+        DisplaySuccessHeader(context);
+        if (result.data.has_value())
+        {
+            DisplayField("Full Name", result.data->full_name, context);
+            DisplayField("Email", result.data->email, context);
+        }
+    }
+    else
+    {
+        DisplayFailureHeader(result.message, context);
+    }
 }

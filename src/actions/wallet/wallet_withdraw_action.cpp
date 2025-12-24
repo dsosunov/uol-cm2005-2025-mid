@@ -1,7 +1,5 @@
 #include "actions/wallet/wallet_withdraw_action.hpp"
 
-#include "core/actions/action_helper.hpp"
-
 #include <format>
 
 WalletWithdrawAction::WalletWithdrawAction(
@@ -13,7 +11,12 @@ WalletWithdrawAction::WalletWithdrawAction(
 
 wallet_forms::WalletOperationForm WalletWithdrawAction::CreateForm(ActionContext& context)
 {
-    auto allowed_currencies = trading_service_->GetAvailableProducts();
+    auto result = trading_service_->GetAvailableProducts();
+    std::set<std::string, std::less<>> allowed_currencies;
+    if (result.success && result.data.has_value())
+    {
+        allowed_currencies = *result.data;
+    }
     return wallet_forms::WalletOperationForm(context.form_input_provider, context.output,
                                              allowed_currencies);
 }
@@ -26,9 +29,17 @@ utils::ServiceResult<double> WalletWithdrawAction::ExecuteService(const dto::Wal
 void WalletWithdrawAction::DisplayResults(const utils::ServiceResult<double>& result,
                                           const dto::WalletOperation& data, ActionContext& context)
 {
-    actions::ActionHelper::DisplayResult(
-        result.success, GetOperationName(), result.message, context, [&context, &data, &result]() {
-            context.output->WriteLine(std::format("Currency: {}", data.currency));
-            context.output->WriteLine(std::format("New Balance: {:.2f}", *result.data));
-        });
+    if (result.success)
+    {
+        DisplaySuccessHeader(context);
+        DisplayField("Currency", data.currency, context);
+        if (result.data.has_value())
+        {
+            WriteLine(std::format("New Balance: {:.2f}", *result.data), context);
+        }
+    }
+    else
+    {
+        DisplayFailureHeader(result.message, context);
+    }
 }

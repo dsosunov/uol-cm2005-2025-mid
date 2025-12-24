@@ -36,9 +36,9 @@ class UserService
     utils::ServiceResult<User> LoginUser(std::string_view email, std::string_view password);
     utils::ServiceResult<void> ResetPassword(std::string_view email,
                                              std::string_view new_password) const;
-    std::optional<User> GetCurrentUser() const;
-    void Logout();
-    bool IsLoggedIn() const;
+    utils::ServiceResult<User> GetCurrentUser() const;
+    utils::ServiceResult<void> Logout();
+    utils::ServiceResult<bool> IsLoggedIn() const;
 
   private:
     std::shared_ptr<persistence::UserDataAdapter> adapter_;

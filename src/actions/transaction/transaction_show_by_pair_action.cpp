@@ -1,9 +1,6 @@
 #include "actions/transaction/transaction_show_by_pair_action.hpp"
 
-#include "core/actions/action_helper.hpp"
-#include "core/utils/output_formatter.hpp"
 #include "core/utils/time_utils.hpp"
-#include "forms/transaction/product_pair_form.hpp"
 
 #include <format>
 
@@ -15,38 +12,52 @@ TransactionShowByPairAction::TransactionShowByPairAction(
 {
 }
 
-void TransactionShowByPairAction::Execute(ActionContext& context)
+transaction_forms::ProductPairForm TransactionShowByPairAction::CreateForm(ActionContext& context)
 {
-    auto allowed_currencies = trading_service_->GetAvailableProducts();
-    dto::TransactionQuery data;
-    transaction_forms::ProductPairForm form(context.form_input_provider, context.output,
-                                            allowed_currencies);
-    if (auto form_result = form.Read(data);
-        actions::ActionHelper::HandleFormCancellation(form_result, "Query", context))
+    auto result = trading_service_->GetAvailableProducts();
+    std::set<std::string, std::less<>> allowed_currencies;
+    if (result.success && result.data.has_value())
     {
+        allowed_currencies = *result.data;
+    }
+    return transaction_forms::ProductPairForm(context.form_input_provider, context.output,
+                                              allowed_currencies);
+}
+
+utils::ServiceResult<std::vector<services::Transaction>> TransactionShowByPairAction::
+    ExecuteService(const dto::TransactionQuery& data, ActionContext& context)
+{
+    return transactions_service_->GetTransactionsByPair(data.product_pair);
+}
+
+void TransactionShowByPairAction::DisplayResults(
+    const utils::ServiceResult<std::vector<services::Transaction>>& result,
+    const dto::TransactionQuery& data, ActionContext& context)
+{
+    if (!result.success || !result.data.has_value())
+    {
+        DisplayFailureHeader(result.message, context);
         return;
     }
-    auto transactions = transactions_service_->GetTransactionsByPair(data.product_pair);
-    DisplayResults(data.product_pair, transactions, context);
-}
-void TransactionShowByPairAction::DisplayResults(
-    const std::string& product_pair, const std::vector<services::Transaction>& transactions,
-    ActionContext& context) const
-{
-    context.output->WriteLine(
-        utils::OutputFormatter::SectionHeader(std::format("Transactions for {}", product_pair)));
+
+    const auto& transactions = *result.data;
+    DisplaySuccessHeader(context);
+    DisplayField("Product Pair", data.product_pair, context);
+    WriteEmptyLine(context);
+
     if (transactions.empty())
     {
-        context.output->WriteLine("No transactions found for this product pair.");
+        WriteLine("No transactions found for this product pair.", context);
     }
     else
     {
         int index = 1;
         for (const auto& transaction : transactions)
         {
-            context.output->WriteLine(std::format(
-                "{}. {} - {:.2f} @ {:.4f} - {}", index, transaction.type, transaction.amount,
-                transaction.price, utils::FormatTimestamp(transaction.timestamp)));
+            WriteLine(std::format("{}. {} - {:.2f} @ {:.4f} - {}", index, transaction.type,
+                                  transaction.amount, transaction.price,
+                                  utils::FormatTimestamp(transaction.timestamp)),
+                      context);
             ++index;
         }
     }

@@ -185,7 +185,8 @@ utils::ServiceResult<GenerationData> TradingService::GenerateTrades(int count) c
     return utils::ServiceResult<GenerationData>::Success(data, "Trades generated successfully");
 }
 
-std::set<std::string, std::less<>> TradingService::GetAvailableProducts() const
+utils::ServiceResult<std::set<std::string, std::less<>>> TradingService::GetAvailableProducts()
+    const
 {
     std::set<std::string, std::less<>> currencies;
 
@@ -200,11 +201,11 @@ std::set<std::string, std::less<>> TradingService::GetAvailableProducts() const
         }
     });
 
-    return currencies;
+    return {true, "Available products retrieved successfully", currencies};
 }
 
-std::vector<std::string> TradingService::GetDateSamples(dto::Timeframe timeframe,
-                                                        const DateQueryOptions& options) const
+utils::ServiceResult<std::vector<std::string>> TradingService::GetDateSamples(
+    dto::Timeframe timeframe, const DateQueryOptions& options) const
 {
     std::set<std::string, std::less<>> unique_dates;
 
@@ -233,7 +234,7 @@ std::vector<std::string> TradingService::GetDateSamples(dto::Timeframe timeframe
 
     if (unique_dates.empty())
     {
-        return {};
+        return {true, "No date samples found", {}};
     }
 
     std::vector<std::string> result(unique_dates.begin(), unique_dates.end());
@@ -254,7 +255,7 @@ std::vector<std::string> TradingService::GetDateSamples(dto::Timeframe timeframe
             break;
     }
 
-    return filtered;
+    return {true, "Date samples retrieved successfully", filtered};
 }
 
 } // namespace services

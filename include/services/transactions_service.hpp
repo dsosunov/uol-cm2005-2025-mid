@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "core/utils/service_result.hpp"
 #include "core/utils/time_utils.hpp"
 #include "dto/constants.hpp"
 
@@ -36,15 +37,15 @@ class TransactionsService
     TransactionsService() = default;
     explicit TransactionsService(std::shared_ptr<persistence::TransactionDataAdapter> adapter);
     ~TransactionsService() = default;
-    std::vector<Transaction> GetLastTransactions(int count,
-                                                 std::optional<int> user_id = std::nullopt) const;
-    std::vector<Transaction> GetTransactionsByPair(std::string_view product_pair,
-                                                   std::optional<int> user_id = std::nullopt) const;
-    ActivityStats GetActivitySummary(dto::Timeframe timeframe,
-                                     const std::optional<utils::TimePoint>& start_date,
-                                     const std::optional<utils::TimePoint>& end_date,
-                                     std::optional<int> user_id = std::nullopt) const;
-    bool AddTransaction(const Transaction& transaction);
+    utils::ServiceResult<std::vector<Transaction>> GetLastTransactions(
+        int count, std::optional<int> user_id = std::nullopt) const;
+    utils::ServiceResult<std::vector<Transaction>> GetTransactionsByPair(
+        std::string_view product_pair, std::optional<int> user_id = std::nullopt) const;
+    utils::ServiceResult<ActivityStats> GetActivitySummary(
+        dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
+        const std::optional<utils::TimePoint>& end_date,
+        std::optional<int> user_id = std::nullopt) const;
+    utils::ServiceResult<void> AddTransaction(const Transaction& transaction);
 
   private:
     std::vector<Transaction> transactions_ = {

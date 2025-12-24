@@ -1,24 +1,34 @@
 ﻿#pragma once
-#include "core/actions/action_context.hpp"
-#include "core/actions/menu_action.hpp"
+#include "core/actions/form_based_action.hpp"
 #include "dto/transaction_query.hpp"
+#include "forms/transaction/product_pair_form.hpp"
 #include "services/trading_service.hpp"
 #include "services/transactions_service.hpp"
 
 #include <memory>
+#include <vector>
 
-class TransactionShowByPairAction : public MenuAction
+class TransactionShowByPairAction
+    : public actions::FormBasedAction<transaction_forms::ProductPairForm, dto::TransactionQuery,
+                                      utils::ServiceResult<std::vector<services::Transaction>>>
 {
   public:
     explicit TransactionShowByPairAction(
         std::shared_ptr<services::TransactionsService> transactions_service,
         std::shared_ptr<services::TradingService> trading_service);
-    void Execute(ActionContext& context) override;
+
+  protected:
+    transaction_forms::ProductPairForm CreateForm(ActionContext& context) override;
+    utils::ServiceResult<std::vector<services::Transaction>> ExecuteService(
+        const dto::TransactionQuery& data, ActionContext& context) override;
+    void DisplayResults(const utils::ServiceResult<std::vector<services::Transaction>>& result,
+                        const dto::TransactionQuery& data, ActionContext& context) override;
+    const char* GetOperationName() const override
+    {
+        return "Transaction Query";
+    }
 
   private:
-    void DisplayResults(const std::string& product_pair,
-                        const std::vector<services::Transaction>& transactions,
-                        ActionContext& context) const;
     std::shared_ptr<services::TransactionsService> transactions_service_;
     std::shared_ptr<services::TradingService> trading_service_;
 };

@@ -1,6 +1,5 @@
 #include "actions/transaction/transaction_show_last5_action.hpp"
 
-#include "core/utils/output_formatter.hpp"
 #include "core/utils/time_utils.hpp"
 
 #include <format>
@@ -11,24 +10,43 @@ TransactionShowLast5Action::TransactionShowLast5Action(
 {
 }
 
-void TransactionShowLast5Action::Execute(ActionContext& context)
+shared_forms::EmptyForm TransactionShowLast5Action::CreateForm(ActionContext& context)
 {
-    context.output->WriteLine(utils::OutputFormatter::SectionHeader("Last 5 Transactions"));
+    return shared_forms::EmptyForm();
+}
 
-    auto transactions = transactions_service_->GetLastTransactions(5);
+utils::ServiceResult<std::vector<services::Transaction>> TransactionShowLast5Action::ExecuteService(
+    const EmptyRequest& data, ActionContext& context)
+{
+    return transactions_service_->GetLastTransactions(5);
+}
+
+void TransactionShowLast5Action::DisplayResults(
+    const utils::ServiceResult<std::vector<services::Transaction>>& result,
+    const EmptyRequest& data, ActionContext& context)
+{
+    if (!result.success || !result.data.has_value())
+    {
+        DisplayFailureHeader(result.message, context);
+        return;
+    }
+
+    const auto& transactions = *result.data;
+    DisplaySuccessHeader(context);
+
     if (transactions.empty())
     {
-        context.output->WriteLine("No transactions found.");
+        WriteLine("No transactions found.", context);
     }
     else
     {
         int index = 1;
         for (const auto& transaction : transactions)
         {
-            context.output->WriteLine(std::format("{}. {} - {} - {:.2f} @ {:.4f} - {}", index,
-                                                  transaction.product_pair, transaction.type,
-                                                  transaction.amount, transaction.price,
-                                                  utils::FormatTimestamp(transaction.timestamp)));
+            WriteLine(std::format("{}. {} - {} - {:.2f} @ {:.4f} - {}", index,
+                                  transaction.product_pair, transaction.type, transaction.amount,
+                                  transaction.price, utils::FormatTimestamp(transaction.timestamp)),
+                      context);
             ++index;
         }
     }

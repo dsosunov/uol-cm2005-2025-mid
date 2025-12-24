@@ -93,9 +93,9 @@ class TradingService
         dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
         const std::optional<utils::TimePoint>& end_date) const;
     utils::ServiceResult<GenerationData> GenerateTrades(int count) const;
-    std::set<std::string, std::less<>> GetAvailableProducts() const;
-    std::vector<std::string> GetDateSamples(dto::Timeframe timeframe,
-                                            const DateQueryOptions& options) const;
+    utils::ServiceResult<std::set<std::string, std::less<>>> GetAvailableProducts() const;
+    utils::ServiceResult<std::vector<std::string>> GetDateSamples(
+        dto::Timeframe timeframe, const DateQueryOptions& options) const;
 
   private:
     std::shared_ptr<persistence::TradingDataAdapter> adapter_;

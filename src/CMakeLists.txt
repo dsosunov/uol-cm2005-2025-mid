@@ -25,7 +25,6 @@ set(SOURCES
     core/utils/output_formatter.cpp
     core/utils/service_utils.cpp
     core/utils/date_filter.cpp
-    core/actions/action_helper.cpp
     service_container.cpp
     core/ui/io/standard_input.cpp
     core/ui/io/standard_output.cpp

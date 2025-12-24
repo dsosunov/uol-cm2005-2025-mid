@@ -1,8 +1,5 @@
 #include "actions/user/user_reset_action.hpp"
 
-#include "core/actions/action_helper.hpp"
-#include "forms/user/reset_form.hpp"
-
 #include <format>
 
 UserResetAction::UserResetAction(std::shared_ptr<services::UserService> user_service)
@@ -10,25 +7,28 @@ UserResetAction::UserResetAction(std::shared_ptr<services::UserService> user_ser
 {
 }
 
-void UserResetAction::Execute(ActionContext& context)
+user_forms::ResetForm UserResetAction::CreateForm(ActionContext& context)
 {
-    dto::UserReset data;
-    user_forms::ResetForm form(context.form_input_provider, context.output);
-
-    if (auto form_result = form.Read(data);
-        actions::ActionHelper::HandleFormCancellation(form_result, "Reset", context))
-    {
-        return;
-    }
-    auto result = user_service_->ResetPassword(data.email, data.new_password);
-    DisplayResults(result, data.email, context);
+    return user_forms::ResetForm(context.form_input_provider, context.output);
 }
-void UserResetAction::DisplayResults(const utils::ServiceResult<void>& result,
-                                     const std::string& account, ActionContext& context) const
+
+utils::ServiceResult<void> UserResetAction::ExecuteService(const dto::UserReset& data,
+                                                           ActionContext& context)
 {
-    actions::ActionHelper::DisplayResult(
-        result.success, "Password Reset", result.message, context, [&context, &account]() {
-            context.output->WriteLine(std::format("Account: {}", account));
-            context.output->WriteLine("New password has been set.");
-        });
+    return user_service_->ResetPassword(data.email, data.new_password);
+}
+
+void UserResetAction::DisplayResults(const utils::ServiceResult<void>& result,
+                                     const dto::UserReset& data, ActionContext& context)
+{
+    if (result.success)
+    {
+        DisplaySuccessHeader(context);
+        DisplayField("Account", data.email, context);
+        WriteLine("New password has been set.", context);
+    }
+    else
+    {
+        DisplayFailureHeader(result.message, context);
+    }
 }

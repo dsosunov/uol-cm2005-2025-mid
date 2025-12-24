@@ -24,10 +24,12 @@ class WalletService
     WalletService(std::shared_ptr<persistence::WalletDataAdapter> reader,
                   std::shared_ptr<data::CsvWriter> writer);
     ~WalletService() = default;
-    std::map<std::string, double, std::less<>> GetBalances(
+    utils::ServiceResult<std::map<std::string, double, std::less<>>> GetBalances(
         std::optional<int> user_id = std::nullopt) const;
-    double GetBalance(std::string_view currency, std::optional<int> user_id = std::nullopt) const;
-    double GetTotalBalanceInUSD(std::optional<int> user_id = std::nullopt) const;
+    utils::ServiceResult<double> GetBalance(std::string_view currency,
+                                            std::optional<int> user_id = std::nullopt) const;
+    utils::ServiceResult<double> GetTotalBalanceInUSD(
+        std::optional<int> user_id = std::nullopt) const;
     utils::ServiceResult<double> Deposit(std::string_view currency, double amount,
                                          std::optional<int> user_id = std::nullopt);
     utils::ServiceResult<double> Withdraw(std::string_view currency, double amount,
