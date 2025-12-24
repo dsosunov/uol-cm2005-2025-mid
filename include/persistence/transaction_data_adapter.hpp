@@ -22,6 +22,7 @@ class TransactionDataAdapter : public BaseDataAdapter<services::Transaction>
         const data::CsvRecord& record) const override;
 
   private:
+    static std::string CleanNumericField(const std::string& field);
     static data::CsvRecord TransformFromTransaction(const services::Transaction& txn);
 };
 } // namespace persistence

@@ -12,8 +12,10 @@ std::optional<TimePoint> ParseTimestamp(std::string_view str)
     {
         return std::nullopt;
     }
+
     std::tm tm = {};
     std::istringstream ss{std::string(str)};
+
     if (str.contains('/'))
     {
         char delim;
@@ -24,6 +26,7 @@ std::optional<TimePoint> ParseTimestamp(std::string_view str)
         }
         tm.tm_year -= 1900;
         tm.tm_mon -= 1;
+
         if (!ss.eof())
         {
             ss >> tm.tm_hour >> delim >> tm.tm_min >> delim >> tm.tm_sec;
@@ -53,6 +56,7 @@ std::optional<TimePoint> ParseTimestamp(std::string_view str)
     {
         return std::nullopt;
     }
+
     tm.tm_isdst = -1;
 
     auto ymd = std::chrono::year{tm.tm_year + 1900} /
@@ -69,10 +73,12 @@ std::optional<TimePoint> ParseTimestamp(std::string_view str)
 
     return std::chrono::time_point_cast<std::chrono::microseconds>(days + hms);
 }
+
 std::string FormatDate(const TimePoint& tp)
 {
     auto time = std::chrono::system_clock::to_time_t(tp);
     std::tm tm;
+
 #ifdef _WIN32
     localtime_s(&tm, &time);
 #else
@@ -80,8 +86,10 @@ std::string FormatDate(const TimePoint& tp)
 #endif
     std::ostringstream ss;
     ss << std::put_time(&tm, "%Y-%m-%d");
+
     return ss.str();
 }
+
 std::string FormatTimestamp(const TimePoint& tp)
 {
     auto time = std::chrono::system_clock::to_time_t(tp);
@@ -89,14 +97,17 @@ std::string FormatTimestamp(const TimePoint& tp)
         std::chrono::duration_cast<std::chrono::microseconds>(tp.time_since_epoch()).count() %
         1000000;
     std::tm tm;
+
 #ifdef _WIN32
     localtime_s(&tm, &time);
 #else
     localtime_r(&time, &tm);
 #endif
+
     std::ostringstream ss;
     ss << std::put_time(&tm, "%Y/%m/%d %H:%M:%S");
     ss << std::format(".{:06}", microseconds);
+
     return ss.str();
 }
 } // namespace utils

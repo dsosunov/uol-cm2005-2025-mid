@@ -14,6 +14,7 @@ WalletService::WalletService()
     balances_[1]["JPY"] = 50000.00;
     balances_[1]["CAD"] = 1500.00;
 }
+
 WalletService::WalletService(std::shared_ptr<persistence::WalletDataAdapter> reader,
                              std::shared_ptr<data::CsvWriter> writer)
     : reader_(reader), writer_(writer)
@@ -23,18 +24,22 @@ WalletService::WalletService(std::shared_ptr<persistence::WalletDataAdapter> rea
         balances_[default_user_id_] = reader_->ReadBalances(default_user_id_);
     }
 }
+
 int WalletService::GetEffectiveUserId(std::optional<int> user_id) const
 {
     return ServiceUtils::GetEffectiveUserId(user_id, default_user_id_);
 }
+
 std::map<std::string, double, std::less<>> WalletService::GetBalances(
     std::optional<int> user_id) const
 {
     int effective_id = GetEffectiveUserId(user_id);
+
     if (reader_ && !balances_.contains(effective_id))
     {
         balances_[effective_id] = reader_->ReadBalances(effective_id);
     }
+
     if (auto it = balances_.find(effective_id); it != balances_.end())
     {
         return it->second;
@@ -59,13 +64,16 @@ double WalletService::GetTotalBalanceInUSD(std::optional<int> user_id) const
     std::map<std::string, double, std::less<>> rates = {
         {"USD", 1.0},  {"EUR", 1.09}, {"GBP", 1.27}, {"JPY", 0.0067},
         {"CAD", 0.73}, {"AUD", 0.65}, {"CHF", 1.13}, {"CNY", 0.14}};
+
     int effective_id = GetEffectiveUserId(user_id);
     auto user_it = balances_.find(effective_id);
     if (user_it == balances_.end())
     {
         return 0.0;
     }
+
     double total_usd = 0.0;
+
     for (const auto& [currency, amount] : user_it->second)
     {
         auto rate_it = rates.find(currency);
@@ -97,11 +105,14 @@ utils::ServiceResult<double> WalletService::Withdraw(std::string_view currency, 
     {
         return utils::ServiceResult<double>::Failure("Amount must be positive");
     }
+
     int effective_id = GetEffectiveUserId(user_id);
+
     if (double current_balance = GetBalance(currency, user_id); current_balance < amount)
     {
         return utils::ServiceResult<double>::Failure("Insufficient balance");
     }
+
     std::string currency_str(currency);
     balances_[effective_id][currency_str] -= amount;
     double new_balance = balances_[effective_id][currency_str];

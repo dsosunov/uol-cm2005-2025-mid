@@ -8,6 +8,7 @@ CurrencyValidator::CurrencyValidator(std::set<std::string, std::less<>> allowed_
     : allowed_currencies_(std::move(allowed_currencies))
 {
 }
+
 form::ValidationResult CurrencyValidator::Validate(const std::string& value,
                                                    const form::FormContext& context) const
 {

@@ -24,8 +24,8 @@ class UserDataAdapter : public BaseDataAdapter<services::UserRecord>
     std::optional<services::UserRecord> FindByUsername(std::string_view username) const;
     bool ExistsByEmail(std::string_view email) const;
     bool ExistsByUsername(std::string_view username) const;
-    bool Insert(services::UserRecord& user);
-    bool Update(const services::UserRecord& user);
+    bool Insert(services::UserRecord& user) const;
+    bool Update(const services::UserRecord& user) const;
 
   protected:
     std::optional<services::UserRecord> TransformToEntity(

@@ -9,10 +9,12 @@ UserResetAction::UserResetAction(std::shared_ptr<services::UserService> user_ser
     : user_service_(std::move(user_service))
 {
 }
+
 void UserResetAction::Execute(ActionContext& context)
 {
     dto::UserReset data;
     user_forms::ResetForm form(context.form_input_provider, context.output);
+
     if (auto form_result = form.Read(data);
         actions::ActionHelper::HandleFormCancellation(form_result, "Reset", context))
     {

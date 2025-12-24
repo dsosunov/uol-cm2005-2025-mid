@@ -1,13 +1,16 @@
 ﻿#include "persistence/wallet_data_adapter.hpp"
+
 namespace persistence
 {
 WalletDataAdapter::WalletDataAdapter(std::shared_ptr<data::CsvReader> reader) : reader_(reader)
 {
 }
+
 bool WalletDataAdapter::IsValid() const
 {
     return reader_ && reader_->FileExists();
 }
+
 void WalletDataAdapter::ProcessBalanceRecord(const data::CsvRecord& record, int user_id,
                                              std::map<std::string, double, std::less<>>& balances)
 {
@@ -40,6 +43,7 @@ void WalletDataAdapter::ProcessBalanceRecord(const data::CsvRecord& record, int 
 std::map<std::string, double, std::less<>> WalletDataAdapter::ReadBalances(int user_id) const
 {
     std::map<std::string, double, std::less<>> balances;
+
     if (!IsValid())
     {
         return balances;
@@ -57,16 +61,19 @@ bool WalletDataAdapter::WriteBalances(data::CsvWriter& writer, int user_id,
     {
         data::CsvRecord record;
         record.fields.reserve(5);
+
         record.fields.emplace_back("");
         record.fields.emplace_back(currency);
         record.fields.emplace_back(std::to_string(user_id));
         record.fields.emplace_back("0");
         record.fields.emplace_back(std::to_string(balance));
+
         if (!writer.Write(record))
         {
             return false;
         }
     }
+
     return writer.Flush();
 }
 } // namespace persistence

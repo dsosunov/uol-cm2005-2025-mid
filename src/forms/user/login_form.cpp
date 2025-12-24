@@ -11,11 +11,13 @@ LoginForm::LoginForm(std::shared_ptr<form::FormInputProvider> input_provider,
     : form::Form(SetupFormLayout(), input_provider, output)
 {
 }
+
 std::vector<std::shared_ptr<form::Field>> LoginForm::SetupFormLayout()
 {
     std::vector<std::shared_ptr<form::Field>> fields;
     form::AddField<UsernameField>(fields);
     form::AddField<LoginPasswordField>(fields);
+
     return fields;
 }
 } // namespace user_forms

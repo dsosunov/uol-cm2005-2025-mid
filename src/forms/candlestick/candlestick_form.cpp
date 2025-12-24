@@ -16,6 +16,7 @@ CandlestickForm::CandlestickForm(std::shared_ptr<form::FormInputProvider> input_
     : form::Form(SetupFormLayout(std::move(data_provider)), input_provider, output)
 {
 }
+
 std::vector<std::shared_ptr<form::Field>> CandlestickForm::SetupFormLayout(
     std::shared_ptr<CandlestickFormDataProvider> data_provider)
 {
@@ -24,18 +25,21 @@ std::vector<std::shared_ptr<form::Field>> CandlestickForm::SetupFormLayout(
             auto timeframe = form_context.GetValue("timeframe");
             return data_provider->GetStartDates(timeframe.value_or(""));
         });
+
     auto end_date_source = std::make_shared<form::ContextualDataSource>(
         [data_provider](const form::FormContext& form_context) {
             auto timeframe = form_context.GetValue("timeframe");
             auto start_date = form_context.GetValue("start_date");
             return data_provider->GetEndDates(timeframe.value_or(""), start_date.value_or(""));
         });
+
     std::vector<std::shared_ptr<form::Field>> fields;
     form::AddField<CurrencyPairField>(fields, data_provider->GetAvailableProducts());
     form::AddField<AsksBidsField>(fields);
     form::AddField<TimeframeField>(fields);
     form::AddField<StartDateField>(fields, start_date_source);
     form::AddField<EndDateField>(fields, end_date_source);
+
     return fields;
 }
 } // namespace candlestick

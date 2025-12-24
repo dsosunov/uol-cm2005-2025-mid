@@ -10,9 +10,11 @@ TransactionShowLast5Action::TransactionShowLast5Action(
     : transactions_service_(std::move(transactions_service))
 {
 }
+
 void TransactionShowLast5Action::Execute(ActionContext& context)
 {
     context.output->WriteLine(utils::OutputFormatter::SectionHeader("Last 5 Transactions"));
+
     auto transactions = transactions_service_->GetLastTransactions(5);
     if (transactions.empty())
     {

@@ -9,6 +9,7 @@ WalletDepositAction::WalletDepositAction(std::shared_ptr<services::WalletService
     : wallet_service_(std::move(wallet_service)), trading_service_(std::move(trading_service))
 {
 }
+
 wallet_forms::WalletOperationForm WalletDepositAction::CreateForm(ActionContext& context)
 {
     auto allowed_currencies = trading_service_->GetAvailableProducts();

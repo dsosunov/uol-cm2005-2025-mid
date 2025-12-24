@@ -14,6 +14,7 @@ TransactionShowByPairAction::TransactionShowByPairAction(
       trading_service_(std::move(trading_service))
 {
 }
+
 void TransactionShowByPairAction::Execute(ActionContext& context)
 {
     auto allowed_currencies = trading_service_->GetAvailableProducts();

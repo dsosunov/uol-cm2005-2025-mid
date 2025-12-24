@@ -13,10 +13,12 @@ TransactionsService::TransactionsService(
     : adapter_(adapter)
 {
 }
+
 int TransactionsService::GetEffectiveUserId(std::optional<int> user_id) const
 {
     return ServiceUtils::GetEffectiveUserId(user_id, default_user_id_);
 }
+
 std::vector<Transaction> TransactionsService::GetLastTransactions(int count,
                                                                   std::optional<int> user_id) const
 {
@@ -80,6 +82,7 @@ ActivityStats TransactionsService::GetActivitySummary(
     int effective_id = GetEffectiveUserId(user_id);
     int total = 0;
     double total_volume = 0.0;
+
     for (const auto& transaction : transactions_)
     {
         if (transaction.user_id == effective_id)
@@ -95,7 +98,9 @@ bool TransactionsService::AddTransaction(const Transaction& transaction)
 {
     Transaction new_transaction = transaction;
     new_transaction.id = next_transaction_id_++;
+
     transactions_.push_back(new_transaction);
+
     return true;
 }
 } // namespace services

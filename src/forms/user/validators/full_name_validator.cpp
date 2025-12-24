@@ -11,15 +11,19 @@ form::ValidationResult FullNameValidator::Validate(const std::string& value,
     {
         return form::ValidationResult::Invalid("Full name cannot be empty");
     }
+
     if (value.length() < 2)
     {
         return form::ValidationResult::Invalid("Full name must be at least 2 characters");
     }
+
     if (value.length() > 100)
     {
         return form::ValidationResult::Invalid("Full name must be at most 100 characters");
     }
+
     bool has_letter = false;
+
     for (char c : value)
     {
         if (std::isalpha(c))
@@ -28,6 +32,7 @@ form::ValidationResult FullNameValidator::Validate(const std::string& value,
             break;
         }
     }
+
     if (!has_letter)
     {
         return form::ValidationResult::Invalid("Full name must contain at least one letter");

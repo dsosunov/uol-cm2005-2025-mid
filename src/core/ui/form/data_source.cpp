@@ -4,6 +4,7 @@ namespace form
 ContextualDataSource::ContextualDataSource(ProviderFunc provider) : provider_(std::move(provider))
 {
 }
+
 std::vector<DataSource::OptionPair> ContextualDataSource::GetOptions(
     const FormContext& context) const
 {

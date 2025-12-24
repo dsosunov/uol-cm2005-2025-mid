@@ -12,6 +12,7 @@ form::ValidationResult EmailOrUsernameValidator::Validate(const std::string& val
     {
         return form::ValidationResult::Invalid("Email or username cannot be empty");
     }
+
     if (value.contains('@'))
     {
         EmailValidator email_validator;

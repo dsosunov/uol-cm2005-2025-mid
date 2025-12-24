@@ -8,6 +8,7 @@ UserLoginAction::UserLoginAction(std::shared_ptr<services::UserService> user_ser
     : user_service_(std::move(user_service))
 {
 }
+
 user_forms::LoginForm UserLoginAction::CreateForm(ActionContext& context)
 {
     return user_forms::LoginForm(context.form_input_provider, context.output);

@@ -11,11 +11,13 @@ ProductPairForm::ProductPairForm(std::shared_ptr<form::FormInputProvider> input_
     : form::Form(SetupFormLayout(allowed_currencies), input_provider, output)
 {
 }
+
 std::vector<std::shared_ptr<form::Field>> ProductPairForm::SetupFormLayout(
     const std::set<std::string, std::less<>>& allowed_currencies)
 {
     std::vector<std::shared_ptr<form::Field>> fields;
     form::AddField<ProductPairField>(fields, allowed_currencies);
+
     return fields;
 }
 } // namespace transaction_forms

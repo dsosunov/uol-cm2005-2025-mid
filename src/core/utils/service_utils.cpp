@@ -1,4 +1,5 @@
 ﻿#include "core/utils/service_utils.hpp"
+
 namespace services
 {
 int ServiceUtils::GetEffectiveUserId(std::optional<int> user_id, int default_user_id)

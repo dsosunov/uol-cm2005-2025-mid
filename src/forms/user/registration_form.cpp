@@ -12,12 +12,14 @@ RegistrationForm::RegistrationForm(std::shared_ptr<form::FormInputProvider> inpu
     : form::Form(SetupFormLayout(), input_provider, output)
 {
 }
+
 std::vector<std::shared_ptr<form::Field>> RegistrationForm::SetupFormLayout()
 {
     std::vector<std::shared_ptr<form::Field>> fields;
     form::AddField<FullNameField>(fields);
     form::AddField<EmailField>(fields);
     form::AddField<PasswordField>(fields);
+
     return fields;
 }
 } // namespace user_forms

@@ -9,9 +9,11 @@ WalletViewBalanceAction::WalletViewBalanceAction(
     : wallet_service_(std::move(wallet_service))
 {
 }
+
 void WalletViewBalanceAction::Execute(ActionContext& context)
 {
     context.output->WriteLine(utils::OutputFormatter::SectionHeader("Wallet Balances"));
+
     auto balances = wallet_service_->GetBalances();
     if (balances.empty())
     {

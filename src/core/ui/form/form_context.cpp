@@ -5,6 +5,7 @@ void FormContext::SetValue(std::string_view key, std::string_view value)
 {
     values_[std::string(key)] = std::string(value);
 }
+
 std::optional<std::string> FormContext::GetValue(std::string_view key) const
 {
     if (auto it = values_.find(std::string(key)); it != values_.end())
@@ -13,6 +14,7 @@ std::optional<std::string> FormContext::GetValue(std::string_view key) const
     }
     return std::nullopt;
 }
+
 void FormContext::Clear()
 {
     values_.clear();

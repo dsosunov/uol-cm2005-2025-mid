@@ -16,6 +16,7 @@ TransactionActivitySummaryAction::TransactionActivitySummaryAction(
       trading_service_(std::move(trading_service))
 {
 }
+
 void TransactionActivitySummaryAction::Execute(ActionContext& context)
 {
     auto form_data_provider =

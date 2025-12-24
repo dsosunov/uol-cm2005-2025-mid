@@ -11,14 +11,17 @@ form::ValidationResult UsernameValidator::Validate(const std::string& value,
     {
         return form::ValidationResult::Invalid("Username cannot be empty");
     }
+
     if (value.length() < 3)
     {
         return form::ValidationResult::Invalid("Username must be at least 3 characters");
     }
+
     if (value.length() > 20)
     {
         return form::ValidationResult::Invalid("Username must be at most 20 characters");
     }
+
     for (char c : value)
     {
         if (!std::isalnum(c) && c != '_')

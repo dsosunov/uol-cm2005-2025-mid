@@ -8,6 +8,7 @@ UserRegisterAction::UserRegisterAction(std::shared_ptr<services::UserService> us
     : user_service_(std::move(user_service))
 {
 }
+
 user_forms::RegistrationForm UserRegisterAction::CreateForm(ActionContext& context)
 {
     return user_forms::RegistrationForm(context.form_input_provider, context.output);

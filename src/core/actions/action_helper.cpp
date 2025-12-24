@@ -1,4 +1,5 @@
 ﻿#include "core/actions/action_helper.hpp"
+
 namespace actions
 {
 bool ActionHelper::HandleFormCancellation(form::FormReadResult result,
@@ -17,6 +18,7 @@ void ActionHelper::DisplayResult(bool success, std::string_view operation_name,
                                  const std::function<void()>& display_data)
 {
     context.output->WriteLine("");
+
     if (success)
     {
         context.output->WriteLine(utils::OutputFormatter::SuccessHeader(operation_name));

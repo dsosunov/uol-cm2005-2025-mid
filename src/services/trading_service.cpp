@@ -26,8 +26,10 @@ void ProcessCandlestickOrder(const OrderRecord& order, std::string_view product_
 {
     if (order.product_pair != product_pair)
         return;
+
     if (!date_filter.IsInRange(order.timestamp))
         return;
+
     auto& candle = candlestick_map[order.timestamp];
     if (candle.timestamp == utils::TimePoint{})
     {
@@ -44,6 +46,7 @@ void ProcessCandlestickOrder(const OrderRecord& order, std::string_view product_
         candle.low = std::min(candle.low, order.price);
         candle.close = order.price;
     }
+
     candle.volume += order.amount;
 }
 
@@ -55,10 +58,12 @@ void ProcessSummaryOrder(const OrderRecord& order, std::string_view product_pair
     {
         return;
     }
+
     if (!date_filter.IsInRange(order.timestamp))
     {
         return;
     }
+
     std::string formatted_date = utils::FormatDate(order.timestamp);
     std::string period_key;
     if (timeframe == dto::Timeframe::Monthly && formatted_date.length() >= 7)
@@ -73,6 +78,7 @@ void ProcessSummaryOrder(const OrderRecord& order, std::string_view product_pair
     {
         period_key = formatted_date;
     }
+
     auto& stats = aggregated_data[period_key];
     stats.min_price = std::min(stats.min_price, order.price);
     stats.max_price = std::max(stats.max_price, order.price);
@@ -93,17 +99,21 @@ utils::ServiceResult<std::vector<CandlestickData>> TradingService::GetCandlestic
     std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
     std::map<utils::TimePoint, CandlestickData> candlestick_map;
     utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
+
     adapter_->ReadWithProcessor(
         order_type, [&product_pair, &date_filter, &candlestick_map](const OrderRecord& order) {
             ProcessCandlestickOrder(order, product_pair, date_filter, candlestick_map);
         });
+
     if (candlestick_map.empty())
     {
         return utils::ServiceResult<std::vector<CandlestickData>>::Failure(
             "No data found for the specified currency pair and date range");
     }
+
     std::vector<CandlestickData> candlesticks;
     candlesticks.reserve(candlestick_map.size());
+
     for (const auto& [timestamp, candle] : candlestick_map)
     {
         candlesticks.push_back(candle);
@@ -119,15 +129,18 @@ utils::ServiceResult<CandlestickSummaryData> TradingService::GetCandlestickSumma
     std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
     std::map<std::string, PeriodStats, std::less<>> aggregated_data;
     utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
+
     adapter_->ReadWithProcessor(order_type, [&product_pair, &date_filter, &timeframe,
                                              &aggregated_data](const OrderRecord& order) {
         ProcessSummaryOrder(order, product_pair, date_filter, timeframe, aggregated_data);
     });
+
     if (aggregated_data.empty())
     {
         return utils::ServiceResult<CandlestickSummaryData>::Failure(
             "No data found for the specified currency pair and date range");
     }
+
     std::vector<PeriodSummary> periods;
     periods.reserve(aggregated_data.size());
     for (const auto& [period, stats] : aggregated_data)
@@ -146,6 +159,7 @@ utils::ServiceResult<GenerationData> TradingService::GenerateTrades(int count) c
     {
         return utils::ServiceResult<GenerationData>::Failure("Count must be positive");
     }
+
     std::map<std::string, int, std::less<>> trades_by_pair = {
         {"USD/EUR", count / 3},     {"GBP/USD", count / 5},  {"USD/JPY", count / 3},
         {"EUR/GBP", count / 5},     {"CAD/USD", count / 10}, {"AUD/USD", count / 10},
@@ -162,6 +176,7 @@ utils::ServiceResult<GenerationData> TradingService::GenerateTrades(int count) c
 std::set<std::string, std::less<>> TradingService::GetAvailableProducts() const
 {
     std::set<std::string, std::less<>> currencies;
+
     adapter_->ReadWithProcessor([&currencies](const OrderRecord& order) {
         const auto& product = order.product_pair;
         size_t slash_pos = product.find('/');
@@ -177,12 +192,16 @@ std::vector<std::string> TradingService::GetDateSamples(dto::Timeframe timeframe
                                                         const DateQueryOptions& options) const
 {
     std::set<std::string, std::less<>> unique_dates;
+
     adapter_->ReadWithProcessor([&unique_dates, &options, &timeframe](const OrderRecord& order) {
         if (options.start_date.has_value() && order.timestamp < *options.start_date)
             return;
+
         if (options.end_date.has_value() && order.timestamp > *options.end_date)
             return;
+
         std::string formatted_date = utils::FormatDate(order.timestamp);
+
         if (timeframe == dto::Timeframe::Yearly && formatted_date.length() >= 4)
         {
             unique_dates.insert(formatted_date.substr(0, 4));
@@ -196,13 +215,16 @@ std::vector<std::string> TradingService::GetDateSamples(dto::Timeframe timeframe
             unique_dates.insert(formatted_date.substr(0, 10));
         }
     });
+
     if (unique_dates.empty())
     {
         return {};
     }
+
     std::vector<std::string> result(unique_dates.begin(), unique_dates.end());
     std::vector<std::string> filtered;
     int skipped = 0;
+
     for (const auto& date : result)
     {
         if (skipped < options.offset)
@@ -210,10 +232,13 @@ std::vector<std::string> TradingService::GetDateSamples(dto::Timeframe timeframe
             skipped++;
             continue;
         }
+
         filtered.push_back(date);
+
         if (options.limit.has_value() && filtered.size() >= static_cast<size_t>(*options.limit))
             break;
     }
+
     return filtered;
 }
 } // namespace services

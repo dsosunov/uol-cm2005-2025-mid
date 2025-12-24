@@ -11,6 +11,7 @@ UserService::UserService(std::shared_ptr<persistence::UserDataAdapter> adapter)
     : adapter_(std::move(adapter))
 {
 }
+
 utils::ServiceResult<User> UserService::RegisterUser(std::string_view full_name,
                                                      std::string_view email,
                                                      std::string_view password)
@@ -19,14 +20,17 @@ utils::ServiceResult<User> UserService::RegisterUser(std::string_view full_name,
     {
         return utils::ServiceResult<User>::Failure("Email already registered");
     }
+
     std::string username(email.substr(0, email.find('@')));
     std::string original_username = username;
     int suffix = 1;
+
     while (adapter_->ExistsByUsername(username))
     {
         username = std::format("{}{}", original_username, suffix);
         ++suffix;
     }
+
     UserRecord new_record{0, std::string(full_name), std::string(email), username,
                           HashPassword(password)};
     if (!adapter_->Insert(new_record))
@@ -39,15 +43,19 @@ utils::ServiceResult<User> UserService::LoginUser(std::string_view username,
                                                   std::string_view password)
 {
     size_t password_hash = HashPassword(password);
+
     auto user_record = adapter_->FindByUsername(username);
+
     if (!user_record)
     {
         user_record = adapter_->FindByEmail(username);
     }
+
     if (!user_record)
     {
         return utils::ServiceResult<User>::Failure("User not found");
     }
+
     if (user_record->password_hash != password_hash)
     {
         return utils::ServiceResult<User>::Failure("Invalid password");
@@ -59,14 +67,17 @@ utils::ServiceResult<void> UserService::ResetPassword(std::string_view email_or_
                                                       std::string_view new_password)
 {
     auto user_record = adapter_->FindByUsername(email_or_username);
+
     if (!user_record)
     {
         user_record = adapter_->FindByEmail(email_or_username);
     }
+
     if (!user_record)
     {
         return utils::ServiceResult<void>::Failure("User not found");
     }
+
     user_record->password_hash = HashPassword(new_password);
     if (!adapter_->Update(*user_record))
     {

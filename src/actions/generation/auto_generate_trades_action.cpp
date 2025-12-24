@@ -11,6 +11,7 @@ AutoGenerateTradesAction::AutoGenerateTradesAction(
     : trading_service_(std::move(trading_service))
 {
 }
+
 void AutoGenerateTradesAction::Execute(ActionContext& context)
 {
     context.output->WriteLine("");
@@ -23,7 +24,9 @@ void AutoGenerateTradesAction::Execute(ActionContext& context)
         [](const std::any&, const std::string&,
            const form::FormContext&) { /* not implemented yet */ },
         nullptr);
+
     form::FormContext emptyContext;
+
     if (auto inputOpt = context.form_input_provider->ReadField(confirmField, emptyContext);
         !inputOpt || *inputOpt == "cancel")
     {
@@ -31,6 +34,7 @@ void AutoGenerateTradesAction::Execute(ActionContext& context)
         context.output->WriteLine("Auto-generation cancelled.");
         return;
     }
+
     auto result = trading_service_->GenerateTrades(10);
     context.output->WriteLine("");
     if (result.success)

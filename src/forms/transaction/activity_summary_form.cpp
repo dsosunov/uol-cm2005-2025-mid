@@ -14,6 +14,7 @@ ActivitySummaryForm::ActivitySummaryForm(
     : form::Form(SetupFormLayout(std::move(data_provider)), input_provider, output)
 {
 }
+
 std::vector<std::shared_ptr<form::Field>> ActivitySummaryForm::SetupFormLayout(
     std::shared_ptr<ActivitySummaryFormDataProvider> data_provider)
 {

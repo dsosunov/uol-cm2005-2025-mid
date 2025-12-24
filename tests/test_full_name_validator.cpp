@@ -5,12 +5,14 @@
 
 using namespace user_forms;
 using namespace form;
+
 class FullNameValidatorTest : public ::testing::Test
 {
   protected:
     FullNameValidator validator;
     FormContext context;
 };
+
 TEST_F(FullNameValidatorTest, RejectsEmptyString)
 {
     auto result = validator.Validate("", context);

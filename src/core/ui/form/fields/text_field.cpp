@@ -7,14 +7,17 @@ TextField::TextField(std::string name, std::string prompt, ValueBinder binder,
       validator_(std::move(validator))
 {
 }
+
 const std::string& TextField::GetName() const
 {
     return name_;
 }
+
 const std::string& TextField::GetPrompt() const
 {
     return prompt_;
 }
+
 std::optional<std::string> TextField::GetValidationHint() const
 {
     if (validator_)
@@ -23,6 +26,7 @@ std::optional<std::string> TextField::GetValidationHint() const
     }
     return std::nullopt;
 }
+
 ValidationResult TextField::Validate(const std::string& value, const FormContext& context) const
 {
     if (validator_)
@@ -31,6 +35,7 @@ ValidationResult TextField::Validate(const std::string& value, const FormContext
     }
     return ValidationResult::Valid();
 }
+
 void TextField::BindValue(std::any& target, const std::string& value,
                           const FormContext& context) const
 {

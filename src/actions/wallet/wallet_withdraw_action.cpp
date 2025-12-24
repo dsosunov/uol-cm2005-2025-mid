@@ -10,6 +10,7 @@ WalletWithdrawAction::WalletWithdrawAction(
     : wallet_service_(std::move(wallet_service)), trading_service_(std::move(trading_service))
 {
 }
+
 wallet_forms::WalletOperationForm WalletWithdrawAction::CreateForm(ActionContext& context)
 {
     auto allowed_currencies = trading_service_->GetAvailableProducts();

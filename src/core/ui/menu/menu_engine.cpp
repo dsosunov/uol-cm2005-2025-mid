@@ -6,17 +6,21 @@ MenuEngine::MenuEngine(std::unique_ptr<MenuNode> root, std::shared_ptr<MenuRende
 {
     stack_.push_back(root_.get());
 }
+
 void MenuEngine::Run()
 {
     while (true)
     {
         const auto* current = stack_.back();
+
         renderer_->RenderMenu(*current);
         MenuNode* selected = input_->ReadSelection(*current);
+
         if (!selected)
         {
             return;
         }
+
         if (selected->HasChildren())
         {
             stack_.push_back(selected);

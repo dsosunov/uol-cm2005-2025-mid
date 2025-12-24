@@ -21,6 +21,7 @@ std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
     auto wallet_service = container.Resolve<services::WalletService>();
     auto transactions_service = container.Resolve<services::TransactionsService>();
     auto trading_service = container.Resolve<services::TradingService>();
+
     return MenuBuilder("Trading Platform")
         .AddLeaf("Candlestick summary", std::make_unique<CandlestickSummaryAction>(trading_service))
         .AddBranch("User")
@@ -45,12 +46,15 @@ std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
                  std::make_unique<AutoGenerateTradesAction>(trading_service))
         .Build();
 }
+
 int main()
 {
     ServiceContainer container;
     auto menu = BuildMenu(container);
     MenuEngine engine(std::move(menu), container.Resolve<MenuRenderer>(),
                       container.Resolve<MenuInput>(), container.Resolve<ActionContext>());
+
     engine.Run();
+
     return 0;
 }
