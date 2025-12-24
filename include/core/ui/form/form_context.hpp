@@ -14,8 +14,7 @@ class FormContext
     // Template overload for type-safe retrieval with automatic casting
     template <typename T> std::optional<T> GetValue(std::string_view key) const
     {
-        auto value = GetValue(key);
-        if (value.has_value())
+        if (auto value = GetValue(key); value.has_value())
         {
             try
             {
