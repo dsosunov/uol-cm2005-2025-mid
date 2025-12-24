@@ -2,6 +2,7 @@
 
 #include "core/utils/time_utils.hpp"
 
+#include <algorithm>
 #include <format>
 
 TransactionShowLast5Action::TransactionShowLast5Action(
@@ -31,7 +32,7 @@ void TransactionShowLast5Action::DisplayResults(
         return;
     }
 
-    const auto& transactions = *result.data;
+    auto transactions = *result.data;
     DisplaySuccessHeader(context);
 
     if (transactions.empty())
@@ -40,6 +41,8 @@ void TransactionShowLast5Action::DisplayResults(
     }
     else
     {
+        // Display in reverse order so newest transactions appear first
+        std::reverse(transactions.begin(), transactions.end());
         int index = 1;
         for (const auto& transaction : transactions)
         {

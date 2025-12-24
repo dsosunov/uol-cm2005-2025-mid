@@ -1,25 +1,25 @@
 ﻿#pragma once
 #include "core/actions/form_based_action.hpp"
 #include "dto/transaction_query.hpp"
-#include "forms/transaction/product_pair_form.hpp"
+#include "forms/transaction/currency_form.hpp"
 #include "services/trading_service.hpp"
 #include "services/transactions_service.hpp"
 
 #include <memory>
 #include <vector>
 
-class TransactionShowByPairAction
+class TransactionShowByCurrencyAction
     : public actions::FormBasedAction<
-          transaction_forms::ProductPairForm, dto::TransactionQuery,
+          transaction_forms::CurrencyForm, dto::TransactionQuery,
           utils::ServiceResult<std::vector<services::WalletTransaction>>>
 {
   public:
-    explicit TransactionShowByPairAction(
+    explicit TransactionShowByCurrencyAction(
         std::shared_ptr<services::TransactionsService> transactions_service,
         std::shared_ptr<services::TradingService> trading_service);
 
   protected:
-    transaction_forms::ProductPairForm CreateForm(ActionContext& context) override;
+    transaction_forms::CurrencyForm CreateForm(ActionContext& context) override;
     utils::ServiceResult<std::vector<services::WalletTransaction>> ExecuteService(
         const dto::TransactionQuery& data, ActionContext& context) override;
     void DisplayResults(

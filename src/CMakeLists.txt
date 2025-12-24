@@ -8,7 +8,7 @@ set(SOURCES
     actions/wallet/wallet_deposit_action.cpp
     actions/wallet/wallet_withdraw_action.cpp
     actions/transaction/transaction_show_last5_action.cpp
-    actions/transaction/transaction_show_by_pair_action.cpp
+    actions/transaction/transaction_show_by_currency_action.cpp
     actions/transaction/transaction_activity_summary_action.cpp
     actions/generation/auto_generate_trades_action.cpp
     services/user_service.cpp
@@ -41,10 +41,12 @@ set(SOURCES
     core/ui/form/fields/text_field.cpp
     core/ui/form/fields/selection_field.cpp
     forms/shared/validators/currency_pair_validator.cpp
+    forms/shared/validators/currency_validator.cpp
     forms/shared/fields/timeframe_field.cpp
     forms/shared/fields/date_fields.cpp
     forms/shared/fields/password_field.cpp
     forms/shared/fields/product_pair_field.cpp
+    forms/shared/fields/currency_field.cpp
     forms/candlestick/fields/currency_pair_field.cpp
     forms/candlestick/fields/asks_bids_field.cpp
     forms/candlestick/fields/timeframe_field.cpp
@@ -71,10 +73,11 @@ set(SOURCES
     forms/wallet/validators/amount_validator.cpp
     forms/wallet/wallet_operation_form.cpp
     forms/transaction/fields/product_pair_field.cpp
+    forms/transaction/fields/currency_field.cpp
     forms/transaction/fields/timeframe_field.cpp
     forms/transaction/fields/start_date_field.cpp
     forms/transaction/fields/end_date_field.cpp
-    forms/transaction/product_pair_form.cpp
+    forms/transaction/currency_form.cpp
     forms/transaction/activity_summary_form.cpp
     forms/transaction/activity_summary_form_data_provider.cpp
 )

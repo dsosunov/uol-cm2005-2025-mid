@@ -26,14 +26,18 @@ utils::ServiceResult<std::vector<WalletTransaction>> TransactionsService::GetLas
 {
     int effective_id = GetEffectiveUserId(user_id);
     std::vector<WalletTransaction> result;
-    result.reserve(count);
 
-    // Read from end of file backwards until we collect enough transactions for this user
-    adapter_->ReadReverseWithProcessor(
+    // Read all transactions and keep only the last N for this user (sliding window)
+    adapter_->ReadWithProcessor(
         [&result, effective_id, count](const WalletTransaction& transaction) {
-            if (transaction.user_id == effective_id && result.size() < static_cast<size_t>(count))
+            if (transaction.user_id == effective_id)
             {
                 result.push_back(transaction);
+                // Keep only the last N transactions
+                if (result.size() > static_cast<size_t>(count))
+                {
+                    result.erase(result.begin());
+                }
             }
         });
 

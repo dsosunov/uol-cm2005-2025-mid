@@ -8,7 +8,7 @@ namespace transaction_forms
 
 ProductPairField::ProductPairField(std::set<std::string, std::less<>> allowed_currencies)
     : forms::shared::ProductPairField<dto::TransactionQuery>(std::move(allowed_currencies),
-                                                             &dto::TransactionQuery::product_pair)
+                                                             &dto::TransactionQuery::currency)
 {
 }
 

@@ -1,10 +1,10 @@
-#include "actions/transaction/transaction_show_by_pair_action.hpp"
+#include "actions/transaction/transaction_show_by_currency_action.hpp"
 
 #include "core/utils/time_utils.hpp"
 
 #include <format>
 
-TransactionShowByPairAction::TransactionShowByPairAction(
+TransactionShowByCurrencyAction::TransactionShowByCurrencyAction(
     std::shared_ptr<services::TransactionsService> transactions_service,
     std::shared_ptr<services::TradingService> trading_service)
     : transactions_service_(std::move(transactions_service)),
@@ -12,7 +12,7 @@ TransactionShowByPairAction::TransactionShowByPairAction(
 {
 }
 
-transaction_forms::ProductPairForm TransactionShowByPairAction::CreateForm(ActionContext& context)
+transaction_forms::CurrencyForm TransactionShowByCurrencyAction::CreateForm(ActionContext& context)
 {
     auto result = trading_service_->GetAvailableProducts();
     std::set<std::string, std::less<>> allowed_currencies;
@@ -20,17 +20,17 @@ transaction_forms::ProductPairForm TransactionShowByPairAction::CreateForm(Actio
     {
         allowed_currencies = *result.data;
     }
-    return transaction_forms::ProductPairForm(context.form_input_provider, context.output,
-                                              allowed_currencies);
+    return transaction_forms::CurrencyForm(context.form_input_provider, context.output,
+                                           allowed_currencies);
 }
 
-utils::ServiceResult<std::vector<services::WalletTransaction>> TransactionShowByPairAction::
+utils::ServiceResult<std::vector<services::WalletTransaction>> TransactionShowByCurrencyAction::
     ExecuteService(const dto::TransactionQuery& data, ActionContext& context)
 {
-    return transactions_service_->GetTransactionsByCurrency(data.product_pair);
+    return transactions_service_->GetTransactionsByCurrency(data.currency);
 }
 
-void TransactionShowByPairAction::DisplayResults(
+void TransactionShowByCurrencyAction::DisplayResults(
     const utils::ServiceResult<std::vector<services::WalletTransaction>>& result,
     const dto::TransactionQuery& data, ActionContext& context)
 {
@@ -42,12 +42,12 @@ void TransactionShowByPairAction::DisplayResults(
 
     const auto& transactions = *result.data;
     DisplaySuccessHeader(context);
-    DisplayField("Product Pair", data.product_pair, context);
+    DisplayField("Currency", data.currency, context);
     WriteEmptyLine(context);
 
     if (transactions.empty())
     {
-        WriteLine("No transactions found for this product pair.", context);
+        WriteLine("No transactions found for this currency.", context);
     }
     else
     {

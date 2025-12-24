@@ -1,7 +1,7 @@
 ﻿#include "actions/generation/auto_generate_trades_action.hpp"
 #include "actions/summary/candlestick_summary_action.hpp"
 #include "actions/transaction/transaction_activity_summary_action.hpp"
-#include "actions/transaction/transaction_show_by_pair_action.hpp"
+#include "actions/transaction/transaction_show_by_currency_action.hpp"
 #include "actions/transaction/transaction_show_last5_action.hpp"
 #include "actions/user/user_login_action.hpp"
 #include "actions/user/user_register_action.hpp"
@@ -36,10 +36,10 @@ std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
         .Parent()
         .AddBranch("Transactions")
         .AddLeaf("Show last 5", std::make_unique<TransactionShowLast5Action>(transactions_service))
-        .AddLeaf("Show by product pair", std::make_unique<TransactionShowByPairAction>(
-                                             transactions_service, trading_service))
-        .AddLeaf("Show activity summary", std::make_unique<TransactionActivitySummaryAction>(
-                                              transactions_service, trading_service))
+        .AddLeaf("Show by currency", std::make_unique<TransactionShowByCurrencyAction>(
+                                         transactions_service, trading_service))
+        .AddLeaf("Show summary", std::make_unique<TransactionActivitySummaryAction>(
+                                     transactions_service, trading_service))
         .Parent()
         .AddLeaf("Auto-generate trades",
                  std::make_unique<AutoGenerateTradesAction>(trading_service))

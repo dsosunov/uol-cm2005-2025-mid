@@ -4,6 +4,6 @@ namespace dto
 {
 struct TransactionQuery
 {
-    std::string product_pair;
+    std::string currency;
 };
 } // namespace dto

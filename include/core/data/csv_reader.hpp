@@ -52,45 +52,24 @@ class CsvReader
             return;
         }
 
-        std::ifstream file(file_path_, std::ios::ate | std::ios::binary);
+        // Read all lines first, then process in reverse
+        std::ifstream file(file_path_);
         if (!file.is_open())
         {
             return;
         }
 
-        std::streampos file_size = file.tellg();
-        if (file_size == 0)
-        {
-            return;
-        }
-
         std::vector<std::string> lines;
-        std::streamoff pos = static_cast<std::streamoff>(file_size);
-
-        while (pos > 0)
+        std::string line;
+        while (std::getline(file, line))
         {
-            --pos;
-            file.seekg(pos);
-
-            char ch;
-            file.get(ch);
-
-            if (ch == '\n' || pos == 0)
+            if (!line.empty())
             {
-                std::streamoff line_start = (ch == '\n' && pos > 0) ? pos + 1 : pos;
-                file.seekg(line_start);
-
-                std::string current_line;
-                std::getline(file, current_line);
-
-                if (!current_line.empty() || ch == '\n')
-                {
-                    lines.push_back(std::move(current_line));
-                }
+                lines.push_back(line);
             }
         }
 
-        // Process all lines in reverse order (last line first)
+        // Process lines in reverse order (last line first)
         for (auto it = lines.rbegin(); it != lines.rend(); ++it)
         {
             auto record_opt = ParseRecord(*it);

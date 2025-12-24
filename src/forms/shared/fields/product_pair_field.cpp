@@ -19,7 +19,7 @@ CandlestickProductPairField::CandlestickProductPairField(
 template <typename TDTO>
 ProductPairField<TDTO>::ProductPairField(std::set<std::string, std::less<>> allowed_currencies,
                                          MemberPtr member_ptr)
-    : form::TextField("product_pair", "Product pair",
+    : form::TextField("product_pair", "Currency",
                       form::SimpleFieldBinder<TDTO, std::string>(member_ptr),
                       std::make_shared<CurrencyPairValidator>(std::move(allowed_currencies)))
 {

@@ -33,7 +33,6 @@ struct ActivityStats
 class TransactionsService
 {
   public:
-    TransactionsService() = default;
     explicit TransactionsService(std::shared_ptr<persistence::TransactionDataAdapter> adapter);
     ~TransactionsService() = default;
     utils::ServiceResult<std::vector<WalletTransaction>> GetLastTransactions(
