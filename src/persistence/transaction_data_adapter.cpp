@@ -7,6 +7,7 @@
 
 namespace persistence
 {
+
 TransactionDataAdapter::TransactionDataAdapter(std::shared_ptr<data::CsvReader> reader)
     : BaseDataAdapter<services::Transaction>(reader)
 {
@@ -96,6 +97,7 @@ std::optional<services::Transaction> TransactionDataAdapter::TransformToEntity(
         {
             return std::nullopt;
         }
+
         txn.price = std::stod(clean_price);
         txn.amount = std::stod(clean_amount);
 
@@ -110,4 +112,5 @@ std::optional<services::Transaction> TransactionDataAdapter::TransformToEntity(
         return std::nullopt;
     }
 }
+
 } // namespace persistence

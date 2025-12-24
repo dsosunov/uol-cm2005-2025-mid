@@ -6,6 +6,7 @@
 
 namespace forms::shared
 {
+
 CurrencyPairValidator::CurrencyPairValidator(std::set<std::string, std::less<>> allowed_currencies)
     : allowed_currencies_(std::move(allowed_currencies))
 {
@@ -35,10 +36,13 @@ form::ValidationResult CurrencyPairValidator::Validate(const std::string& value,
     {
         return form::ValidationResult::Invalid(std::format("Unknown currency: {}", second));
     }
+
     return form::ValidationResult::Valid();
 }
+
 std::optional<std::string> CurrencyPairValidator::GetHint() const
 {
     return "Enter currency pair in format CUR1/CUR2 (e.g., USD/CAD)";
 }
+
 } // namespace forms::shared

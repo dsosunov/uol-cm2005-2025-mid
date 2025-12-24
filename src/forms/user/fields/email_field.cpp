@@ -6,6 +6,7 @@
 
 namespace user_forms
 {
+
 EmailField::EmailField()
     : form::TextField("email", "Email",
                       form::SimpleFieldBinder<dto::UserRegistration, std::string>(
@@ -13,4 +14,5 @@ EmailField::EmailField()
                       form::ValidatorFactory::Email())
 {
 }
+
 } // namespace user_forms

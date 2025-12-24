@@ -6,6 +6,7 @@
 
 namespace user_forms
 {
+
 EmailOrUsernameField::EmailOrUsernameField()
     : form::TextField(
           "email_or_username", "Email or username",
@@ -13,4 +14,5 @@ EmailOrUsernameField::EmailOrUsernameField()
           form::ValidatorFactory::EmailOrUsername())
 {
 }
+
 } // namespace user_forms

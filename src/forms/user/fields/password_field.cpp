@@ -5,9 +5,11 @@
 
 namespace user_forms
 {
+
 PasswordField::PasswordField()
     : forms::shared::PasswordField<dto::UserRegistration>("password", "Password",
                                                           &dto::UserRegistration::password)
 {
 }
+
 } // namespace user_forms

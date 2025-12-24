@@ -5,6 +5,7 @@
 
 namespace user_forms
 {
+
 form::ValidationResult EmailOrUsernameValidator::Validate(const std::string& value,
                                                           const form::FormContext& context) const
 {
@@ -24,8 +25,10 @@ form::ValidationResult EmailOrUsernameValidator::Validate(const std::string& val
         return username_validator.Validate(value, context);
     }
 }
+
 std::optional<std::string> EmailOrUsernameValidator::GetHint() const
 {
     return "Enter a valid email address or username (3-20 alphanumeric characters or underscores)";
 }
+
 } // namespace user_forms

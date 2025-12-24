@@ -5,9 +5,11 @@
 
 namespace user_forms
 {
+
 NewPasswordField::NewPasswordField()
     : forms::shared::PasswordField<dto::UserReset>("new_password", "New password",
                                                    &dto::UserReset::new_password)
 {
 }
+
 } // namespace user_forms

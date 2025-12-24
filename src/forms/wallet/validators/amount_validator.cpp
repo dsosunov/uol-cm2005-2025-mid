@@ -5,6 +5,7 @@
 
 namespace wallet_forms
 {
+
 form::ValidationResult AmountValidator::Validate(const std::string& value,
                                                  const form::FormContext& context) const
 {
@@ -69,10 +70,13 @@ form::ValidationResult AmountValidator::Validate(const std::string& value,
     {
         return form::ValidationResult::Invalid("Invalid amount format");
     }
+
     return form::ValidationResult::Valid();
 }
+
 std::optional<std::string> AmountValidator::GetHint() const
 {
     return "Enter a positive number with up to 8 decimal places";
 }
+
 } // namespace wallet_forms

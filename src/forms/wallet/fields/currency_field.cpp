@@ -6,6 +6,7 @@
 
 namespace wallet_forms
 {
+
 CurrencyField::CurrencyField(std::set<std::string, std::less<>> allowed_currencies)
     : form::TextField("currency", "Currency",
                       form::SimpleFieldBinder<dto::WalletOperation, std::string>(
@@ -13,4 +14,5 @@ CurrencyField::CurrencyField(std::set<std::string, std::less<>> allowed_currenci
                       std::make_shared<CurrencyValidator>(std::move(allowed_currencies)))
 {
 }
+
 } // namespace wallet_forms

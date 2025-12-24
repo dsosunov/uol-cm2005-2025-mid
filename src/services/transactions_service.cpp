@@ -8,6 +8,7 @@
 
 namespace services
 {
+
 TransactionsService::TransactionsService(
     std::shared_ptr<persistence::TransactionDataAdapter> adapter)
     : adapter_(adapter)
@@ -44,8 +45,10 @@ std::vector<Transaction> TransactionsService::GetLastTransactions(int count,
             }
         }
     }
+
     return result;
 }
+
 std::vector<Transaction> TransactionsService::GetTransactionsByPair(
     std::string_view product_pair, std::optional<int> user_id) const
 {
@@ -71,8 +74,10 @@ std::vector<Transaction> TransactionsService::GetTransactionsByPair(
             }
         }
     }
+
     return result;
 }
+
 ActivityStats TransactionsService::GetActivitySummary(
     [[maybe_unused]] dto::Timeframe timeframe,
     [[maybe_unused]] const std::optional<utils::TimePoint>& start_date,
@@ -91,9 +96,12 @@ ActivityStats TransactionsService::GetActivitySummary(
             total_volume += transaction.amount * transaction.price;
         }
     }
+
     double average = (total > 0) ? (total_volume / total) : 0.0;
+
     return {total, total_volume, average};
 }
+
 bool TransactionsService::AddTransaction(const Transaction& transaction)
 {
     Transaction new_transaction = transaction;
@@ -103,4 +111,5 @@ bool TransactionsService::AddTransaction(const Transaction& transaction)
 
     return true;
 }
+
 } // namespace services

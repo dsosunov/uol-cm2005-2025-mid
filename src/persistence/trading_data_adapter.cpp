@@ -8,6 +8,7 @@
 
 namespace persistence
 {
+
 TradingDataAdapter::TradingDataAdapter(std::shared_ptr<data::CsvReader> reader)
     : BaseDataAdapter<services::OrderRecord>(reader)
 {
@@ -76,6 +77,7 @@ std::optional<services::OrderRecord> TradingDataAdapter::TransformToEntity(
         {
             return std::nullopt;
         }
+
         order.price = std::stod(clean_price);
         order.amount = std::stod(clean_amount);
 
@@ -100,6 +102,7 @@ data::CsvRecord TradingDataAdapter::TransformFromOrderRecord(const services::Ord
     record.fields.push_back(order.product_pair);
 
     std::string order_type_str{dto::OrderTypeToString(order.order_type)};
+
     if (!order_type_str.empty() && order_type_str.back() == 's')
     {
         order_type_str.pop_back();
@@ -118,4 +121,5 @@ std::string TradingDataAdapter::CleanNumericField(const std::string& field)
     std::erase_if(cleaned, [](char c) { return !std::isdigit(c) && c != '.' && c != '-'; });
     return cleaned;
 }
+
 } // namespace persistence

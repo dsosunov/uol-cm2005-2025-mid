@@ -6,6 +6,7 @@
 
 namespace user_forms
 {
+
 UsernameField::UsernameField()
     : form::TextField(
           "username", "Username",
@@ -13,4 +14,5 @@ UsernameField::UsernameField()
           form::ValidatorFactory::Username())
 {
 }
+
 } // namespace user_forms

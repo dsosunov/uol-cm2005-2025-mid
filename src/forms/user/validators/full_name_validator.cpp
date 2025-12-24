@@ -4,6 +4,7 @@
 
 namespace user_forms
 {
+
 form::ValidationResult FullNameValidator::Validate(const std::string& value,
                                                    const form::FormContext& context) const
 {
@@ -37,10 +38,13 @@ form::ValidationResult FullNameValidator::Validate(const std::string& value,
     {
         return form::ValidationResult::Invalid("Full name must contain at least one letter");
     }
+
     return form::ValidationResult::Valid();
 }
+
 std::optional<std::string> FullNameValidator::GetHint() const
 {
     return "Full name must be 2-100 characters and contain at least one letter";
 }
+
 } // namespace user_forms

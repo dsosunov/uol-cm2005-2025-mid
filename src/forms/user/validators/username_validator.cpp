@@ -4,6 +4,7 @@
 
 namespace user_forms
 {
+
 form::ValidationResult UsernameValidator::Validate(const std::string& value,
                                                    const form::FormContext& context) const
 {
@@ -30,10 +31,13 @@ form::ValidationResult UsernameValidator::Validate(const std::string& value,
                 "Username can only contain letters, numbers, and underscores");
         }
     }
+
     return form::ValidationResult::Valid();
 }
+
 std::optional<std::string> UsernameValidator::GetHint() const
 {
     return "3-20 characters, letters, numbers, and underscores only";
 }
+
 } // namespace user_forms

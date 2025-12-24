@@ -6,6 +6,7 @@
 
 namespace wallet_forms
 {
+
 AmountField::AmountField()
     : form::TextField(
           "amount", "Amount",
@@ -13,4 +14,5 @@ AmountField::AmountField()
           form::ValidatorFactory::Amount())
 {
 }
+
 } // namespace wallet_forms

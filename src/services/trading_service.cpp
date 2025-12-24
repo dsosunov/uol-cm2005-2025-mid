@@ -66,6 +66,7 @@ void ProcessSummaryOrder(const OrderRecord& order, std::string_view product_pair
 
     std::string formatted_date = utils::FormatDate(order.timestamp);
     std::string period_key;
+
     if (timeframe == dto::Timeframe::Monthly && formatted_date.length() >= 7)
     {
         period_key = formatted_date.substr(0, 7);
@@ -85,12 +86,14 @@ void ProcessSummaryOrder(const OrderRecord& order, std::string_view product_pair
     stats.total_volume += order.amount;
     stats.count++;
 }
+
 } // namespace
 
 TradingService::TradingService(std::shared_ptr<persistence::TradingDataAdapter> adapter)
     : adapter_(adapter)
 {
 }
+
 utils::ServiceResult<std::vector<CandlestickData>> TradingService::GetCandlestickData(
     std::string_view currency_base, std::string_view currency_quote, dto::OrderType order_type,
     [[maybe_unused]] dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
@@ -118,9 +121,11 @@ utils::ServiceResult<std::vector<CandlestickData>> TradingService::GetCandlestic
     {
         candlesticks.push_back(candle);
     }
+
     return utils::ServiceResult<std::vector<CandlestickData>>::Success(candlesticks,
                                                                        "Data retrieved from CSV");
 }
+
 utils::ServiceResult<CandlestickSummaryData> TradingService::GetCandlestickSummary(
     std::string_view currency_base, std::string_view currency_quote, dto::OrderType order_type,
     dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
@@ -148,11 +153,14 @@ utils::ServiceResult<CandlestickSummaryData> TradingService::GetCandlestickSumma
         periods.emplace_back(period, stats.min_price, stats.max_price, stats.total_volume,
                              stats.total_volume / stats.count, stats.count);
     }
+
     CandlestickSummaryData data{
         periods, std::string(currency_base) + "/" + std::string(currency_quote), timeframe};
+
     return utils::ServiceResult<CandlestickSummaryData>::Success(data,
                                                                  "Summary generated successfully");
 }
+
 utils::ServiceResult<GenerationData> TradingService::GenerateTrades(int count) const
 {
     if (count <= 0)
@@ -164,15 +172,19 @@ utils::ServiceResult<GenerationData> TradingService::GenerateTrades(int count) c
         {"USD/EUR", count / 3},     {"GBP/USD", count / 5},  {"USD/JPY", count / 3},
         {"EUR/GBP", count / 5},     {"CAD/USD", count / 10}, {"AUD/USD", count / 10},
         {"USD/CHF", count / 10 + 1}};
+
     int total_generated = 0;
     for (const auto& [pair, cnt] : trades_by_pair)
     {
         total_generated += cnt;
     }
+
     double total_volume = count * 5000.0;
     GenerationData data{count, trades_by_pair, total_volume};
+
     return utils::ServiceResult<GenerationData>::Success(data, "Trades generated successfully");
 }
+
 std::set<std::string, std::less<>> TradingService::GetAvailableProducts() const
 {
     std::set<std::string, std::less<>> currencies;
@@ -180,14 +192,17 @@ std::set<std::string, std::less<>> TradingService::GetAvailableProducts() const
     adapter_->ReadWithProcessor([&currencies](const OrderRecord& order) {
         const auto& product = order.product_pair;
         size_t slash_pos = product.find('/');
+
         if (slash_pos != std::string::npos)
         {
             currencies.insert(product.substr(0, slash_pos));
             currencies.insert(product.substr(slash_pos + 1));
         }
     });
+
     return currencies;
 }
+
 std::vector<std::string> TradingService::GetDateSamples(dto::Timeframe timeframe,
                                                         const DateQueryOptions& options) const
 {
@@ -241,4 +256,5 @@ std::vector<std::string> TradingService::GetDateSamples(dto::Timeframe timeframe
 
     return filtered;
 }
+
 } // namespace services

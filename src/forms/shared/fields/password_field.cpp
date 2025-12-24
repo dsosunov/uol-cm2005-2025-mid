@@ -8,6 +8,7 @@
 
 namespace forms::shared
 {
+
 template <typename TDTO>
 PasswordField<TDTO>::PasswordField(const std::string& field_name, const std::string& prompt,
                                    MemberPtr member_ptr)
@@ -15,7 +16,9 @@ PasswordField<TDTO>::PasswordField(const std::string& field_name, const std::str
                       form::ValidatorFactory::Password())
 {
 }
+
 template class PasswordField<dto::UserRegistration>;
 template class PasswordField<dto::UserLogin>;
 template class PasswordField<dto::UserReset>;
+
 } // namespace forms::shared

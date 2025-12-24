@@ -4,8 +4,10 @@
 
 namespace candlestick
 {
+
 CurrencyPairField::CurrencyPairField(std::set<std::string, std::less<>> allowed_currencies)
     : forms::shared::CandlestickProductPairField(std::move(allowed_currencies))
 {
 }
+
 } // namespace candlestick

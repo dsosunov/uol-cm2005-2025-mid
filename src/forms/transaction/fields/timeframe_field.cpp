@@ -5,8 +5,10 @@
 
 namespace transaction_forms
 {
+
 TimeframeField::TimeframeField()
     : forms::shared::TimeframeField<dto::ActivitySummary>(&dto::ActivitySummary::timeframe)
 {
 }
+
 } // namespace transaction_forms

@@ -6,6 +6,7 @@
 
 namespace user_forms
 {
+
 FullNameField::FullNameField()
     : form::TextField("full_name", "Full name",
                       form::SimpleFieldBinder<dto::UserRegistration, std::string>(
@@ -13,4 +14,5 @@ FullNameField::FullNameField()
                       form::ValidatorFactory::FullName())
 {
 }
+
 } // namespace user_forms

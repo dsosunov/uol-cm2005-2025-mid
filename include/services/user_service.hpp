@@ -34,10 +34,10 @@ class UserService
     explicit UserService(std::shared_ptr<persistence::UserDataAdapter> adapter);
     ~UserService() = default;
     utils::ServiceResult<User> RegisterUser(std::string_view full_name, std::string_view email,
-                                            std::string_view password);
+                                            std::string_view password) const;
     utils::ServiceResult<User> LoginUser(std::string_view username, std::string_view password);
     utils::ServiceResult<void> ResetPassword(std::string_view email_or_username,
-                                             std::string_view new_password);
+                                             std::string_view new_password) const;
     std::optional<User> GetCurrentUser() const;
     void Logout();
     bool IsLoggedIn() const;

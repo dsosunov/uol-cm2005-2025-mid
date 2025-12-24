@@ -6,6 +6,7 @@
 
 namespace candlestick
 {
+
 AsksBidsField::AsksBidsField()
     : form::SelectionField(
           "order_type", "Select data type",
@@ -14,4 +15,5 @@ AsksBidsField::AsksBidsField()
           form::OrderTypeFieldBinder<dto::CandlestickQuery>(&dto::CandlestickQuery::order_type))
 {
 }
+
 } // namespace candlestick

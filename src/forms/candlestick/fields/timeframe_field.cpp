@@ -5,8 +5,10 @@
 
 namespace candlestick
 {
+
 TimeframeField::TimeframeField()
     : forms::shared::TimeframeField<dto::CandlestickQuery>(&dto::CandlestickQuery::timeframe)
 {
 }
+
 } // namespace candlestick

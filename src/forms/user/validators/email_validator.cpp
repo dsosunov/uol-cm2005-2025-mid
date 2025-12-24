@@ -2,6 +2,7 @@
 
 namespace user_forms
 {
+
 form::ValidationResult EmailValidator::Validate(const std::string& value,
                                                 const form::FormContext& context) const
 {
@@ -21,10 +22,13 @@ form::ValidationResult EmailValidator::Validate(const std::string& value,
     {
         return form::ValidationResult::Invalid("Invalid email format");
     }
+
     return form::ValidationResult::Valid();
 }
+
 std::optional<std::string> EmailValidator::GetHint() const
 {
     return "Valid email format (e.g., user@example.com)";
 }
+
 } // namespace user_forms

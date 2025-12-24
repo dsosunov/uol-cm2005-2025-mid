@@ -8,6 +8,7 @@
 
 namespace forms::shared
 {
+
 template <typename TDTO>
 TimeframeField<TDTO>::TimeframeField(MemberPtr member_ptr)
     : form::SelectionField(
@@ -17,6 +18,8 @@ TimeframeField<TDTO>::TimeframeField(MemberPtr member_ptr)
           form::TimeframeFieldBinder<TDTO>(member_ptr))
 {
 }
+
 template class TimeframeField<dto::CandlestickQuery>;
 template class TimeframeField<dto::ActivitySummary>;
+
 } // namespace forms::shared

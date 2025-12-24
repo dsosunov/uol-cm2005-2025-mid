@@ -7,6 +7,7 @@
 
 namespace persistence
 {
+
 UserDataAdapter::UserDataAdapter(std::shared_ptr<data::CsvReader> reader,
                                  std::shared_ptr<data::CsvWriter> writer)
     : BaseDataAdapter<services::UserRecord>(reader), writer_(std::move(writer))
@@ -165,4 +166,5 @@ int UserDataAdapter::GetNextId() const
 
     return max_id + 1;
 }
+
 } // namespace persistence

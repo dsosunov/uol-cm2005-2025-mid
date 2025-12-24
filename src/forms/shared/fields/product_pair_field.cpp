@@ -8,12 +8,14 @@
 
 namespace forms::shared
 {
+
 CandlestickProductPairField::CandlestickProductPairField(
     std::set<std::string, std::less<>> allowed_currencies)
     : form::TextField("product_pair", "Currency pair", CurrencyPairBinder<dto::CandlestickQuery>(),
                       std::make_shared<CurrencyPairValidator>(std::move(allowed_currencies)))
 {
 }
+
 template <typename TDTO>
 ProductPairField<TDTO>::ProductPairField(std::set<std::string, std::less<>> allowed_currencies,
                                          MemberPtr member_ptr)
@@ -22,5 +24,7 @@ ProductPairField<TDTO>::ProductPairField(std::set<std::string, std::less<>> allo
                       std::make_shared<CurrencyPairValidator>(std::move(allowed_currencies)))
 {
 }
+
 template class ProductPairField<dto::TransactionQuery>;
+
 } // namespace forms::shared

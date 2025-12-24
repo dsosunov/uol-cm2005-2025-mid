@@ -2,6 +2,7 @@
 
 namespace persistence
 {
+
 WalletDataAdapter::WalletDataAdapter(std::shared_ptr<data::CsvReader> reader) : reader_(reader)
 {
 }
@@ -52,8 +53,10 @@ std::map<std::string, double, std::less<>> WalletDataAdapter::ReadBalances(int u
     reader_->ReadWithProcessor([&balances, user_id](const data::CsvRecord& record) {
         ProcessBalanceRecord(record, user_id, balances);
     });
+
     return balances;
 }
+
 bool WalletDataAdapter::WriteBalances(data::CsvWriter& writer, int user_id,
                                       const std::map<std::string, double, std::less<>>& balances)
 {
@@ -76,4 +79,5 @@ bool WalletDataAdapter::WriteBalances(data::CsvWriter& writer, int user_id,
 
     return writer.Flush();
 }
+
 } // namespace persistence
