@@ -1,17 +1,19 @@
 ﻿#pragma once
 #include "core/utils/time_utils.hpp"
 #include "dto/constants.hpp"
-#include <string>
+
 #include <optional>
+#include <string>
+
 namespace dto
 {
-  struct CandlestickQuery
-  {
+struct CandlestickQuery
+{
     std::string currency_base;
     std::string currency_quote;
     OrderType order_type;
     Timeframe timeframe;
     std::optional<utils::TimePoint> start_date;
     std::optional<utils::TimePoint> end_date;
-  };
-}
+};
+} // namespace dto

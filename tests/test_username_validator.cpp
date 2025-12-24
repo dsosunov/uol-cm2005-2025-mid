@@ -1,11 +1,13 @@
-﻿#include <gtest/gtest.h>
+﻿#include "core/ui/form/form_context.hpp"
 #include "forms/user/validators/username_validator.hpp"
-#include "core/ui/form/form_context.hpp"
+
+#include <gtest/gtest.h>
+
 using namespace user_forms;
 using namespace form;
 class UsernameValidatorTest : public ::testing::Test
 {
-protected:
+  protected:
     UsernameValidator validator;
     FormContext context;
 };

@@ -2,9 +2,9 @@
 #include <string>
 namespace dto
 {
-  struct WalletOperation
-  {
+struct WalletOperation
+{
     std::string currency;
     std::string amount;
-  };
-}
+};
+} // namespace dto

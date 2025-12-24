@@ -1,4 +1,5 @@
 ﻿#include "service_container.hpp"
+
 #include "core/actions/action_context.hpp"
 #include "core/data/csv_reader.hpp"
 #include "core/ui/form/menu_form_input_provider.hpp"
@@ -12,13 +13,15 @@
 #include "services/transactions_service.hpp"
 #include "services/user_service.hpp"
 #include "services/wallet_service.hpp"
+
 ServiceContainer::ServiceContainer()
 {
     auto csv_reader = std::make_shared<data::CsvReader>("data/20200317.csv");
     auto trading_adapter = std::make_shared<persistence::TradingDataAdapter>(csv_reader);
     auto user_csv_reader = std::make_shared<data::CsvReader>("data/users.csv");
     auto user_csv_writer = std::make_shared<data::CsvWriter>("data/users.csv", false);
-    auto user_adapter = std::make_shared<persistence::UserDataAdapter>(user_csv_reader, user_csv_writer);
+    auto user_adapter =
+        std::make_shared<persistence::UserDataAdapter>(user_csv_reader, user_csv_writer);
     Register(std::make_shared<services::UserService>(user_adapter));
     Register(std::make_shared<services::WalletService>());
     Register(std::make_shared<services::TransactionsService>());

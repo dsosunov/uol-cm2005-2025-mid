@@ -2,9 +2,9 @@
 #include <string>
 namespace dto
 {
-  struct UserLogin
-  {
+struct UserLogin
+{
     std::string username;
     std::string password;
-  };
-}
+};
+} // namespace dto

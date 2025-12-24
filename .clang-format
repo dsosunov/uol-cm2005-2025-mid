@@ -1,0 +1,16 @@
+BasedOnStyle: Microsoft
+
+ColumnLimit: 100 # Google default is 80; many teams relax this
+
+SortIncludes: true
+IncludeBlocks: Regroup
+
+AllowShortIfStatementsOnASingleLine: false
+
+AllowShortFunctionsOnASingleLine: None
+AlwaysBreakAfterReturnType: None
+BreakAfterJavaFieldAnnotations: true
+
+PointerAlignment: Left
+
+MaxEmptyLinesToKeep: 1

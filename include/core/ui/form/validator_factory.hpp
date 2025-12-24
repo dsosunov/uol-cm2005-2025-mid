@@ -1,35 +1,38 @@
 ﻿#pragma once
-#include <memory>
 #include "core/ui/form/validator.hpp"
+
+#include <memory>
+
 namespace user_forms
 {
-    class EmailValidator;
-    class UsernameValidator;
-    class PasswordValidator;
-    class FullNameValidator;
-    class EmailOrUsernameValidator;
-}
+class EmailValidator;
+class UsernameValidator;
+class PasswordValidator;
+class FullNameValidator;
+class EmailOrUsernameValidator;
+} // namespace user_forms
 namespace wallet_forms
 {
-    class CurrencyValidator;
-    class AmountValidator;
-}
+class CurrencyValidator;
+class AmountValidator;
+} // namespace wallet_forms
 namespace forms::shared
 {
-    class CurrencyPairValidator;
+class CurrencyPairValidator;
 }
 namespace form
 {
-    class ValidatorFactory
-    {
-    public:
-        static std::shared_ptr<Validator> Email();
-        static std::shared_ptr<Validator> Username();
-        static std::shared_ptr<Validator> Password();
-        static std::shared_ptr<Validator> FullName();
-        static std::shared_ptr<Validator> EmailOrUsername();
-        static std::shared_ptr<Validator> Amount();
-    private:
-        ValidatorFactory() = default;
-    };
-}
+class ValidatorFactory
+{
+  public:
+    static std::shared_ptr<Validator> Email();
+    static std::shared_ptr<Validator> Username();
+    static std::shared_ptr<Validator> Password();
+    static std::shared_ptr<Validator> FullName();
+    static std::shared_ptr<Validator> EmailOrUsername();
+    static std::shared_ptr<Validator> Amount();
+
+  private:
+    ValidatorFactory() = default;
+};
+} // namespace form

@@ -2,8 +2,8 @@
 #include <string>
 namespace dto
 {
-  struct TransactionQuery
-  {
+struct TransactionQuery
+{
     std::string product_pair;
-  };
-}
+};
+} // namespace dto

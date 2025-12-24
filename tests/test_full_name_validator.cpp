@@ -1,11 +1,13 @@
-﻿#include <gtest/gtest.h>
+﻿#include "core/ui/form/form_context.hpp"
 #include "forms/user/validators/full_name_validator.hpp"
-#include "core/ui/form/form_context.hpp"
+
+#include <gtest/gtest.h>
+
 using namespace user_forms;
 using namespace form;
 class FullNameValidatorTest : public ::testing::Test
 {
-protected:
+  protected:
     FullNameValidator validator;
     FormContext context;
 };

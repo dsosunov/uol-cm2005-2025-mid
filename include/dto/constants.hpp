@@ -3,42 +3,42 @@
 #include <string_view>
 namespace dto
 {
-  enum class Timeframe
-  {
+enum class Timeframe
+{
     Daily,
     Monthly,
     Yearly
-  };
-  enum class OrderType
-  {
+};
+enum class OrderType
+{
     Asks,
     Bids
-  };
-  inline std::string_view TimeframeToString(Timeframe timeframe)
-  {
+};
+inline std::string_view TimeframeToString(Timeframe timeframe)
+{
     using enum Timeframe;
     switch (timeframe)
     {
     case Daily:
-      return "daily";
+        return "daily";
     case Monthly:
-      return "monthly";
+        return "monthly";
     case Yearly:
-      return "yearly";
+        return "yearly";
     default:
-      return "";
+        return "";
     }
-  }
-  inline std::string_view OrderTypeToString(OrderType order_type)
-  {
+}
+inline std::string_view OrderTypeToString(OrderType order_type)
+{
     switch (order_type)
     {
     case OrderType::Asks:
-      return "asks";
+        return "asks";
     case OrderType::Bids:
-      return "bids";
+        return "bids";
     default:
-      return "";
+        return "";
     }
-  }
 }
+} // namespace dto

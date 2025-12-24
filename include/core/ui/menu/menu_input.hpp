@@ -1,13 +1,17 @@
 ﻿#pragma once
-#include <memory>
 #include "core/ui/io/input.hpp"
 #include "core/ui/menu/menu_node.hpp"
 #include "core/ui/menu/menu_renderer.hpp"
-class MenuInput {
- public:
-  MenuInput(std::shared_ptr<Input> input, std::shared_ptr<MenuRenderer> renderer);
-  MenuNode* ReadSelection(const MenuNode& current) const;
- private:
-  std::shared_ptr<Input> input_;
-  std::shared_ptr<MenuRenderer> renderer_;
+
+#include <memory>
+
+class MenuInput
+{
+  public:
+    MenuInput(std::shared_ptr<Input> input, std::shared_ptr<MenuRenderer> renderer);
+    MenuNode* ReadSelection(const MenuNode& current) const;
+
+  private:
+    std::shared_ptr<Input> input_;
+    std::shared_ptr<MenuRenderer> renderer_;
 };

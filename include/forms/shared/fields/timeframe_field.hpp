@@ -3,11 +3,10 @@
 #include "dto/constants.hpp"
 namespace forms::shared
 {
-    template <typename TDTO>
-    class TimeframeField : public form::SelectionField
-    {
-    public:
-        using MemberPtr = dto::Timeframe TDTO::*;
-        explicit TimeframeField(MemberPtr member_ptr);
-    };
-}
+template <typename TDTO> class TimeframeField : public form::SelectionField
+{
+  public:
+    using MemberPtr = dto::Timeframe TDTO::*;
+    explicit TimeframeField(MemberPtr member_ptr);
+};
+} // namespace forms::shared

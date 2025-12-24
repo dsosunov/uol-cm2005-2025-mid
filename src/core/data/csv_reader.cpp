@@ -1,155 +1,210 @@
 ﻿#include "core/data/csv_reader.hpp"
 namespace data
 {
-    CsvReader::CsvReader(const std::filesystem::path &file_path) : file_path_(file_path)
+
+CsvReader::CsvReader(const std::filesystem::path& file_path) : file_path_(file_path)
+{
+}
+
+CsvReader::~CsvReader() = default;
+
+bool CsvReader::IsOpen() const
+{
+    std::ifstream test_file(file_path_);
+
+    return test_file.is_open();
+}
+
+const std::filesystem::path& CsvReader::GetFilePath() const
+{
+    return file_path_;
+}
+
+std::vector<CsvRecord> CsvReader::ReadAll(const RecordFilter& filter) const
+{
+    std::vector<CsvRecord> results;
+    results.reserve(100);
+
+    std::ifstream file(file_path_);
+    if (!file.is_open())
     {
-    }
-    CsvReader::~CsvReader() = default;
-    bool CsvReader::IsOpen() const
-    {
-        std::ifstream test_file(file_path_);
-        return test_file.is_open();
-    }
-    const std::filesystem::path &CsvReader::GetFilePath() const
-    {
-        return file_path_;
-    }
-    std::vector<CsvRecord> CsvReader::ReadAll(const RecordFilter &filter) const
-    {
-        std::vector<CsvRecord> results;
-        results.reserve(100);
-        std::ifstream file(file_path_);
-        if (!file.is_open())
-        {
-            return results;
-        }
-        std::string line;
-        while (std::getline(file, line))
-        {
-            auto record_opt = ParseRecord(line);
-            if (!record_opt.has_value())
-            {
-                continue;
-            }
-            const auto &record = *record_opt;
-            if (filter != nullptr && !filter(record))
-            {
-                continue;
-            }
-            results.push_back(record);
-        }
         return results;
     }
-    size_t CsvReader::Count(const RecordFilter &filter) const
+
+    std::string line;
+    while (std::getline(file, line))
     {
-        size_t count = 0;
-        std::ifstream file(file_path_);
-        if (!file.is_open())
+        auto record_opt = ParseRecord(line);
+        if (!record_opt.has_value())
         {
-            return 0;
+            continue;
         }
-        std::string line;
-        while (std::getline(file, line))
+
+        const auto& record = *record_opt;
+        if (filter != nullptr && !filter(record))
         {
-            auto record_opt = ParseRecord(line);
-            if (!record_opt.has_value())
-            {
-                continue;
-            }
-            if (filter == nullptr || filter(*record_opt))
-            {
-                count++;
-            }
+            continue;
         }
-        return count;
+
+        results.push_back(record);
     }
-    bool CsvReader::FileExists() const
+
+    return results;
+}
+
+size_t CsvReader::Count(const RecordFilter& filter) const
+{
+    size_t count = 0;
+
+    std::ifstream file(file_path_);
+    if (!file.is_open())
     {
-        return std::filesystem::exists(file_path_) && std::filesystem::is_regular_file(file_path_);
+        return 0;
     }
-    std::optional<CsvRecord> CsvReader::ParseRecord(std::string_view line)
+
+    std::string line;
+    while (std::getline(file, line))
     {
-        if (line.empty())
+        auto record_opt = ParseRecord(line);
+        if (!record_opt.has_value())
         {
-            return std::nullopt;
+            continue;
         }
-        while (!line.empty() && std::isspace(line.front()))
+
+        if (filter == nullptr || filter(*record_opt))
         {
-            line.remove_prefix(1);
+            count++;
         }
-        while (!line.empty() && std::isspace(line.back()))
+    }
+
+    return count;
+}
+
+bool CsvReader::FileExists() const
+{
+    return std::filesystem::exists(file_path_) && std::filesystem::is_regular_file(file_path_);
+}
+
+std::string_view CsvReader::TrimWhitespace(std::string_view line)
+{
+    while (!line.empty() && std::isspace(line.front()))
+    {
+        line.remove_prefix(1);
+    }
+
+    while (!line.empty() && std::isspace(line.back()))
+    {
+        line.remove_suffix(1);
+    }
+    return line;
+}
+
+size_t CsvReader::ParseQuotedField(std::string_view line, size_t pos, std::string& field)
+{
+    pos++; // Skip opening quote
+
+    while (pos < line.size())
+    {
+        if (line[pos] == '"')
         {
-            line.remove_suffix(1);
-        }
-        if (line.empty())
-        {
-            return std::nullopt;
-        }
-        CsvRecord record;
-        size_t pos = 0;
-        while (pos <= line.size())
-        {
-            if (pos == line.size())
+            if (pos + 1 < line.size() && line[pos + 1] == '"')
             {
-                if (!record.fields.empty() || pos > 0)
-                {
-                    record.fields.emplace_back("");
-                }
-                break;
-            }
-            std::string field;
-            if (line[pos] == '"')
-            {
-                pos++;
-                while (pos < line.size())
-                {
-                    if (line[pos] == '"')
-                    {
-                        if (pos + 1 < line.size() && line[pos + 1] == '"')
-                        {
-                            field += '"';
-                            pos += 2;
-                        }
-                        else
-                        {
-                            pos++;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        field += line[pos];
-                        pos++;
-                    }
-                }
-                while (pos < line.size() && line[pos] != ',')
-                {
-                    pos++;
-                }
-                if (pos < line.size() && line[pos] == ',')
-                {
-                    pos++;
-                }
+                field += '"';
+                pos += 2;
             }
             else
             {
-                size_t start = pos;
-                while (pos < line.size() && line[pos] != ',')
-                {
-                    pos++;
-                }
-                field = std::string(line.substr(start, pos - start));
-                if (pos < line.size() && line[pos] == ',')
-                {
-                    pos++;
-                }
+                pos++;
+                break;
             }
-            record.fields.push_back(field);
         }
-        if (record.fields.empty())
+        else
         {
-            return std::nullopt;
+            field += line[pos];
+            pos++;
         }
-        return record;
     }
+
+    // Skip any trailing characters until comma
+    while (pos < line.size() && line[pos] != ',')
+    {
+        pos++;
+    }
+
+    // Skip comma if present
+    if (pos < line.size() && line[pos] == ',')
+    {
+        pos++;
+    }
+
+    return pos;
 }
+
+size_t CsvReader::ParseUnquotedField(std::string_view line, size_t pos, std::string& field)
+{
+    size_t start = pos;
+    while (pos < line.size() && line[pos] != ',')
+    {
+        pos++;
+    }
+
+    field = std::string(line.substr(start, pos - start));
+
+    // Skip comma if present
+    if (pos < line.size() && line[pos] == ',')
+    {
+        pos++;
+    }
+
+    return pos;
+}
+
+std::optional<CsvRecord> CsvReader::ParseRecord(std::string_view line)
+{
+    if (line.empty())
+    {
+        return std::nullopt;
+    }
+
+    line = TrimWhitespace(line);
+    if (line.empty())
+    {
+        return std::nullopt;
+    }
+
+    CsvRecord record;
+    size_t pos = 0;
+
+    while (pos <= line.size())
+    {
+        if (pos == line.size())
+        {
+            if (!record.fields.empty() || pos > 0)
+            {
+                record.fields.emplace_back("");
+            }
+            break;
+        }
+
+        std::string field;
+        if (line[pos] == '"')
+        {
+            pos = ParseQuotedField(line, pos, field);
+        }
+        else
+        {
+            pos = ParseUnquotedField(line, pos, field);
+        }
+
+        record.fields.push_back(field);
+    }
+
+    if (record.fields.empty())
+    {
+        return std::nullopt;
+    }
+
+    return record;
+}
+
+} // namespace data

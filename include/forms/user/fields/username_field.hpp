@@ -1,8 +1,10 @@
 ﻿#pragma once
 #include "core/ui/form/fields/text_field.hpp"
-namespace user_forms {
-class UsernameField : public form::TextField {
- public:
-  explicit UsernameField();
+namespace user_forms
+{
+class UsernameField : public form::TextField
+{
+  public:
+    explicit UsernameField();
 };
-}
+} // namespace user_forms

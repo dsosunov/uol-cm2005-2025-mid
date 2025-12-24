@@ -1,165 +1,176 @@
 ﻿#include "core/data/csv_writer.hpp"
+
 #include <algorithm>
 #include <sstream>
+
 namespace data
 {
-    CsvWriter::CsvWriter(const std::filesystem::path &file_path, bool append, size_t buffer_size)
-        : file_path_(file_path), append_mode_(append), buffer_size_(buffer_size)
+CsvWriter::CsvWriter(const std::filesystem::path& file_path, bool append, size_t buffer_size)
+    : file_path_(file_path), append_mode_(append), buffer_size_(buffer_size)
+{
+    buffer_.reserve(buffer_size_);
+    if (file_path_.has_parent_path())
     {
-        buffer_.reserve(buffer_size_);
-        if (file_path_.has_parent_path())
-        {
-            std::filesystem::create_directories(file_path_.parent_path());
-        }
+        std::filesystem::create_directories(file_path_.parent_path());
     }
-    CsvWriter::~CsvWriter() noexcept
+}
+CsvWriter::~CsvWriter() noexcept
+{
+    // added intentionally
+    try
     {
-        // added intentionally
-        try
-        {
-            Flush();
-        }
-        catch (...)
-        {
-            // expected
-        }
+        Flush();
     }
+    catch (...)
+    {
+        // expected
+    }
+}
 
-    CsvWriter::CsvWriter(CsvWriter &&other) noexcept
-        : file_path_(std::move(other.file_path_)),
-          append_mode_(other.append_mode_),
-          buffer_size_(other.buffer_size_),
-          buffer_(std::move(other.buffer_)),
-          has_flushed_(other.has_flushed_)
+CsvWriter::CsvWriter(CsvWriter&& other) noexcept
+    : file_path_(std::move(other.file_path_)), append_mode_(other.append_mode_),
+      buffer_size_(other.buffer_size_), buffer_(std::move(other.buffer_)),
+      has_flushed_(other.has_flushed_)
+{
+    other.buffer_size_ = 0;
+    other.has_flushed_ = false;
+}
+
+CsvWriter& CsvWriter::operator=(CsvWriter&& other) noexcept
+{
+    if (this != &other)
     {
+        Flush();
+        file_path_ = std::move(other.file_path_);
+        append_mode_ = other.append_mode_;
+        buffer_size_ = other.buffer_size_;
+        buffer_ = std::move(other.buffer_);
+        has_flushed_ = other.has_flushed_;
         other.buffer_size_ = 0;
         other.has_flushed_ = false;
     }
+    return *this;
+}
 
-    CsvWriter &CsvWriter::operator=(CsvWriter &&other) noexcept
+bool CsvWriter::Write(const CsvRecord& record)
+{
+    if (!record.IsValid())
     {
-        if (this != &other)
-        {
-            Flush();
-            file_path_ = std::move(other.file_path_);
-            append_mode_ = other.append_mode_;
-            buffer_size_ = other.buffer_size_;
-            buffer_ = std::move(other.buffer_);
-            has_flushed_ = other.has_flushed_;
-            other.buffer_size_ = 0;
-            other.has_flushed_ = false;
-        }
-        return *this;
+        return false;
     }
-    bool CsvWriter::Write(const CsvRecord &record)
+    buffer_.push_back(record);
+    if (buffer_size_ > 0 && buffer_.size() >= buffer_size_)
     {
-        if (!record.IsValid())
-        {
-            return false;
-        }
-        buffer_.push_back(record);
-        if (buffer_size_ > 0 && buffer_.size() >= buffer_size_)
-        {
-            return FlushInternal();
-        }
-        return true;
-    }
-    bool CsvWriter::WriteAll(const std::vector<CsvRecord> &records)
-    {
-        return std::ranges::all_of(records, [this](const auto &record)
-                                   { return Write(record); });
-    }
-    bool CsvWriter::Flush()
-    {
-        if (buffer_.empty())
-        {
-            return true;
-        }
         return FlushInternal();
     }
-    bool CsvWriter::IsOpen() const
+
+    return true;
+}
+
+bool CsvWriter::WriteAll(const std::vector<CsvRecord>& records)
+{
+    return std::ranges::all_of(records, [this](const auto& record) { return Write(record); });
+}
+
+bool CsvWriter::Flush()
+{
+    if (buffer_.empty())
     {
-        std::ofstream test_file(file_path_, std::ios::app);
-        return test_file.is_open();
+        return true;
     }
-    const std::filesystem::path &CsvWriter::GetFilePath() const
+    return FlushInternal();
+}
+
+bool CsvWriter::IsOpen() const
+{
+    std::ofstream test_file(file_path_, std::ios::app);
+    return test_file.is_open();
+}
+
+const std::filesystem::path& CsvWriter::GetFilePath() const
+{
+    return file_path_;
+}
+
+size_t CsvWriter::GetBufferSize() const
+{
+    return buffer_.size();
+}
+
+void CsvWriter::ClearBuffer()
+{
+    buffer_.clear();
+}
+
+bool CsvWriter::FlushInternal()
+{
+    if (buffer_.empty())
     {
-        return file_path_;
+        return true;
     }
-    size_t CsvWriter::GetBufferSize() const
+    std::ios::openmode mode = std::ios::out;
+    if (append_mode_ || has_flushed_)
     {
-        return buffer_.size();
+        mode |= std::ios::app;
     }
-    void CsvWriter::ClearBuffer()
+    else
     {
-        buffer_.clear();
+        mode |= std::ios::trunc;
     }
-    bool CsvWriter::FlushInternal()
+    std::ofstream file(file_path_, mode);
+    if (!file.is_open())
     {
-        if (buffer_.empty())
+        return false;
+    }
+    for (const auto& record : buffer_)
+    {
+        file << FormatRecord(record) << '\n';
+    }
+    file.close();
+    buffer_.clear();
+    has_flushed_ = true;
+    return true;
+}
+
+std::string CsvWriter::EscapeField(const std::string& field)
+{
+    bool needs_quoting =
+        field.contains(',') || field.contains('"') || field.contains('\n') || field.contains('\r');
+
+    if (!needs_quoting)
+    {
+        return field;
+    }
+
+    std::string escaped = "\"";
+    for (char c : field)
+    {
+        if (c == '"')
         {
-            return true;
-        }
-        std::ios::openmode mode = std::ios::out;
-        if (append_mode_ || has_flushed_)
-        {
-            mode |= std::ios::app;
+            escaped += "\"\"";
         }
         else
         {
-            mode |= std::ios::trunc;
+            escaped += c;
         }
-        std::ofstream file(file_path_, mode);
-        if (!file.is_open())
-        {
-            return false;
-        }
-        for (const auto &record : buffer_)
-        {
-            file << FormatRecord(record) << '\n';
-        }
-        file.close();
-        buffer_.clear();
-        has_flushed_ = true;
-        return true;
     }
-    std::string CsvWriter::FormatRecord(const CsvRecord &record)
-    {
-        if (record.fields.empty())
-        {
-            return "";
-        }
-        auto escape_field = [](const std::string &field)
-        {
-            if (bool needs_quoting = field.contains(',') ||
-                                     field.contains('"') ||
-                                     field.contains('\n') ||
-                                     field.contains('\r');
-                !needs_quoting)
-            {
-                return field;
-            }
-            std::string escaped = "\"";
-            for (char c : field)
-            {
-                if (c == '"')
-                {
-                    escaped += "\"\"";
-                }
-                else
-                {
-                    escaped += c;
-                }
-            }
-            escaped += '"';
-            return escaped;
-        };
-        std::ostringstream oss;
-        oss << escape_field(record.fields[0]);
-        for (size_t i = 1; i < record.fields.size(); ++i)
-        {
-            oss << ',' << escape_field(record.fields[i]);
-        }
-        return oss.str();
-    }
+    escaped += '"';
+    return escaped;
 }
+
+std::string CsvWriter::FormatRecord(const CsvRecord& record)
+{
+    if (record.fields.empty())
+    {
+        return "";
+    }
+
+    std::ostringstream oss;
+    oss << EscapeField(record.fields[0]);
+    for (size_t i = 1; i < record.fields.size(); ++i)
+    {
+        oss << ',' << EscapeField(record.fields[i]);
+    }
+    return oss.str();
+}
+} // namespace data
