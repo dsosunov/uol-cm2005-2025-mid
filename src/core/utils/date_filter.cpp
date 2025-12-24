@@ -8,43 +8,33 @@ DateFilter::DateFilter(std::optional<TimePoint> start, std::optional<TimePoint> 
 
 bool DateFilter::IsInRange(const TimePoint& tp) const
 {
-    if (start_date_.has_value())
+    if (start_date_.has_value() && tp < *start_date_)
     {
-        std::string tp_str = FormatDate(tp);
-        std::string start_str = FormatDate(*start_date_);
-
-        if (tp_str < start_str)
-            return false;
+        return false;
     }
 
     if (end_date_.has_value())
     {
-        std::string tp_str = FormatDate(tp);
-        std::string end_str = FormatDate(*end_date_);
+        auto end_check = *end_date_;
 
-        if (tp_str > end_str)
+        // Check if start equals end and both are at midnight
+        if (start_date_.has_value() && *start_date_ == *end_date_)
+        {
+            auto duration = end_check.time_since_epoch();
+            auto days = std::chrono::duration_cast<std::chrono::days>(duration);
+            auto time_of_day = duration - days;
+
+            if (time_of_day == std::chrono::seconds(0))
+            {
+                // If start equals end at midnight, include the entire day
+                end_check += std::chrono::hours(24);
+            }
+        }
+
+        if (tp >= end_check)
+        {
             return false;
-    }
-
-    return true;
-}
-
-bool DateFilter::IsInRange(std::string_view date_string) const
-{
-    if (start_date_.has_value())
-    {
-        std::string start_str = FormatDate(*start_date_);
-
-        if (date_string < start_str)
-            return false;
-    }
-
-    if (end_date_.has_value())
-    {
-        std::string end_str = FormatDate(*end_date_);
-
-        if (date_string > end_str)
-            return false;
+        }
     }
 
     return true;

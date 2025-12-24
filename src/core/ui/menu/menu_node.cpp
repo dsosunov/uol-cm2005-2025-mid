@@ -2,7 +2,7 @@
 
 #include "core/actions/menu_action.hpp"
 
-MenuNode::MenuNode(std::string title, std::unique_ptr<MenuAction> action, std::string value)
+MenuNode::MenuNode(std::string title, std::unique_ptr<MenuAction> action, std::any value)
     : title_(std::move(title)), value_(std::move(value)), action_(std::move(action))
 {
 }
@@ -12,7 +12,7 @@ const std::string& MenuNode::Title() const
     return title_;
 }
 
-const std::string& MenuNode::Value() const
+const std::any& MenuNode::Value() const
 {
     return value_;
 }

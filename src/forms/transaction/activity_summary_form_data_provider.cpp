@@ -12,19 +12,12 @@ ActivitySummaryFormDataProvider::ActivitySummaryFormDataProvider(
 }
 
 std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormDataProvider::
-    GetStartDates(std::string_view timeframe) const
+    GetStartDates(dto::Timeframe timeframe) const
 {
-    using enum dto::Timeframe;
     services::DateQueryOptions options;
     options.limit = 100;
 
-    dto::Timeframe timeframe_enum = Daily;
-    if (timeframe == "monthly")
-        timeframe_enum = Monthly;
-    else if (timeframe == "yearly")
-        timeframe_enum = Yearly;
-
-    auto date_result = trading_service_->GetDateSamples(timeframe_enum, options);
+    auto date_result = trading_service_->GetDateSamples(timeframe, options);
     if (!date_result.success || !date_result.data.has_value())
     {
         return {};
@@ -37,37 +30,26 @@ std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormData
 
     for (const auto& date : dates)
     {
-        pairs.emplace_back(date, date);
+        auto time_point = utils::ParseTimestamp(date);
+        pairs.emplace_back(date, time_point);
     }
 
     return pairs;
 }
 
 std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormDataProvider::
-    GetEndDates(std::string_view timeframe, std::string_view start_date) const
+    GetEndDates(dto::Timeframe timeframe, std::optional<utils::TimePoint> start_date) const
 {
     services::DateQueryOptions options;
 
-    if (!start_date.empty())
+    if (start_date.has_value())
     {
-        auto parsed = utils::ParseTimestamp(start_date);
-
-        if (parsed.has_value())
-        {
-            options.start_date = *parsed;
-        }
+        options.start_date = *start_date;
     }
 
     options.limit = 100;
 
-    dto::Timeframe timeframe_enum = dto::Timeframe::Daily;
-
-    if (timeframe == "monthly")
-        timeframe_enum = dto::Timeframe::Monthly;
-    else if (timeframe == "yearly")
-        timeframe_enum = dto::Timeframe::Yearly;
-
-    auto date_result = trading_service_->GetDateSamples(timeframe_enum, options);
+    auto date_result = trading_service_->GetDateSamples(timeframe, options);
     if (!date_result.success || !date_result.data.has_value())
     {
         return {};
@@ -80,15 +62,11 @@ std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormData
 
     for (const auto& date : dates)
     {
-        pairs.emplace_back(date, date);
+        auto time_point = utils::ParseTimestamp(date);
+        pairs.emplace_back(date, time_point);
     }
 
     return pairs;
 }
 
-std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormDataProvider::
-    GetDatesByTimeframe(std::string_view timeframe) const
-{
-    return GetStartDates(timeframe);
-}
 } // namespace transaction_forms

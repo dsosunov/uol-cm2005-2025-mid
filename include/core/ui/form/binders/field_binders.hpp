@@ -18,10 +18,17 @@ template <typename T, typename FieldType> class SimpleFieldBinder
     explicit SimpleFieldBinder(MemberPtr member_ptr) : member_ptr_(member_ptr)
     {
     }
-    void operator()(std::any& target, const std::string& value, const FormContext&) const
+    void operator()(std::any& target, const std::any& value, const FormContext&) const
     {
         auto& obj = std::any_cast<std::reference_wrapper<T>>(target).get();
-        obj.*member_ptr_ = value;
+        if constexpr (std::is_same_v<FieldType, std::string>)
+        {
+            obj.*member_ptr_ = std::any_cast<std::string>(value);
+        }
+        else
+        {
+            obj.*member_ptr_ = std::any_cast<FieldType>(value);
+        }
     }
 
   private:
@@ -34,17 +41,14 @@ template <typename T> class DateFieldBinder
     explicit DateFieldBinder(MemberPtr member_ptr) : member_ptr_(member_ptr)
     {
     }
-    void operator()(std::any& target, const std::string& value, const FormContext&) const
+    void operator()(std::any& target, const std::any& value, const FormContext&) const
     {
         auto& obj = std::any_cast<std::reference_wrapper<T>>(target).get();
-        if (value.empty())
-        {
-            obj.*member_ptr_ = std::nullopt;
-        }
-        else
-        {
-            obj.*member_ptr_ = utils::ParseTimestamp(value);
-        }
+
+        // The value from the menu is a string (the date), not an optional<TimePoint>
+        const auto& date_string = std::any_cast<const std::string&>(value);
+        auto parsed = utils::ParseTimestamp(date_string);
+        obj.*member_ptr_ = parsed;
     }
 
   private:
@@ -57,18 +61,10 @@ template <typename T> class TimeframeFieldBinder
     explicit TimeframeFieldBinder(MemberPtr member_ptr) : member_ptr_(member_ptr)
     {
     }
-    void operator()(std::any& target, const std::string& value, const FormContext&) const
+    void operator()(std::any& target, const std::any& value, const FormContext&) const
     {
-        using enum dto::Timeframe;
         auto& obj = std::any_cast<std::reference_wrapper<T>>(target).get();
-        if (value == "daily")
-            obj.*member_ptr_ = Daily;
-        else if (value == "monthly")
-            obj.*member_ptr_ = Monthly;
-        else if (value == "yearly")
-            obj.*member_ptr_ = Yearly;
-        else
-            throw std::invalid_argument("Invalid timeframe value: " + value);
+        obj.*member_ptr_ = std::any_cast<dto::Timeframe>(value);
     }
 
   private:
@@ -81,15 +77,10 @@ template <typename T> class OrderTypeFieldBinder
     explicit OrderTypeFieldBinder(MemberPtr member_ptr) : member_ptr_(member_ptr)
     {
     }
-    void operator()(std::any& target, const std::string& value, const FormContext&) const
+    void operator()(std::any& target, const std::any& value, const FormContext&) const
     {
         auto& obj = std::any_cast<std::reference_wrapper<T>>(target).get();
-        if (value == "asks")
-            obj.*member_ptr_ = dto::OrderType::Asks;
-        else if (value == "bids")
-            obj.*member_ptr_ = dto::OrderType::Bids;
-        else
-            throw std::invalid_argument("Invalid order type value: " + value);
+        obj.*member_ptr_ = std::any_cast<dto::OrderType>(value);
     }
 
   private:

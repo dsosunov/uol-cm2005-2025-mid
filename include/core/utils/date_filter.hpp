@@ -10,7 +10,6 @@ class DateFilter
   public:
     DateFilter(std::optional<TimePoint> start, std::optional<TimePoint> end);
     bool IsInRange(const TimePoint& tp) const;
-    bool IsInRange(std::string_view date_string) const;
     static DateFilter Create(std::optional<TimePoint> start, std::optional<TimePoint> end);
     static DateFilter NoFilter();
 

@@ -10,8 +10,8 @@ namespace candlestick
 AsksBidsField::AsksBidsField()
     : form::SelectionField(
           "order_type", "Select data type",
-          std::make_shared<form::StaticDataSource>(
-              std::vector<form::DataSource::OptionPair>{{"Asks", "asks"}, {"Bids", "bids"}}),
+          std::make_shared<form::StaticDataSource>(std::vector<form::DataSource::OptionPair>{
+              {"Asks", dto::OrderType::Asks}, {"Bids", dto::OrderType::Bids}}),
           form::OrderTypeFieldBinder<dto::CandlestickQuery>(&dto::CandlestickQuery::order_type))
 {
 }

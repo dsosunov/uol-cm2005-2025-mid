@@ -17,7 +17,7 @@ class Field
     virtual std::optional<std::string> GetValidationHint() const = 0;
     virtual ValidationResult Validate(const std::string& value,
                                       const FormContext& context) const = 0;
-    virtual void BindValue(std::any& target, const std::string& value,
+    virtual void BindValue(std::any& target, const std::any& value,
                            const FormContext& context) const = 0;
 };
 } // namespace form

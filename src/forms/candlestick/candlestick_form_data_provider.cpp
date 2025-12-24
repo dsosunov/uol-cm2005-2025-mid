@@ -23,20 +23,12 @@ std::set<std::string, std::less<>> CandlestickFormDataProvider::GetAvailableProd
 }
 
 std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider::GetStartDates(
-    std::string_view timeframe) const
+    dto::Timeframe timeframe) const
 {
-    using enum dto::Timeframe;
     services::DateQueryOptions options;
     options.limit = 100;
 
-    dto::Timeframe timeframe_enum = Daily;
-
-    if (timeframe == "monthly")
-        timeframe_enum = Monthly;
-    else if (timeframe == "yearly")
-        timeframe_enum = Yearly;
-
-    auto date_result = trading_service_->GetDateSamples(timeframe_enum, options);
+    auto date_result = trading_service_->GetDateSamples(timeframe, options);
     if (!date_result.success || !date_result.data.has_value())
     {
         return {};
@@ -53,25 +45,17 @@ std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider
 }
 
 std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider::GetEndDates(
-    std::string_view timeframe, std::string_view start_date) const
+    dto::Timeframe timeframe, std::optional<utils::TimePoint> start_date) const
 {
     services::DateQueryOptions options;
-    if (!start_date.empty())
+    if (start_date.has_value())
     {
-        auto parsed = utils::ParseTimestamp(start_date);
-        if (parsed.has_value())
-        {
-            options.start_date = *parsed;
-        }
+        options.start_date = *start_date;
     }
 
     options.limit = 100;
-    dto::Timeframe timeframe_enum = dto::Timeframe::Daily;
-    if (timeframe == "monthly")
-        timeframe_enum = dto::Timeframe::Monthly;
-    else if (timeframe == "yearly")
-        timeframe_enum = dto::Timeframe::Yearly;
-    auto date_result = trading_service_->GetDateSamples(timeframe_enum, options);
+
+    auto date_result = trading_service_->GetDateSamples(timeframe, options);
     if (!date_result.success || !date_result.data.has_value())
     {
         return {};
@@ -87,9 +71,4 @@ std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider
     return pairs;
 }
 
-std::vector<CandlestickFormDataProvider::OptionPair> CandlestickFormDataProvider::
-    GetDatesByTimeframe(std::string_view timeframe) const
-{
-    return GetStartDates(timeframe);
-}
 } // namespace candlestick

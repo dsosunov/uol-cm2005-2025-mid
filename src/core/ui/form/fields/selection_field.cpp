@@ -45,7 +45,7 @@ ValidationResult SelectionField::Validate(const std::string& value,
     return ValidationResult::Valid();
 }
 
-void SelectionField::BindValue(std::any& target, const std::string& value,
+void SelectionField::BindValue(std::any& target, const std::any& value,
                                const FormContext& context) const
 {
     binder_(target, value, context);

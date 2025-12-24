@@ -7,5 +7,5 @@
 
 namespace form
 {
-using ValueBinder = std::function<void(std::any&, const std::string&, const FormContext&)>;
+using ValueBinder = std::function<void(std::any&, const std::any&, const FormContext&)>;
 }

@@ -20,14 +20,21 @@ std::vector<std::shared_ptr<form::Field>> ActivitySummaryForm::SetupFormLayout(
 {
     auto start_date_source = std::make_shared<form::ContextualDataSource>(
         [data_provider](const form::FormContext& form_context) {
-            auto timeframe = form_context.GetValue("timeframe");
-            return data_provider->GetStartDates(timeframe.value_or(""));
+            if (auto timeframe = form_context.GetValue<dto::Timeframe>("timeframe"))
+            {
+                return data_provider->GetStartDates(*timeframe);
+            }
+            return std::vector<form::DataSource::OptionPair>{};
         });
     auto end_date_source = std::make_shared<form::ContextualDataSource>(
         [data_provider](const form::FormContext& form_context) {
-            auto timeframe = form_context.GetValue("timeframe");
-            auto start_date = form_context.GetValue("start_date");
-            return data_provider->GetEndDates(timeframe.value_or(""), start_date.value_or(""));
+            if (auto timeframe = form_context.GetValue<dto::Timeframe>("timeframe"))
+            {
+                auto start_date =
+                    form_context.GetValue<std::optional<utils::TimePoint>>("start_date");
+                return data_provider->GetEndDates(*timeframe, start_date.value_or(std::nullopt));
+            }
+            return std::vector<form::DataSource::OptionPair>{};
         });
     std::vector<std::shared_ptr<form::Field>> fields;
     form::AddField<TimeframeField>(fields);

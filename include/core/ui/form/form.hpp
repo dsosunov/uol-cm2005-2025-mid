@@ -44,24 +44,34 @@ template <typename T> FormReadResult Form::Read(T& target)
             output_->WriteLine(std::format("[{}]", *hint));
         }
         output_->Write(std::format("{}: ", field->GetPrompt()));
-        auto valueOpt = input_provider_->ReadField(*field, context_);
-        if (!valueOpt)
+        auto value_any = input_provider_->ReadField(*field, context_);
+        if (!value_any)
         {
             output_->WriteLine("Error: Failed to read input");
             return FormReadResult::kCancelled;
         }
-        std::string value = *valueOpt;
-        if (value == "cancel" || value == "Cancel" || value == "CANCEL")
+
+        // Check for cancellation (TextField returns string in std::any)
+        try
         {
-            return FormReadResult::kCancelled;
+            const auto& input = std::any_cast<const std::string&>(*value_any);
+            if (input == "cancel" || input == "Cancel" || input == "CANCEL")
+            {
+                return FormReadResult::kCancelled;
+            }
+            if (auto validation = field->Validate(input, context_); !validation.is_valid)
+            {
+                output_->WriteLine(std::format("Error: {}", validation.error_message));
+                return FormReadResult::kCancelled;
+            }
         }
-        if (auto validation = field->Validate(value, context_); !validation.is_valid)
+        catch (const std::bad_any_cast&)
         {
-            output_->WriteLine(std::format("Error: {}", validation.error_message));
-            return FormReadResult::kCancelled;
+            // Not a string field (e.g., SelectionField), skip string validation
         }
-        field->BindValue(target_any, value, context_);
-        context_.SetValue(field->GetName(), value);
+
+        field->BindValue(target_any, *value_any, context_);
+        context_.SetValue(field->GetName(), *value_any);
     }
     return FormReadResult::kSuccess;
 }

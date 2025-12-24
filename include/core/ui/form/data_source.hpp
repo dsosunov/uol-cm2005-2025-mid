@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "core/ui/form/form_context.hpp"
 
+#include <any>
 #include <memory>
 #include <string>
 #include <utility>
@@ -11,7 +12,7 @@ namespace form
 class DataSource
 {
   public:
-    using OptionPair = std::pair<std::string, std::string>;
+    using OptionPair = std::pair<std::string, std::any>;
     virtual ~DataSource() = default;
     virtual std::vector<OptionPair> GetOptions(const FormContext& context) const = 0;
 };

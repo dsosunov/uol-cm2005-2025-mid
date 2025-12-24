@@ -3,6 +3,7 @@
 #include "core/ui/form/field_validator.hpp"
 #include "core/ui/form/fields/field.hpp"
 
+#include <any>
 #include <memory>
 #include <string>
 #include <utility>
@@ -13,7 +14,7 @@ namespace form
 class SelectionField : public Field
 {
   public:
-    using OptionPair = std::pair<std::string, std::string>;
+    using OptionPair = std::pair<std::string, std::any>;
     SelectionField(std::string name, std::string prompt, std::vector<OptionPair> options,
                    ValueBinder binder);
     SelectionField(std::string name, std::string prompt, std::shared_ptr<DataSource> data_source,
@@ -22,8 +23,9 @@ class SelectionField : public Field
     const std::string& GetPrompt() const override;
     std::optional<std::string> GetValidationHint() const override;
     ValidationResult Validate(const std::string& value, const FormContext& context) const override;
-    void BindValue(std::any& target, const std::string& value,
+    void BindValue(std::any& target, const std::any& value,
                    const FormContext& context) const override;
+
     std::vector<OptionPair> GetOptions(const FormContext& context) const;
 
   private:

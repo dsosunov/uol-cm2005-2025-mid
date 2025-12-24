@@ -36,8 +36,7 @@ ValidationResult TextField::Validate(const std::string& value, const FormContext
     return ValidationResult::Valid();
 }
 
-void TextField::BindValue(std::any& target, const std::string& value,
-                          const FormContext& context) const
+void TextField::BindValue(std::any& target, const std::any& value, const FormContext& context) const
 {
     binder_(target, value, context);
 }

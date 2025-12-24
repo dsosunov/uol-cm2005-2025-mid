@@ -5,6 +5,7 @@
 #include "core/ui/menu/menu_input.hpp"
 #include "core/ui/menu/menu_renderer.hpp"
 
+#include <any>
 #include <memory>
 #include <string>
 #include <utility>
@@ -17,15 +18,15 @@ class MenuFormInputProvider : public FormInputProvider
   public:
     MenuFormInputProvider(std::shared_ptr<Input> input, std::shared_ptr<MenuRenderer> renderer,
                           std::shared_ptr<MenuInput> menu_input);
-    std::optional<std::string> ReadField(const Field& field, const FormContext& context) override;
+    std::optional<std::any> ReadField(const Field& field, const FormContext& context) override;
 
   private:
     std::shared_ptr<Input> input_;
     std::shared_ptr<MenuRenderer> renderer_;
     std::shared_ptr<MenuInput> menu_input_;
-    std::optional<std::string> ReadLine() const;
-    std::optional<std::string> ReadMenuSelection(
+    std::optional<std::any> ReadLine() const;
+    std::optional<std::any> ReadMenuSelection(
         const std::string& title,
-        const std::vector<std::pair<std::string, std::string>>& option_pairs) const;
+        const std::vector<std::pair<std::string, std::any>>& option_pairs) const;
 };
 } // namespace form

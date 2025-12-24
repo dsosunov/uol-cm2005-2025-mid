@@ -13,8 +13,10 @@ template <typename TDTO>
 TimeframeField<TDTO>::TimeframeField(MemberPtr member_ptr)
     : form::SelectionField(
           "timeframe", "Select timeframe",
-          std::make_shared<form::StaticDataSource>(std::vector<form::DataSource::OptionPair>{
-              {"Daily", "daily"}, {"Monthly", "monthly"}, {"Yearly", "yearly"}}),
+          std::make_shared<form::StaticDataSource>(
+              std::vector<form::DataSource::OptionPair>{{"Daily", dto::Timeframe::Daily},
+                                                        {"Monthly", dto::Timeframe::Monthly},
+                                                        {"Yearly", dto::Timeframe::Yearly}}),
           form::TimeframeFieldBinder<TDTO>(member_ptr))
 {
 }

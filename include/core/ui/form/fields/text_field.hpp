@@ -3,6 +3,7 @@
 #include "core/ui/form/fields/field.hpp"
 #include "core/ui/form/validator.hpp"
 
+#include <any>
 #include <memory>
 #include <optional>
 #include <string>
@@ -18,7 +19,7 @@ class TextField : public Field
     const std::string& GetPrompt() const override;
     std::optional<std::string> GetValidationHint() const override;
     ValidationResult Validate(const std::string& value, const FormContext& context) const override;
-    void BindValue(std::any& target, const std::string& value,
+    void BindValue(std::any& target, const std::any& value,
                    const FormContext& context) const override;
 
   private:

@@ -26,10 +26,11 @@ class GenerationConfirmationForm : public form::Form
         // Simple confirmation field - just press enter to confirm
         fields.push_back(std::make_shared<form::TextField>(
             "confirmation", "Press Enter to confirm or type 'cancel' to abort",
-            [](std::any& target, const std::string& value, const form::FormContext&) {
+            [](std::any& target, const std::any& value, const form::FormContext&) {
                 auto& data =
                     std::any_cast<std::reference_wrapper<dto::GenerationRequest>>(target).get();
-                data.confirmation = value.empty() ? "yes" : value;
+                const auto& str = std::any_cast<std::string>(value);
+                data.confirmation = str.empty() ? "yes" : str;
             },
             nullptr));
         return fields;

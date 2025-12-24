@@ -13,8 +13,8 @@ MenuFormInputProvider::MenuFormInputProvider(std::shared_ptr<Input> input,
 {
 }
 
-std::optional<std::string> MenuFormInputProvider::ReadField(const Field& field,
-                                                            const FormContext& context)
+std::optional<std::any> MenuFormInputProvider::ReadField(const Field& field,
+                                                         const FormContext& context)
 {
     if (dynamic_cast<const TextField*>(&field))
     {
@@ -28,14 +28,14 @@ std::optional<std::string> MenuFormInputProvider::ReadField(const Field& field,
     return std::nullopt;
 }
 
-std::optional<std::string> MenuFormInputProvider::ReadLine() const
+std::optional<std::any> MenuFormInputProvider::ReadLine() const
 {
     return input_->ReadLine();
 }
 
-std::optional<std::string> MenuFormInputProvider::ReadMenuSelection(
+std::optional<std::any> MenuFormInputProvider::ReadMenuSelection(
     const std::string& title,
-    const std::vector<std::pair<std::string, std::string>>& option_pairs) const
+    const std::vector<std::pair<std::string, std::any>>& option_pairs) const
 {
     MenuBuilder builder(title);
     for (const auto& [display_title, value] : option_pairs)
