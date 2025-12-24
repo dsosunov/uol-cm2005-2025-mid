@@ -9,7 +9,6 @@ WalletWithdrawAction::WalletWithdrawAction(std::shared_ptr<services::WalletServi
 
 wallet_forms::WalletOperationForm WalletWithdrawAction::CreateForm(ActionContext& context)
 {
-    // Supported fiat currencies for wallet operations
     std::set<std::string, std::less<>> allowed_currencies = {"USD", "EUR", "GBP", "JPY",
                                                              "CAD", "AUD", "CHF", "CNY"};
     return wallet_forms::WalletOperationForm(context.form_input_provider, context.output,

@@ -65,13 +65,11 @@ size_t CsvReader::ParseQuotedField(std::string_view line, size_t pos, std::strin
         }
     }
 
-    // Skip any trailing characters until comma
     while (pos < line.size() && line[pos] != ',')
     {
         pos++;
     }
 
-    // Skip comma if present
     if (pos < line.size() && line[pos] == ',')
     {
         pos++;
@@ -90,7 +88,6 @@ size_t CsvReader::ParseUnquotedField(std::string_view line, size_t pos, std::str
 
     field = std::string(line.substr(start, pos - start));
 
-    // Skip comma if present
     if (pos < line.size() && line[pos] == ',')
     {
         pos++;

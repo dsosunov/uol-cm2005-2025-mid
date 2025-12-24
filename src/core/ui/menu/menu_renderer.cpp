@@ -38,7 +38,6 @@ void MenuRenderer::RenderMenu(const MenuNode& current) const
 
 void MenuRenderer::RenderActionHeader(const MenuNode& node) const
 {
-    // Action header removed - form prompts provide sufficient context
 }
 
 void MenuRenderer::RenderInvalidChoice() const

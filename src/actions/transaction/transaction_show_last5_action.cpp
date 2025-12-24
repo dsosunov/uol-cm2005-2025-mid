@@ -41,7 +41,6 @@ void TransactionShowLast5Action::DisplayResults(
     }
     else
     {
-        // Display in reverse order so newest transactions appear first
         std::reverse(transactions.begin(), transactions.end());
         int index = 1;
         for (const auto& transaction : transactions)

@@ -45,7 +45,6 @@ template <typename T> class DateFieldBinder
     {
         auto& obj = std::any_cast<std::reference_wrapper<T>>(target).get();
 
-        // The value from the menu is a string (the date), not an optional<TimePoint>
         const auto& date_string = std::any_cast<const std::string&>(value);
         auto parsed = utils::ParseTimestamp(date_string);
         obj.*member_ptr_ = parsed;

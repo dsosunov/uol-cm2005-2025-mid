@@ -66,7 +66,6 @@ utils::ServiceResult<double> WalletService::GetTotalBalanceInUSD(std::optional<i
     int effective_id = GetEffectiveUserId(user_id);
     auto balances = CalculateBalances(effective_id);
 
-    // Return actual USD balance only (no mock exchange rates)
     if (auto it = balances.find("USD"); it != balances.end())
     {
         return {true, "USD balance retrieved successfully", it->second};
@@ -85,7 +84,6 @@ utils::ServiceResult<double> WalletService::Deposit(std::string_view currency, d
 
     int effective_id = GetEffectiveUserId(user_id);
 
-    // Create a deposit transaction
     WalletTransaction txn;
     txn.currency = std::string(currency);
     txn.type = "Deposit";
@@ -93,13 +91,11 @@ utils::ServiceResult<double> WalletService::Deposit(std::string_view currency, d
     txn.timestamp = utils::Now();
     txn.user_id = effective_id;
 
-    // Add transaction via adapter
     if (!adapter_->Add(txn))
     {
         return utils::ServiceResult<double>::Failure("Failed to write transaction");
     }
 
-    // Calculate new balance
     auto balances = CalculateBalances(effective_id);
     double new_balance = balances[std::string(currency)];
 
@@ -116,7 +112,6 @@ utils::ServiceResult<double> WalletService::Withdraw(std::string_view currency, 
 
     int effective_id = GetEffectiveUserId(user_id);
 
-    // Check balance first
     auto balance_result = GetBalance(currency, user_id);
     if (!balance_result.success || !balance_result.data.has_value() ||
         *balance_result.data < amount)
@@ -124,7 +119,6 @@ utils::ServiceResult<double> WalletService::Withdraw(std::string_view currency, 
         return utils::ServiceResult<double>::Failure("Insufficient balance");
     }
 
-    // Create a withdrawal transaction
     WalletTransaction txn;
     txn.currency = std::string(currency);
     txn.type = "Withdraw";
@@ -132,13 +126,11 @@ utils::ServiceResult<double> WalletService::Withdraw(std::string_view currency, 
     txn.timestamp = utils::Now();
     txn.user_id = effective_id;
 
-    // Add transaction via adapter
     if (!adapter_->Add(txn))
     {
         return utils::ServiceResult<double>::Failure("Failed to write transaction");
     }
 
-    // Calculate new balance
     auto balances = CalculateBalances(effective_id);
     double new_balance = balances[std::string(currency)];
 

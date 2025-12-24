@@ -11,7 +11,6 @@ class FormContext
     void SetValue(std::string_view key, std::any value);
     std::optional<std::any> GetValue(std::string_view key) const;
 
-    // Template overload for type-safe retrieval with automatic casting
     template <typename T> std::optional<T> GetValue(std::string_view key) const
     {
         if (auto value = GetValue(key); value.has_value())

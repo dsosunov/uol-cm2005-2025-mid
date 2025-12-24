@@ -18,7 +18,6 @@ struct MenuAction
         return "Operation";
     }
 
-    // Form handling
     bool HandleFormCancellation(form::FormReadResult result, std::string_view operation_name,
                                 ActionContext& context) const
     {
@@ -31,7 +30,6 @@ struct MenuAction
         return false;
     }
 
-    // Result display - simple headers (automatically use GetOperationName)
     void DisplaySuccessHeader(ActionContext& context) const
     {
         context.output->WriteLine(utils::OutputFormatter::SuccessHeader(GetOperationName()));
@@ -46,7 +44,6 @@ struct MenuAction
         }
     }
 
-    // Field display helpers
     template <typename T>
     void DisplayField(std::string_view label, const T& value, ActionContext& context) const
     {

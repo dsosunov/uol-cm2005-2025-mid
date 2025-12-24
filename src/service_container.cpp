@@ -26,7 +26,6 @@ ServiceContainer::ServiceContainer()
     auto user_adapter =
         std::make_shared<persistence::UserDataAdapter>(user_csv_reader, user_csv_writer);
 
-    // Transaction adapter shared by WalletService and TransactionsService
     auto transaction_csv_reader = std::make_shared<data::CsvReader>("data/transactions.csv");
     auto transaction_csv_writer = std::make_shared<data::CsvWriter>("data/transactions.csv", false);
     auto transaction_adapter = std::make_shared<persistence::TransactionDataAdapter>(

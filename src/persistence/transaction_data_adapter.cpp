@@ -58,7 +58,6 @@ std::optional<services::WalletTransaction> TransactionDataAdapter::TransformToEn
 
     services::WalletTransaction txn;
 
-    // Parse timestamp
     auto parsed_time = utils::ParseTimestamp(record.fields[0]);
     if (!parsed_time.has_value())
     {
@@ -66,13 +65,10 @@ std::optional<services::WalletTransaction> TransactionDataAdapter::TransformToEn
     }
     txn.timestamp = *parsed_time;
 
-    // Currency
     txn.currency = record.fields[1];
 
-    // Type (Deposit or Withdraw)
     txn.type = record.fields[2];
 
-    // Amount
     try
     {
         std::string clean_amount = CleanNumericField(record.fields[3]);
@@ -91,7 +87,6 @@ std::optional<services::WalletTransaction> TransactionDataAdapter::TransformToEn
         return std::nullopt;
     }
 
-    // User ID
     try
     {
         txn.user_id = std::stoi(record.fields[4]);

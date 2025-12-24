@@ -4,7 +4,6 @@
 
 namespace shared_forms
 {
-// Empty form for actions that don't require input
 class EmptyForm
 {
   public:
@@ -12,7 +11,6 @@ class EmptyForm
 
     form::FormReadResult Read(const EmptyRequest&) const
     {
-        // No input needed
         return form::FormReadResult::kSuccess;
     }
 };

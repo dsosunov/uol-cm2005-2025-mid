@@ -26,7 +26,6 @@ transaction_forms::ActivitySummaryForm TransactionActivitySummaryAction::CreateF
 utils::ServiceResult<services::ActivityStats> TransactionActivitySummaryAction::ExecuteService(
     const dto::ActivitySummary& data, ActionContext& context)
 {
-    // Pass nullopt for dates to get all transactions
     return transactions_service_->GetActivitySummary(data.timeframe, std::nullopt, std::nullopt);
 }
 

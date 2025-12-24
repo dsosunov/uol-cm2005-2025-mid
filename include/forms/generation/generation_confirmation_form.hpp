@@ -23,7 +23,6 @@ class GenerationConfirmationForm : public form::Form
     static std::vector<std::shared_ptr<form::Field>> SetupFormLayout()
     {
         std::vector<std::shared_ptr<form::Field>> fields;
-        // Simple confirmation field - just press enter to confirm
         fields.push_back(std::make_shared<form::TextField>(
             "confirmation", "Press Enter to confirm or type 'cancel' to abort",
             [](std::any& target, const std::any& value, const form::FormContext&) {

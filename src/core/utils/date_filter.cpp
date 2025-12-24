@@ -17,7 +17,6 @@ bool DateFilter::IsInRange(const TimePoint& tp) const
     {
         auto end_check = *end_date_;
 
-        // Check if start equals end and both are at midnight
         if (start_date_.has_value() && *start_date_ == *end_date_)
         {
             auto duration = end_check.time_since_epoch();
@@ -26,7 +25,6 @@ bool DateFilter::IsInRange(const TimePoint& tp) const
 
             if (time_of_day == std::chrono::seconds(0))
             {
-                // If start equals end at midnight, include the entire day
                 end_check += std::chrono::hours(24);
             }
         }

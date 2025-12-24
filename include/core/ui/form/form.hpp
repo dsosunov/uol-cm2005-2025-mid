@@ -52,7 +52,6 @@ template <typename T> FormReadResult Form::Read(T& target)
             return FormReadResult::kCancelled;
         }
 
-        // Check for cancellation (TextField returns string in std::any)
         try
         {
             const auto& input = std::any_cast<const std::string&>(*value_any);
@@ -68,7 +67,6 @@ template <typename T> FormReadResult Form::Read(T& target)
         }
         catch (const std::bad_any_cast&)
         {
-            // Not a string field (e.g., SelectionField), skip string validation
         }
 
         field->BindValue(target_any, *value_any, context_);

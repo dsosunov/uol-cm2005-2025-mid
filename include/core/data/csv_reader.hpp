@@ -52,7 +52,6 @@ class CsvReader
             return;
         }
 
-        // Read all lines first, then process in reverse
         std::ifstream file(file_path_);
         if (!file.is_open())
         {
@@ -69,7 +68,6 @@ class CsvReader
             }
         }
 
-        // Process lines in reverse order (last line first)
         for (auto it = lines.rbegin(); it != lines.rend(); ++it)
         {
             auto record_opt = ParseRecord(*it);

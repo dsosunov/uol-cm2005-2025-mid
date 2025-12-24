@@ -18,14 +18,12 @@ CsvWriter::CsvWriter(const std::filesystem::path& file_path, bool append, size_t
 
 CsvWriter::~CsvWriter() noexcept
 {
-    // added intentionally
     try
     {
         Flush();
     }
     catch (...)
     {
-        // expected
     }
 }
 
