@@ -66,16 +66,18 @@ void CandlestickSummaryAction::DisplayResults(
     WriteLine(std::format("Analysis per {}:", dto::TimeframeToString(result.data->timeframe)),
               context);
 
-    WriteLine(
-        std::format("{:<12} {:<15} {:<15} {:<15} {:<15}", "Period", "Open", "High", "Low", "Close"),
-        context);
-    WriteLine(std::string(12 + 15 + 15 + 15 + 15 + 4, '-'), context);
+    WriteLine(std::format("{:<12} {:<15} {:<15} {:<15} {:<15} {:<15} {:<15} {:<10}", "Period",
+                          "Open", "High", "Low", "Close", "Total Vol", "Avg Vol", "Trades"),
+              context);
+    WriteLine(std::string(12 + 15 + 15 + 15 + 15 + 15 + 15 + 10 + 7, '-'), context);
 
     for (const auto& period : result.data->periods)
     {
-        WriteLine(std::format("{:<12} {:<15.4f} {:<15.4f} {:<15.4f} {:<15.4f}", period.period,
-                              period.open, period.high, period.low, period.close),
-                  context);
+        WriteLine(
+            std::format("{:<12} {:<15.4f} {:<15.4f} {:<15.4f} {:<15.4f} {:<15.4f} {:<15.4f} {:<10}",
+                        period.period, period.open, period.high, period.low, period.close,
+                        period.total_volume, period.avg_volume, period.trade_count),
+            context);
     }
 
     WriteEmptyLine(context);
