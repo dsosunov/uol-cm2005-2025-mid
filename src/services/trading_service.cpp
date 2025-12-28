@@ -14,8 +14,12 @@ namespace
 {
 struct PeriodStats
 {
-    double min_price = std::numeric_limits<double>::max();
-    double max_price = std::numeric_limits<double>::lowest();
+    utils::TimePoint first_timestamp{};
+    utils::TimePoint last_timestamp{};
+    double open = 0.0;
+    double high = 0.0;
+    double low = 0.0;
+    double close = 0.0;
     double total_volume = 0.0;
     int count = 0;
 };
@@ -81,8 +85,34 @@ void ProcessSummaryOrder(const OrderRecord& order, std::string_view product_pair
     }
 
     auto& stats = aggregated_data[period_key];
-    stats.min_price = std::min(stats.min_price, order.price);
-    stats.max_price = std::max(stats.max_price, order.price);
+
+    if (stats.count == 0)
+    {
+        stats.first_timestamp = order.timestamp;
+        stats.last_timestamp = order.timestamp;
+        stats.open = order.price;
+        stats.high = order.price;
+        stats.low = order.price;
+        stats.close = order.price;
+    }
+    else
+    {
+        stats.high = std::max(stats.high, order.price);
+        stats.low = std::min(stats.low, order.price);
+
+        if (order.timestamp < stats.first_timestamp)
+        {
+            stats.first_timestamp = order.timestamp;
+            stats.open = order.price;
+        }
+
+        if (order.timestamp > stats.last_timestamp)
+        {
+            stats.last_timestamp = order.timestamp;
+            stats.close = order.price;
+        }
+    }
+
     stats.total_volume += order.amount;
     stats.count++;
 }
@@ -118,8 +148,8 @@ utils::ServiceResult<CandlestickSummaryData> TradingService::GetCandlestickSumma
     periods.reserve(aggregated_data.size());
     for (const auto& [period, stats] : aggregated_data)
     {
-        periods.emplace_back(period, stats.min_price, stats.max_price, stats.total_volume,
-                             stats.total_volume / stats.count, stats.count);
+        periods.emplace_back(period, stats.open, stats.high, stats.low, stats.close,
+                             stats.total_volume, stats.total_volume / stats.count, stats.count);
     }
 
     CandlestickSummaryData data{

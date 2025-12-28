@@ -67,8 +67,10 @@ struct DateQueryOptions
 struct PeriodSummary
 {
     std::string period;
-    double min_price;
-    double max_price;
+    double open;
+    double high;
+    double low;
+    double close;
     double total_volume;
     double avg_volume;
     int trade_count;
