@@ -1,5 +1,7 @@
 ﻿#include "core/ui/menu/menu_input.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <string>
 
 MenuInput::MenuInput(std::shared_ptr<Input> input, std::shared_ptr<MenuRenderer> renderer)
@@ -7,22 +9,39 @@ MenuInput::MenuInput(std::shared_ptr<Input> input, std::shared_ptr<MenuRenderer>
 {
 }
 
-MenuNode* MenuInput::ReadSelection(const MenuNode& current) const
+namespace
+{
+bool IsBlankLine(const std::string& s)
+{
+    return std::all_of(s.begin(), s.end(),
+                       [](unsigned char c) { return static_cast<bool>(std::isspace(c)); });
+}
+} // namespace
+
+MenuNode* MenuInput::ReadSelection(const MenuNode& current,
+                                   std::optional<size_t> default_option) const
 {
     while (true)
     {
         std::string line = input_->ReadLine();
-        int option;
+        int option = 0;
 
-        try
+        if (default_option.has_value() && (line.empty() || IsBlankLine(line)))
         {
-            option = std::stoi(line);
+            option = static_cast<int>(*default_option);
         }
-        catch (const std::invalid_argument&)
+        else
         {
-            renderer_->RenderInvalidChoice();
-            renderer_->RenderMenu(current);
-            continue;
+            try
+            {
+                option = std::stoi(line);
+            }
+            catch (const std::invalid_argument&)
+            {
+                renderer_->RenderInvalidChoice();
+                renderer_->RenderMenu(current, default_option);
+                continue;
+            }
         }
 
         const size_t childCount = current.Children().size();
@@ -37,7 +56,7 @@ MenuNode* MenuInput::ReadSelection(const MenuNode& current) const
         if (index < 0 || static_cast<size_t>(index) >= childCount)
         {
             renderer_->RenderInvalidChoice();
-            renderer_->RenderMenu(current);
+            renderer_->RenderMenu(current, default_option);
             continue;
         }
 

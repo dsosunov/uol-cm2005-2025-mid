@@ -9,7 +9,7 @@ MenuRenderer::MenuRenderer(std::shared_ptr<Output> output) : output_(std::move(o
 {
 }
 
-void MenuRenderer::RenderMenu(const MenuNode& current) const
+void MenuRenderer::RenderMenu(const MenuNode& current, std::optional<size_t> default_option) const
 {
     output_->WriteLine("");
 
@@ -28,12 +28,25 @@ void MenuRenderer::RenderMenu(const MenuNode& current) const
     const auto& items = current.Children();
     for (size_t i = 0; i < items.size(); ++i)
     {
-        output_->WriteLine(std::format("{}) {}", i + 1, items[i]->Title()));
+        const size_t index = i + 1;
+        const bool is_default = default_option.has_value() && *default_option == index;
+        output_->WriteLine(
+            std::format("{}) {}{}", index, items[i]->Title(), is_default ? " [default]" : ""));
     }
 
     output_->WriteLine(std::format("0) {}", current.IsRoot() ? "Exit" : "Back"));
     output_->WriteLine("───────────────────────────────────────");
-    output_->Write(std::format("Select option (0-{}): ", items.size()));
+
+    if (default_option.has_value() && *default_option >= 1 && *default_option <= items.size())
+    {
+        const auto& label = items[*default_option - 1]->Title();
+        output_->Write(std::format("Choose an option (0-{}). Press Enter for default ({}: {}): ",
+                                   items.size(), *default_option, label));
+    }
+    else
+    {
+        output_->Write(std::format("Choose an option (0-{}): ", items.size()));
+    }
 }
 
 void MenuRenderer::RenderActionHeader(const MenuNode& node) const

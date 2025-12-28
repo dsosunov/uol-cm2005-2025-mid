@@ -5,6 +5,7 @@
 
 #include <any>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -16,9 +17,9 @@ class SelectionField : public Field
   public:
     using OptionPair = std::pair<std::string, std::any>;
     SelectionField(std::string name, std::string prompt, std::vector<OptionPair> options,
-                   ValueBinder binder);
+                   ValueBinder binder, std::optional<size_t> default_index = std::nullopt);
     SelectionField(std::string name, std::string prompt, std::shared_ptr<DataSource> data_source,
-                   ValueBinder binder);
+                   ValueBinder binder, std::optional<size_t> default_index = std::nullopt);
     const std::string& GetName() const override;
     const std::string& GetPrompt() const override;
     std::optional<std::string> GetValidationHint() const override;
@@ -27,6 +28,7 @@ class SelectionField : public Field
                    const FormContext& context) const override;
 
     std::vector<OptionPair> GetOptions(const FormContext& context) const;
+    std::optional<size_t> GetDefaultIndex() const;
 
   private:
     std::string name_;
@@ -34,5 +36,6 @@ class SelectionField : public Field
     std::vector<OptionPair> static_options_;
     std::shared_ptr<DataSource> data_source_;
     ValueBinder binder_;
+    std::optional<size_t> default_index_;
 };
 } // namespace form

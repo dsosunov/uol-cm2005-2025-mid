@@ -17,7 +17,7 @@ TimeframeField<TDTO>::TimeframeField(MemberPtr member_ptr)
               std::vector<form::DataSource::OptionPair>{{"Daily", dto::Timeframe::Daily},
                                                         {"Monthly", dto::Timeframe::Monthly},
                                                         {"Yearly", dto::Timeframe::Yearly}}),
-          form::TimeframeFieldBinder<TDTO>(member_ptr))
+          form::TimeframeFieldBinder<TDTO>(member_ptr), std::optional<size_t>{3})
 {
 }
 

@@ -7,6 +7,7 @@
 
 #include <any>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -26,7 +27,7 @@ class MenuFormInputProvider : public FormInputProvider
     std::shared_ptr<MenuInput> menu_input_;
     std::optional<std::any> ReadLine() const;
     std::optional<std::any> ReadMenuSelection(
-        const std::string& title,
-        const std::vector<std::pair<std::string, std::any>>& option_pairs) const;
+        const std::string& title, const std::vector<std::pair<std::string, std::any>>& option_pairs,
+        std::optional<size_t> default_option) const;
 };
 } // namespace form

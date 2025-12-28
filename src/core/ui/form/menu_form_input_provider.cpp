@@ -23,7 +23,19 @@ std::optional<std::any> MenuFormInputProvider::ReadField(const Field& field,
     else if (auto* selection_field = dynamic_cast<const SelectionField*>(&field))
     {
         auto option_pairs = selection_field->GetOptions(context);
-        return ReadMenuSelection(field.GetPrompt(), option_pairs);
+        std::optional<size_t> default_option = selection_field->GetDefaultIndex();
+        if (!default_option.has_value() && !option_pairs.empty())
+        {
+            default_option = 1;
+        }
+
+        if (default_option.has_value() &&
+            (*default_option < 1 || *default_option > option_pairs.size()))
+        {
+            default_option = option_pairs.empty() ? std::nullopt : std::optional<size_t>{1};
+        }
+
+        return ReadMenuSelection(field.GetPrompt(), option_pairs, default_option);
     }
     return std::nullopt;
 }
@@ -34,8 +46,8 @@ std::optional<std::any> MenuFormInputProvider::ReadLine() const
 }
 
 std::optional<std::any> MenuFormInputProvider::ReadMenuSelection(
-    const std::string& title,
-    const std::vector<std::pair<std::string, std::any>>& option_pairs) const
+    const std::string& title, const std::vector<std::pair<std::string, std::any>>& option_pairs,
+    std::optional<size_t> default_option) const
 {
     MenuBuilder builder(title);
     for (const auto& [display_title, value] : option_pairs)
@@ -44,8 +56,8 @@ std::optional<std::any> MenuFormInputProvider::ReadMenuSelection(
     }
 
     auto menu = builder.Build();
-    renderer_->RenderMenu(*menu);
-    const MenuNode* selected = menu_input_->ReadSelection(*menu);
+    renderer_->RenderMenu(*menu, default_option);
+    const MenuNode* selected = menu_input_->ReadSelection(*menu, default_option);
 
     if (!selected || selected == menu.get())
     {
