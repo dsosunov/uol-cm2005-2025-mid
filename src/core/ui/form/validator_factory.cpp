@@ -23,6 +23,12 @@ std::shared_ptr<Validator> ValidatorFactory::FullName()
     return instance;
 }
 
+std::shared_ptr<Validator> ValidatorFactory::Username()
+{
+    static auto instance = std::make_shared<user_forms::UsernameValidator>();
+    return instance;
+}
+
 std::shared_ptr<Validator> ValidatorFactory::Amount()
 {
     static auto instance = std::make_shared<wallet_forms::AmountValidator>();

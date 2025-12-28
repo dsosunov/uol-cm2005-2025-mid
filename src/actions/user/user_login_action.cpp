@@ -15,7 +15,7 @@ user_forms::LoginForm UserLoginAction::CreateForm(ActionContext& context)
 utils::ServiceResult<services::User> UserLoginAction::ExecuteService(const dto::UserLogin& data,
                                                                      ActionContext& context)
 {
-    return user_service_->LoginUser(data.email, data.password);
+    return user_service_->LoginUser(data.username, data.password);
 }
 
 void UserLoginAction::DisplayResults(const utils::ServiceResult<services::User>& result,

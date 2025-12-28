@@ -8,6 +8,7 @@ namespace user_forms
 class EmailValidator;
 class PasswordValidator;
 class FullNameValidator;
+class UsernameValidator;
 } // namespace user_forms
 namespace wallet_forms
 {
@@ -26,6 +27,7 @@ class ValidatorFactory
     static std::shared_ptr<Validator> Email();
     static std::shared_ptr<Validator> Password();
     static std::shared_ptr<Validator> FullName();
+    static std::shared_ptr<Validator> Username();
     static std::shared_ptr<Validator> Amount();
 
   private:

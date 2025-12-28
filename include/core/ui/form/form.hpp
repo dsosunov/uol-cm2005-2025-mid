@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "core/ui/form/fields/field.hpp"
+#include "core/ui/form/fields/text_field.hpp"
 #include "core/ui/form/form_context.hpp"
 #include "core/ui/form/form_input_provider.hpp"
 #include "core/ui/io/output.hpp"
@@ -44,7 +45,17 @@ template <typename T> FormReadResult Form::Read(T& target)
         {
             output_->WriteLine(std::format("[{}]", *hint));
         }
-        output_->Write(std::format("{}: ", field->GetPrompt()));
+
+        std::string prompt = field->GetPrompt();
+        if (auto* text_field = dynamic_cast<const TextField*>(field.get()))
+        {
+            if (auto default_value = text_field->GetDefaultValue(); default_value)
+            {
+                prompt = std::format("{} [{}]", prompt, *default_value);
+            }
+        }
+
+        output_->Write(std::format("{}: ", prompt));
         auto value_any = input_provider_->ReadField(*field, context_);
         if (!value_any)
         {
@@ -52,9 +63,29 @@ template <typename T> FormReadResult Form::Read(T& target)
             return FormReadResult::kCancelled;
         }
 
+        // Apply default value for text fields when the user submits an empty line.
+        std::any value_to_bind = *value_any;
+        if (auto* text_field = dynamic_cast<const TextField*>(field.get()))
+        {
+            try
+            {
+                const auto& raw = std::any_cast<const std::string&>(*value_any);
+                if (raw.empty())
+                {
+                    if (auto default_value = text_field->GetDefaultValue(); default_value)
+                    {
+                        value_to_bind = *default_value;
+                    }
+                }
+            }
+            catch (const std::bad_any_cast&)
+            {
+            }
+        }
+
         try
         {
-            const auto& input = std::any_cast<const std::string&>(*value_any);
+            const auto& input = std::any_cast<const std::string&>(value_to_bind);
             if (input == "cancel" || input == "Cancel" || input == "CANCEL")
             {
                 return FormReadResult::kCancelled;
@@ -69,8 +100,8 @@ template <typename T> FormReadResult Form::Read(T& target)
         {
         }
 
-        field->BindValue(target_any, *value_any, context_);
-        context_.SetValue(field->GetName(), *value_any);
+        field->BindValue(target_any, value_to_bind, context_);
+        context_.SetValue(field->GetName(), value_to_bind);
     }
     return FormReadResult::kSuccess;
 }

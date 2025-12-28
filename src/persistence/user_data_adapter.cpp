@@ -14,22 +14,24 @@ UserDataAdapter::UserDataAdapter(std::shared_ptr<data::CsvReader> reader,
 {
 }
 
-std::optional<services::UserRecord> UserDataAdapter::FindByEmail(std::string_view email) const
+std::optional<services::UserRecord> UserDataAdapter::FindByUsername(std::string_view username) const
 {
     std::optional<services::UserRecord> result;
 
-    ReadWithProcessor([email](const services::UserRecord& user) { return user.email == email; },
-                      [&result](const services::UserRecord& user) { result = user; });
+    ReadWithProcessor(
+        [username](const services::UserRecord& user) { return user.username == username; },
+        [&result](const services::UserRecord& user) { result = user; });
 
     return result;
 }
 
-bool UserDataAdapter::ExistsByEmail(std::string_view email) const
+bool UserDataAdapter::ExistsByUsername(std::string_view username) const
 {
     bool exists = false;
 
-    ReadWithProcessor([email](const services::UserRecord& user) { return user.email == email; },
-                      [&exists](const services::UserRecord&) { exists = true; });
+    ReadWithProcessor(
+        [username](const services::UserRecord& user) { return user.username == username; },
+        [&exists](const services::UserRecord&) { exists = true; });
 
     return exists;
 }
@@ -65,7 +67,7 @@ bool UserDataAdapter::Update(const services::UserRecord& user) const
 std::optional<services::UserRecord> UserDataAdapter::TransformToEntity(
     const data::CsvRecord& record) const
 {
-    if (record.fields.size() < 4)
+    if (record.fields.size() < 5)
     {
         return std::nullopt;
     }
@@ -75,9 +77,10 @@ std::optional<services::UserRecord> UserDataAdapter::TransformToEntity(
     try
     {
         user.id = std::stoi(record.fields[0]);
-        user.full_name = record.fields[1];
-        user.email = record.fields[2];
-        user.password_hash = std::stoull(record.fields[3]);
+        user.username = record.fields[1];
+        user.full_name = record.fields[2];
+        user.email = record.fields[3];
+        user.password_hash = std::stoull(record.fields[4]);
     }
     catch (const std::invalid_argument&)
     {
@@ -94,9 +97,10 @@ std::optional<services::UserRecord> UserDataAdapter::TransformToEntity(
 data::CsvRecord UserDataAdapter::TransformFromUserRecord(const services::UserRecord& user)
 {
     data::CsvRecord record;
-    record.fields.reserve(4);
+    record.fields.reserve(5);
 
     record.fields.push_back(std::to_string(user.id));
+    record.fields.push_back(user.username);
     record.fields.push_back(user.full_name);
     record.fields.push_back(user.email);
     record.fields.push_back(std::to_string(user.password_hash));

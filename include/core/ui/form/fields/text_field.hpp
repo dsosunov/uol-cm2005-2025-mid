@@ -15,8 +15,12 @@ class TextField : public Field
   public:
     TextField(std::string name, std::string prompt, ValueBinder binder,
               std::shared_ptr<Validator> validator = nullptr);
+    TextField(std::string name, std::string prompt, ValueBinder binder,
+              std::optional<std::string> default_value,
+              std::shared_ptr<Validator> validator = nullptr);
     const std::string& GetName() const override;
     const std::string& GetPrompt() const override;
+    std::optional<std::string> GetDefaultValue() const;
     std::optional<std::string> GetValidationHint() const override;
     ValidationResult Validate(const std::string& value, const FormContext& context) const override;
     void BindValue(std::any& target, const std::any& value,
@@ -25,6 +29,7 @@ class TextField : public Field
   private:
     std::string name_;
     std::string prompt_;
+    std::optional<std::string> default_value_;
     ValueBinder binder_;
     std::shared_ptr<Validator> validator_;
 };

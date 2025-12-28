@@ -4,7 +4,7 @@ namespace dto
 {
 struct UserLogin
 {
-    std::string email;
+    std::string username;
     std::string password;
 };
 } // namespace dto

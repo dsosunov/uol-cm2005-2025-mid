@@ -16,12 +16,14 @@ namespace services
 struct User
 {
     int id;
+    std::string username;
     std::string full_name;
     std::string email;
 };
 struct UserRecord
 {
     int id;
+    std::string username;
     std::string full_name;
     std::string email;
     size_t password_hash;
@@ -31,10 +33,12 @@ class UserService
   public:
     explicit UserService(std::shared_ptr<persistence::UserDataAdapter> adapter);
     ~UserService() = default;
-    utils::ServiceResult<User> RegisterUser(std::string_view full_name, std::string_view email,
+    std::string GenerateUsername() const;
+    utils::ServiceResult<User> RegisterUser(std::string_view username, std::string_view full_name,
+                                            std::string_view email,
                                             std::string_view password) const;
-    utils::ServiceResult<User> LoginUser(std::string_view email, std::string_view password);
-    utils::ServiceResult<void> ResetPassword(std::string_view email,
+    utils::ServiceResult<User> LoginUser(std::string_view username, std::string_view password);
+    utils::ServiceResult<void> ResetPassword(std::string_view username,
                                              std::string_view new_password) const;
     utils::ServiceResult<User> GetCurrentUser() const;
     utils::ServiceResult<void> Logout();

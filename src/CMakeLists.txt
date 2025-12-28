@@ -57,12 +57,14 @@ set(SOURCES
     forms/user/validators/email_validator.cpp
     forms/user/validators/password_validator.cpp
     forms/user/validators/full_name_validator.cpp
+    forms/user/validators/username_validator.cpp
     forms/user/fields/full_name_field.cpp
     forms/user/fields/email_field.cpp
     forms/user/fields/password_field.cpp
+    forms/user/fields/username_field.cpp
     forms/user/fields/login_password_field.cpp
-    forms/user/fields/login_email_field.cpp
-    forms/user/fields/reset_email_field.cpp
+    forms/user/fields/login_username_field.cpp
+    forms/user/fields/reset_username_field.cpp
     forms/user/fields/new_password_field.cpp
     forms/user/registration_form.cpp
     forms/user/login_form.cpp

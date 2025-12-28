@@ -20,8 +20,8 @@ class UserDataAdapter : public BaseDataAdapter<services::UserRecord>
   public:
     UserDataAdapter(std::shared_ptr<data::CsvReader> reader,
                     std::shared_ptr<data::CsvWriter> writer);
-    std::optional<services::UserRecord> FindByEmail(std::string_view email) const;
-    bool ExistsByEmail(std::string_view email) const;
+    std::optional<services::UserRecord> FindByUsername(std::string_view username) const;
+    bool ExistsByUsername(std::string_view username) const;
     bool Insert(services::UserRecord& user) const;
     bool Update(const services::UserRecord& user) const;
 

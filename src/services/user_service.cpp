@@ -4,6 +4,7 @@
 
 #include <format>
 #include <functional>
+#include <random>
 
 namespace services
 {
@@ -13,16 +14,46 @@ UserService::UserService(std::shared_ptr<persistence::UserDataAdapter> adapter)
 {
 }
 
-utils::ServiceResult<User> UserService::RegisterUser(std::string_view full_name,
+std::string UserService::GenerateUsername() const
+{
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    std::uniform_int_distribution<uint64_t> dist(0ULL, 9999999999ULL);
+
+    for (int attempt = 0; attempt < 200; ++attempt)
+    {
+        std::string username = std::format("{:010}", dist(gen));
+        if (!adapter_->ExistsByUsername(username))
+        {
+            return username;
+        }
+    }
+
+    // Fallback (extremely unlikely): scan sequentially.
+    for (uint64_t n = 0; n <= 9999999999ULL; ++n)
+    {
+        std::string username = std::format("{:010}", n);
+        if (!adapter_->ExistsByUsername(username))
+        {
+            return username;
+        }
+    }
+
+    return "0000000000";
+}
+
+utils::ServiceResult<User> UserService::RegisterUser(std::string_view username,
+                                                     std::string_view full_name,
                                                      std::string_view email,
                                                      std::string_view password) const
 {
-    if (adapter_->ExistsByEmail(email))
+    if (adapter_->ExistsByUsername(username))
     {
-        return utils::ServiceResult<User>::Failure("Email already registered");
+        return utils::ServiceResult<User>::Failure("Username already registered");
     }
 
-    UserRecord new_record{0, std::string(full_name), std::string(email), HashPassword(password)};
+    UserRecord new_record{0, std::string(username), std::string(full_name), std::string(email),
+                          HashPassword(password)};
 
     if (!adapter_->Insert(new_record))
     {
@@ -32,10 +63,11 @@ utils::ServiceResult<User> UserService::RegisterUser(std::string_view full_name,
     return utils::ServiceResult<User>::Success(ToUser(new_record), "Registration successful");
 }
 
-utils::ServiceResult<User> UserService::LoginUser(std::string_view email, std::string_view password)
+utils::ServiceResult<User> UserService::LoginUser(std::string_view username,
+                                                  std::string_view password)
 {
     size_t password_hash = HashPassword(password);
-    auto user_record = adapter_->FindByEmail(email);
+    auto user_record = adapter_->FindByUsername(username);
 
     if (!user_record)
     {
@@ -52,10 +84,10 @@ utils::ServiceResult<User> UserService::LoginUser(std::string_view email, std::s
     return utils::ServiceResult<User>::Success(*current_user_, "Login successful");
 }
 
-utils::ServiceResult<void> UserService::ResetPassword(std::string_view email,
+utils::ServiceResult<void> UserService::ResetPassword(std::string_view username,
                                                       std::string_view new_password) const
 {
-    auto user_record = adapter_->FindByEmail(email);
+    auto user_record = adapter_->FindByUsername(username);
 
     if (!user_record)
     {
@@ -99,7 +131,7 @@ size_t UserService::HashPassword(std::string_view password)
 
 User UserService::ToUser(const UserRecord& record)
 {
-    return User{record.id, record.full_name, record.email};
+    return User{record.id, record.username, record.full_name, record.email};
 }
 
 } // namespace services
