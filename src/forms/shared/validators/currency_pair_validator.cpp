@@ -81,7 +81,7 @@ form::ValidationResult CurrencyPairValidator::Validate(const std::string& value,
 
 std::optional<std::string> CurrencyPairValidator::GetHint() const
 {
-    return "Enter currency pair in format CUR1/CUR2 (e.g., USD/CAD)";
+    return "Enter currency pair in format CUR1/CUR2 (e.g., ETH/BTC)";
 }
 
 } // namespace forms::shared
