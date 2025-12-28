@@ -18,8 +18,8 @@ utils::ServiceResult<std::string> UserRemindUsernameAction::ExecuteService(
 }
 
 void UserRemindUsernameAction::DisplayResults(const utils::ServiceResult<std::string>& result,
-                                             const dto::UserRemindUsername& data,
-                                             ActionContext& context)
+                                              const dto::UserRemindUsername& data,
+                                              ActionContext& context)
 {
     if (result.success)
     {
