@@ -94,38 +94,6 @@ TradingService::TradingService(std::shared_ptr<persistence::TradingDataAdapter> 
 {
 }
 
-utils::ServiceResult<std::vector<CandlestickData>> TradingService::GetCandlestickData(
-    std::string_view currency_base, std::string_view currency_quote, dto::OrderType order_type,
-    [[maybe_unused]] dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
-    const std::optional<utils::TimePoint>& end_date) const
-{
-    std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
-    std::map<utils::TimePoint, CandlestickData> candlestick_map;
-    utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
-
-    adapter_->ReadWithProcessor(
-        order_type, [&product_pair, &date_filter, &candlestick_map](const OrderRecord& order) {
-            ProcessCandlestickOrder(order, product_pair, date_filter, candlestick_map);
-        });
-
-    if (candlestick_map.empty())
-    {
-        return utils::ServiceResult<std::vector<CandlestickData>>::Failure(
-            "No data found for the specified currency pair and date range");
-    }
-
-    std::vector<CandlestickData> candlesticks;
-    candlesticks.reserve(candlestick_map.size());
-
-    for (const auto& [timestamp, candle] : candlestick_map)
-    {
-        candlesticks.push_back(candle);
-    }
-
-    return utils::ServiceResult<std::vector<CandlestickData>>::Success(candlesticks,
-                                                                       "Data retrieved from CSV");
-}
-
 utils::ServiceResult<CandlestickSummaryData> TradingService::GetCandlestickSummary(
     std::string_view currency_base, std::string_view currency_quote, dto::OrderType order_type,
     dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,

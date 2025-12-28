@@ -73,6 +73,7 @@ struct PeriodSummary
     double avg_volume;
     int trade_count;
 };
+
 struct CandlestickSummaryData
 {
     std::vector<PeriodSummary> periods;
@@ -84,10 +85,6 @@ class TradingService
   public:
     explicit TradingService(std::shared_ptr<persistence::TradingDataAdapter> adapter);
     ~TradingService() = default;
-    utils::ServiceResult<std::vector<CandlestickData>> GetCandlestickData(
-        std::string_view currency_base, std::string_view currency_quote, dto::OrderType order_type,
-        dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
-        const std::optional<utils::TimePoint>& end_date) const;
     utils::ServiceResult<CandlestickSummaryData> GetCandlestickSummary(
         std::string_view currency_base, std::string_view currency_quote, dto::OrderType order_type,
         dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
