@@ -52,6 +52,12 @@ utils::ServiceResult<User> UserService::RegisterUser(std::string_view username,
         return utils::ServiceResult<User>::Failure("Username already registered");
     }
 
+    // Email must be unique so we can reliably remind usernames by email.
+    if (adapter_->ExistsByEmail(email))
+    {
+        return utils::ServiceResult<User>::Failure("Email already registered");
+    }
+
     UserRecord new_record{0, std::string(username), std::string(full_name), std::string(email),
                           HashPassword(password)};
 
@@ -61,6 +67,18 @@ utils::ServiceResult<User> UserService::RegisterUser(std::string_view username,
     }
 
     return utils::ServiceResult<User>::Success(ToUser(new_record), "Registration successful");
+}
+
+utils::ServiceResult<std::string> UserService::RemindUsername(std::string_view email) const
+{
+    auto user_record = adapter_->FindByEmail(email);
+
+    if (!user_record)
+    {
+        return utils::ServiceResult<std::string>::Failure("User not found");
+    }
+
+    return utils::ServiceResult<std::string>::Success(user_record->username, "Username found");
 }
 
 utils::ServiceResult<User> UserService::LoginUser(std::string_view username,

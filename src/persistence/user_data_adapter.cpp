@@ -36,6 +36,26 @@ bool UserDataAdapter::ExistsByUsername(std::string_view username) const
     return exists;
 }
 
+std::optional<services::UserRecord> UserDataAdapter::FindByEmail(std::string_view email) const
+{
+    std::optional<services::UserRecord> result;
+
+    ReadWithProcessor([email](const services::UserRecord& user) { return user.email == email; },
+                      [&result](const services::UserRecord& user) { result = user; });
+
+    return result;
+}
+
+bool UserDataAdapter::ExistsByEmail(std::string_view email) const
+{
+    bool exists = false;
+
+    ReadWithProcessor([email](const services::UserRecord& user) { return user.email == email; },
+                      [&exists](const services::UserRecord&) { exists = true; });
+
+    return exists;
+}
+
 bool UserDataAdapter::Insert(services::UserRecord& user) const
 {
     user.id = GetNextId();

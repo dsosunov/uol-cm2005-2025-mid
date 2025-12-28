@@ -37,6 +37,7 @@ class UserService
     utils::ServiceResult<User> RegisterUser(std::string_view username, std::string_view full_name,
                                             std::string_view email,
                                             std::string_view password) const;
+    utils::ServiceResult<std::string> RemindUsername(std::string_view email) const;
     utils::ServiceResult<User> LoginUser(std::string_view username, std::string_view password);
     utils::ServiceResult<void> ResetPassword(std::string_view username,
                                              std::string_view new_password) const;

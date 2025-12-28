@@ -5,6 +5,7 @@
 #include "actions/transaction/transaction_show_last5_action.hpp"
 #include "actions/user/user_login_action.hpp"
 #include "actions/user/user_register_action.hpp"
+#include "actions/user/user_remind_username_action.hpp"
 #include "actions/user/user_reset_action.hpp"
 #include "actions/wallet/wallet_deposit_action.hpp"
 #include "actions/wallet/wallet_view_balance_action.hpp"
@@ -27,7 +28,8 @@ std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
         .AddBranch("User")
         .AddLeaf("Register", std::make_unique<UserRegisterAction>(user_service))
         .AddLeaf("Login", std::make_unique<UserLoginAction>(user_service))
-        .AddLeaf("Reset / Remind", std::make_unique<UserResetAction>(user_service))
+        .AddLeaf("Remind a user name", std::make_unique<UserRemindUsernameAction>(user_service))
+        .AddLeaf("Change a password by name", std::make_unique<UserResetAction>(user_service))
         .Parent()
         .AddBranch("Wallet")
         .AddLeaf("View balance", std::make_unique<WalletViewBalanceAction>(wallet_service))

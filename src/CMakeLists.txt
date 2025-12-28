@@ -4,6 +4,7 @@ set(SOURCES
     actions/user/user_register_action.cpp
     actions/user/user_login_action.cpp
     actions/user/user_reset_action.cpp
+    actions/user/user_remind_username_action.cpp
     actions/wallet/wallet_view_balance_action.cpp
     actions/wallet/wallet_deposit_action.cpp
     actions/wallet/wallet_withdraw_action.cpp
@@ -66,9 +67,11 @@ set(SOURCES
     forms/user/fields/login_username_field.cpp
     forms/user/fields/reset_username_field.cpp
     forms/user/fields/new_password_field.cpp
+    forms/user/fields/remind_email_field.cpp
     forms/user/registration_form.cpp
     forms/user/login_form.cpp
     forms/user/reset_form.cpp
+    forms/user/remind_username_form.cpp
     forms/wallet/fields/currency_field.cpp
     forms/wallet/fields/amount_field.cpp
     forms/wallet/validators/currency_validator.cpp
