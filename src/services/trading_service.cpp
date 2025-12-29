@@ -130,30 +130,6 @@ utils::ServiceResult<CandlestickSummaryData> TradingService::GetCandlestickSumma
                                                                  "Summary generated successfully");
 }
 
-utils::ServiceResult<GenerationData> TradingService::GenerateTrades(int count) const
-{
-    if (count <= 0)
-    {
-        return utils::ServiceResult<GenerationData>::Failure("Count must be positive");
-    }
-
-    std::map<std::string, int, std::less<>> trades_by_pair = {
-        {"USD/EUR", count / 3},     {"GBP/USD", count / 5},  {"USD/JPY", count / 3},
-        {"EUR/GBP", count / 5},     {"CAD/USD", count / 10}, {"AUD/USD", count / 10},
-        {"USD/CHF", count / 10 + 1}};
-
-    int total_generated = 0;
-    for (const auto& [pair, cnt] : trades_by_pair)
-    {
-        total_generated += cnt;
-    }
-
-    double total_volume = count * 5000.0;
-    GenerationData data{count, trades_by_pair, total_volume};
-
-    return utils::ServiceResult<GenerationData>::Success(data, "Trades generated successfully");
-}
-
 utils::ServiceResult<std::set<std::string, std::less<>>> TradingService::GetAvailableProducts()
     const
 {

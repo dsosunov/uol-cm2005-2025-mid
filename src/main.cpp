@@ -1,5 +1,5 @@
-﻿#include "actions/generation/auto_generate_trades_action.hpp"
-#include "actions/summary/candlestick_summary_action.hpp"
+﻿#include "actions/summary/candlestick_summary_action.hpp"
+#include "actions/trading/trading_stub_action.hpp"
 #include "actions/transaction/transaction_activity_summary_action.hpp"
 #include "actions/transaction/transaction_show_by_currency_action.hpp"
 #include "actions/transaction/transaction_show_last5_action.hpp"
@@ -16,6 +16,7 @@
 #include "service_container.hpp"
 
 #include <memory>
+
 
 // Menu structure (auth-only nodes marked with [auth]):
 //
@@ -64,7 +65,7 @@ std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
                  std::make_unique<TransactionActivitySummaryAction>(transactions_service), true)
         .Parent()
         .Parent()
-        .AddLeaf("Trading", std::make_unique<AutoGenerateTradesAction>(trading_service), true)
+        .AddLeaf("Trading", std::make_unique<TradingStubAction>(), true)
         .AddLeaf("Log off", std::make_unique<UserLogoffAction>(user_service), true)
         .Build();
 }

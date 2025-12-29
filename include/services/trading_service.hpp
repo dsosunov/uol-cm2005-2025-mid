@@ -4,7 +4,6 @@
 #include "dto/constants.hpp"
 #include "services/date_query_options.hpp"
 
-#include <map>
 #include <memory>
 #include <optional>
 #include <set>
@@ -25,24 +24,6 @@ struct OrderRecord
     dto::OrderType order_type;
     double price;
     double amount;
-};
-struct GenerationData
-{
-    int trades_generated;
-    std::map<std::string, int, std::less<>> trades_by_pair;
-    double total_volume;
-
-    GenerationData() = default;
-    GenerationData(int trades_generated, std::map<std::string, int, std::less<>> trades_by_pair,
-                   double total_volume)
-        : trades_generated(trades_generated), trades_by_pair(std::move(trades_by_pair)),
-          total_volume(total_volume)
-    {
-    }
-    GenerationData(GenerationData&&) noexcept = default;
-    GenerationData& operator=(GenerationData&&) noexcept = default;
-    GenerationData(const GenerationData&) = default;
-    GenerationData& operator=(const GenerationData&) = default;
 };
 struct Candlestick
 {
@@ -71,7 +52,6 @@ class TradingService
         std::string_view currency_base, std::string_view currency_quote, dto::OrderType order_type,
         dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
         const std::optional<utils::TimePoint>& end_date) const;
-    utils::ServiceResult<GenerationData> GenerateTrades(int count) const;
     utils::ServiceResult<std::set<std::string, std::less<>>> GetAvailableProducts() const;
     utils::ServiceResult<std::vector<std::string>> GetDateSamples(
         dto::Timeframe timeframe, const DateQueryOptions& options) const;

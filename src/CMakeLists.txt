@@ -12,7 +12,7 @@ set(SOURCES
     actions/transaction/transaction_show_last5_action.cpp
     actions/transaction/transaction_show_by_currency_action.cpp
     actions/transaction/transaction_activity_summary_action.cpp
-    actions/generation/auto_generate_trades_action.cpp
+    actions/trading/trading_stub_action.cpp
     services/user_service.cpp
     services/wallet_service.cpp
     services/transactions_service.cpp
