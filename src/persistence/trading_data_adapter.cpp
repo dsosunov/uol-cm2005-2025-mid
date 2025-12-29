@@ -1,5 +1,6 @@
 ﻿#include "persistence/trading_data_adapter.hpp"
 
+#include "core/data/csv_writer.hpp"
 #include "core/utils/time_utils.hpp"
 #include "dto/constants.hpp"
 #include "services/trading_service.hpp"
@@ -9,6 +10,7 @@
 #include <charconv>
 #include <cmath>
 #include <string_view>
+
 
 namespace persistence
 {
@@ -63,7 +65,13 @@ std::optional<double> TradingDataAdapter::ParseStrictDouble(std::string_view tex
 }
 
 TradingDataAdapter::TradingDataAdapter(std::shared_ptr<data::CsvReader> reader)
-    : BaseDataAdapter<services::OrderRecord>(reader)
+    : TradingDataAdapter(std::move(reader), nullptr)
+{
+}
+
+TradingDataAdapter::TradingDataAdapter(std::shared_ptr<data::CsvReader> reader,
+                                       std::shared_ptr<data::CsvWriter> writer)
+    : BaseDataAdapter<services::OrderRecord>(std::move(reader)), writer_(std::move(writer))
 {
 }
 
@@ -88,6 +96,34 @@ bool TradingDataAdapter::WriteAll(data::CsvWriter& writer,
 {
     return BaseDataAdapter<services::OrderRecord>::WriteAll(writer, records,
                                                             TransformFromOrderRecord);
+}
+
+bool TradingDataAdapter::Add(const services::OrderRecord& record)
+{
+    if (!writer_)
+    {
+        return false;
+    }
+
+    auto csv = TransformFromOrderRecord(record);
+    return writer_->Write(csv) && writer_->Flush();
+}
+
+bool TradingDataAdapter::AddAll(const std::vector<services::OrderRecord>& records)
+{
+    if (!writer_)
+    {
+        return false;
+    }
+
+    std::vector<data::CsvRecord> csv_records;
+    csv_records.reserve(records.size());
+    for (const auto& r : records)
+    {
+        csv_records.push_back(TransformFromOrderRecord(r));
+    }
+
+    return writer_->WriteAll(csv_records) && writer_->Flush();
 }
 
 std::optional<services::OrderRecord> TradingDataAdapter::TransformToEntity(

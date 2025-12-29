@@ -1,5 +1,5 @@
 ﻿#include "actions/summary/candlestick_summary_action.hpp"
-#include "actions/trading/trading_stub_action.hpp"
+#include "actions/trading/trading_simulation_action.hpp"
 #include "actions/transaction/transaction_activity_summary_action.hpp"
 #include "actions/transaction/transaction_show_by_currency_action.hpp"
 #include "actions/transaction/transaction_show_last5_action.hpp"
@@ -13,10 +13,11 @@
 #include "actions/wallet/wallet_withdraw_action.hpp"
 #include "core/ui/menu/menu_builder.hpp"
 #include "core/ui/menu/menu_engine.hpp"
+#include "persistence/trading_data_adapter.hpp"
 #include "service_container.hpp"
+#include "services/trading_activities_service.hpp"
 
 #include <memory>
-
 
 // Menu structure (auth-only nodes marked with [auth]):
 //
@@ -43,6 +44,7 @@ std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
     auto wallet_service = container.Resolve<services::WalletService>();
     auto transactions_service = container.Resolve<services::TransactionsService>();
     auto trading_service = container.Resolve<services::TradingService>();
+    auto trading_activities_service = container.Resolve<services::TradingActivitiesService>();
 
     return MenuBuilder("Trading Platform")
         .AddLeaf("Register", std::make_unique<UserRegisterAction>(user_service))
@@ -65,7 +67,8 @@ std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
                  std::make_unique<TransactionActivitySummaryAction>(transactions_service), true)
         .Parent()
         .Parent()
-        .AddLeaf("Trading", std::make_unique<TradingStubAction>(), true)
+        .AddLeaf("Trading", std::make_unique<TradingSimulationAction>(trading_activities_service),
+                 true)
         .AddLeaf("Log off", std::make_unique<UserLogoffAction>(user_service), true)
         .Build();
 }

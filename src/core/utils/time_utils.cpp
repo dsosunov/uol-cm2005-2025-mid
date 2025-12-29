@@ -16,6 +16,8 @@ std::optional<TimePoint> ParseTimestamp(std::string_view str)
     std::tm tm = {};
     std::istringstream ss{std::string(str)};
 
+    int microseconds = 0;
+
     if (str.contains('/'))
     {
         char delim;
@@ -27,14 +29,40 @@ std::optional<TimePoint> ParseTimestamp(std::string_view str)
         tm.tm_year -= 1900;
         tm.tm_mon -= 1;
 
-        if (!ss.eof())
+        ss >> std::ws;
+        if (std::isdigit(ss.peek()))
         {
-            ss >> tm.tm_hour >> delim >> tm.tm_min >> delim >> tm.tm_sec;
+            char time_delim;
+            ss >> tm.tm_hour >> time_delim >> tm.tm_min >> time_delim >> tm.tm_sec;
             if (ss.fail())
             {
                 tm.tm_hour = 0;
                 tm.tm_min = 0;
                 tm.tm_sec = 0;
+            }
+
+            if (ss.peek() == '.')
+            {
+                ss.get();
+                std::string frac;
+                frac.reserve(6);
+                while (std::isdigit(ss.peek()) && frac.size() < 6)
+                {
+                    frac.push_back(static_cast<char>(ss.get()));
+                }
+                while (frac.size() < 6)
+                {
+                    frac.push_back('0');
+                }
+
+                try
+                {
+                    microseconds = std::stoi(frac);
+                }
+                catch (...)
+                {
+                    microseconds = 0;
+                }
             }
         }
     }
@@ -48,9 +76,47 @@ std::optional<TimePoint> ParseTimestamp(std::string_view str)
         }
         tm.tm_year -= 1900;
         tm.tm_mon -= 1;
+
         tm.tm_hour = 0;
         tm.tm_min = 0;
         tm.tm_sec = 0;
+
+        ss >> std::ws;
+        if (std::isdigit(ss.peek()))
+        {
+            char time_delim;
+            ss >> tm.tm_hour >> time_delim >> tm.tm_min >> time_delim >> tm.tm_sec;
+            if (ss.fail())
+            {
+                tm.tm_hour = 0;
+                tm.tm_min = 0;
+                tm.tm_sec = 0;
+            }
+
+            if (ss.peek() == '.')
+            {
+                ss.get();
+                std::string frac;
+                frac.reserve(6);
+                while (std::isdigit(ss.peek()) && frac.size() < 6)
+                {
+                    frac.push_back(static_cast<char>(ss.get()));
+                }
+                while (frac.size() < 6)
+                {
+                    frac.push_back('0');
+                }
+
+                try
+                {
+                    microseconds = std::stoi(frac);
+                }
+                catch (...)
+                {
+                    microseconds = 0;
+                }
+            }
+        }
     }
     else
     {
@@ -71,7 +137,12 @@ std::optional<TimePoint> ParseTimestamp(std::string_view str)
         return std::nullopt;
     }
 
-    return std::chrono::time_point_cast<std::chrono::microseconds>(days + hms);
+    auto tp = std::chrono::time_point_cast<std::chrono::microseconds>(days + hms);
+    if (microseconds != 0)
+    {
+        tp += std::chrono::microseconds{microseconds};
+    }
+    return tp;
 }
 
 std::string FormatDate(const TimePoint& tp)

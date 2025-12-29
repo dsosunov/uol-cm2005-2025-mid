@@ -1,5 +1,7 @@
 #include "forms/shared/validators/currency_validator.hpp"
 
+#include "core/utils/string_utils.hpp"
+
 #include <algorithm>
 #include <cctype>
 #include <format>
@@ -33,7 +35,13 @@ form::ValidationResult CurrencyValidator::Validate(const std::string& value,
 
 std::optional<std::string> CurrencyValidator::GetHint() const
 {
-    return "Enter currency code (e.g., BTC, ETH, USD)";
+    if (allowed_currencies_.empty())
+    {
+        return std::nullopt;
+    }
+
+    return std::format("Enter a currency code ({})",
+                       utils::StringUtils::Join(allowed_currencies_, ", "));
 }
 
 } // namespace forms::shared

@@ -13,10 +13,12 @@
 #include "persistence/user_data_adapter.hpp"
 #include "services/authentication_context.hpp"
 #include "services/authentication_service.hpp"
+#include "services/trading_activities_service.hpp"
 #include "services/trading_service.hpp"
 #include "services/transactions_service.hpp"
 #include "services/user_service.hpp"
 #include "services/wallet_service.hpp"
+
 
 ServiceContainer::ServiceContainer()
 {
@@ -24,7 +26,9 @@ ServiceContainer::ServiceContainer()
     auto auth_service = std::make_shared<services::AuthenticationService>(auth_context);
 
     auto csv_reader = std::make_shared<data::CsvReader>("data/20200317.csv");
-    auto trading_adapter = std::make_shared<persistence::TradingDataAdapter>(csv_reader);
+    auto csv_writer = std::make_shared<data::CsvWriter>("data/20200317.csv", true);
+    auto trading_adapter =
+        std::make_shared<persistence::TradingDataAdapter>(csv_reader, csv_writer);
 
     auto user_csv_reader = std::make_shared<data::CsvReader>("data/users.csv");
     auto user_csv_writer = std::make_shared<data::CsvWriter>("data/users.csv", false);
@@ -32,17 +36,20 @@ ServiceContainer::ServiceContainer()
         std::make_shared<persistence::UserDataAdapter>(user_csv_reader, user_csv_writer);
 
     auto transaction_csv_reader = std::make_shared<data::CsvReader>("data/transactions.csv");
-    auto transaction_csv_writer = std::make_shared<data::CsvWriter>("data/transactions.csv", false);
+    auto transaction_csv_writer = std::make_shared<data::CsvWriter>("data/transactions.csv", true);
     auto transaction_adapter = std::make_shared<persistence::TransactionDataAdapter>(
         transaction_csv_reader, transaction_csv_writer);
 
     Register(auth_context);
     Register(auth_service);
+    Register(trading_adapter);
 
     Register(std::make_shared<services::UserService>(user_adapter, auth_service));
     Register(std::make_shared<services::WalletService>(transaction_adapter, auth_service));
     Register(std::make_shared<services::TransactionsService>(transaction_adapter, auth_service));
     Register(std::make_shared<services::TradingService>(trading_adapter));
+    Register(std::make_shared<services::TradingActivitiesService>(
+        auth_service, Resolve<services::WalletService>(), trading_adapter));
 
     auto output = std::make_shared<StandardOutput>();
     auto input = std::make_shared<StandardInput>();

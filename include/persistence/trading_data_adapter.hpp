@@ -17,11 +17,17 @@ class TradingDataAdapter : public BaseDataAdapter<services::OrderRecord>
 {
   public:
     explicit TradingDataAdapter(std::shared_ptr<data::CsvReader> reader);
+    TradingDataAdapter(std::shared_ptr<data::CsvReader> reader,
+                       std::shared_ptr<data::CsvWriter> writer);
     void ReadWithProcessor(
         dto::OrderType order_type,
         const std::function<void(const services::OrderRecord&)>& processor) const;
     void ReadWithProcessor(
         const std::function<void(const services::OrderRecord&)>& processor) const;
+
+    bool Add(const services::OrderRecord& record);
+    bool AddAll(const std::vector<services::OrderRecord>& records);
+
     static bool WriteAll(data::CsvWriter& writer,
                          const std::vector<services::OrderRecord>& records);
 
@@ -30,6 +36,7 @@ class TradingDataAdapter : public BaseDataAdapter<services::OrderRecord>
         const data::CsvRecord& record) const override;
 
   private:
+    std::shared_ptr<data::CsvWriter> writer_;
     static data::CsvRecord TransformFromOrderRecord(const services::OrderRecord& order);
     static std::string_view TrimWhitespace(std::string_view text);
     static std::optional<double> ParseStrictDouble(std::string_view text);

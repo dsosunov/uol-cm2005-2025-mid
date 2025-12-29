@@ -12,11 +12,12 @@ set(SOURCES
     actions/transaction/transaction_show_last5_action.cpp
     actions/transaction/transaction_show_by_currency_action.cpp
     actions/transaction/transaction_activity_summary_action.cpp
-    actions/trading/trading_stub_action.cpp
+    actions/trading/trading_simulation_action.cpp
     services/user_service.cpp
     services/wallet_service.cpp
     services/transactions_service.cpp
     services/trading_service.cpp
+    services/trading_activities_service.cpp
     persistence/user_data_adapter.cpp
     persistence/trading_data_adapter.cpp
     persistence/transaction_data_adapter.cpp

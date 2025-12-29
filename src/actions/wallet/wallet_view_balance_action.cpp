@@ -44,22 +44,19 @@ void WalletViewBalanceAction::DisplayResults(
     }
     else
     {
+        WriteLine(std::format("{:<12} {:<12}", "Currency", "Balance"), context);
+        WriteLine(std::string(12 + 1 + 12, '-'), context);
+
         for (const auto& [currency, amount] : balances)
         {
-            std::string symbol = "$";
-            if (currency == "EUR")
-                symbol = "€";
-            else if (currency == "GBP")
-                symbol = "£";
-            else if (currency == "JPY")
-                symbol = "¥";
-            WriteLine(std::format("{}: {}{:.2f}", currency, symbol, amount), context);
+            WriteLine(std::format("{:<12} {:<12.2f}", currency, amount), context);
         }
         WriteEmptyLine(context);
         auto total_result = wallet_service_->GetTotalBalanceInUSD();
         if (total_result.success && total_result.data.has_value())
         {
-            WriteLine(std::format("Total (USD equivalent): ${:.2f}", *total_result.data), context);
+            WriteLine(std::format("Total (USD equivalent): {:.2f} USD", *total_result.data),
+                      context);
         }
     }
     DisplayResultFooter(context);

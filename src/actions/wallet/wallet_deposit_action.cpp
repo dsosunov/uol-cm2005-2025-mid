@@ -9,8 +9,8 @@ WalletDepositAction::WalletDepositAction(std::shared_ptr<services::WalletService
 
 wallet_forms::WalletOperationForm WalletDepositAction::CreateForm(ActionContext& context)
 {
-    std::set<std::string, std::less<>> allowed_currencies = {"USD", "EUR", "GBP", "JPY",
-                                                             "CAD", "AUD", "CHF", "CNY"};
+    // Deposit supports only trading currencies.
+    std::set<std::string, std::less<>> allowed_currencies = {"BTC", "DOGE", "ETH", "USDT"};
     return wallet_forms::WalletOperationForm(context.form_input_provider, context.output,
                                              allowed_currencies);
 }
@@ -31,11 +31,15 @@ void WalletDepositAction::DisplayResults(const utils::ServiceResult<double>& res
     if (result.success)
     {
         DisplaySuccessHeader(context);
-        DisplayField("Currency", data.currency, context);
-        if (result.data.has_value())
-        {
-            WriteLine(std::format("New Balance: {:.2f}", *result.data), context);
-        }
+        double amount = std::stod(data.amount);
+
+        WriteLine(std::format("{:<12} {:<12} {:<12}", "Currency", "Amount", "New Balance"),
+                  context);
+        WriteLine(std::string(12 + 1 + 12 + 1 + 12, '-'), context);
+
+        WriteLine(std::format("{:<12} {:<12.2f} {:<12.2f}", data.currency, amount,
+                              result.data.value_or(0.0)),
+                  context);
         DisplayResultFooter(context);
     }
     else

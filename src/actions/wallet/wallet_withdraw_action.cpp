@@ -9,8 +9,25 @@ WalletWithdrawAction::WalletWithdrawAction(std::shared_ptr<services::WalletServi
 
 wallet_forms::WalletOperationForm WalletWithdrawAction::CreateForm(ActionContext& context)
 {
-    std::set<std::string, std::less<>> allowed_currencies = {"USD", "EUR", "GBP", "JPY",
-                                                             "CAD", "AUD", "CHF", "CNY"};
+    std::set<std::string, std::less<>> allowed_currencies;
+
+    // Allow withdrawing only currencies present in the user's wallet history.
+    // (Effectively: currencies the user has deposited/held at some point.)
+    auto balances_result = wallet_service_->GetBalances();
+    if (balances_result.success && balances_result.data.has_value())
+    {
+        for (const auto& [currency, amount] : *balances_result.data)
+        {
+            (void)amount;
+            allowed_currencies.insert(currency);
+        }
+    }
+
+    if (allowed_currencies.empty())
+    {
+        WriteLine("No deposited currencies available to withdraw. Deposit first.", context);
+    }
+
     return wallet_forms::WalletOperationForm(context.form_input_provider, context.output,
                                              allowed_currencies);
 }
@@ -31,11 +48,15 @@ void WalletWithdrawAction::DisplayResults(const utils::ServiceResult<double>& re
     if (result.success)
     {
         DisplaySuccessHeader(context);
-        DisplayField("Currency", data.currency, context);
-        if (result.data.has_value())
-        {
-            WriteLine(std::format("New Balance: {:.2f}", *result.data), context);
-        }
+        double amount = std::stod(data.amount);
+
+        WriteLine(std::format("{:<12} {:<12} {:<12}", "Currency", "Amount", "New Balance"),
+                  context);
+        WriteLine(std::string(12 + 1 + 12 + 1 + 12, '-'), context);
+
+        WriteLine(std::format("{:<12} {:<12.2f} {:<12.2f}", data.currency, amount,
+                              result.data.value_or(0.0)),
+                  context);
         DisplayResultFooter(context);
     }
     else
