@@ -47,6 +47,26 @@ void TransactionActivitySummaryAction::DisplayResults(
     const auto& stats = *result.data;
     DisplaySuccessHeader(context);
 
+    DisplayField("Timeframe", dto::TimeframeToString(query.timeframe), context);
+
+    if (query.start_date.has_value() && query.end_date.has_value())
+    {
+        DisplayField("Span",
+                     std::format("{} - {}", utils::FormatDate(*query.start_date),
+                                 utils::FormatDate(*query.end_date)),
+                     context);
+    }
+    else if (query.start_date.has_value())
+    {
+        DisplayField("Start Date", utils::FormatDate(*query.start_date), context);
+    }
+    else if (query.end_date.has_value())
+    {
+        DisplayField("End Date", utils::FormatDate(*query.end_date), context);
+    }
+
+    WriteEmptyLine(context);
+
     WriteLine(std::format("{:<28} {}", "Metric", "Value"), context);
     WriteLine(std::string(28 + 1 + 24, '-'), context);
     WriteLine(

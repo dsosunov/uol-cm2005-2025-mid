@@ -51,12 +51,18 @@ void CandlestickSummaryAction::DisplayResults(
     DisplayField("Data Type", dto::OrderTypeToString(query.order_type), context);
     DisplayField("Timeframe", dto::TimeframeToString(query.timeframe), context);
 
-    if (query.start_date.has_value())
+    if (query.start_date.has_value() && query.end_date.has_value())
+    {
+        DisplayField("Span",
+                     std::format("{} - {}", utils::FormatDate(*query.start_date),
+                                 utils::FormatDate(*query.end_date)),
+                     context);
+    }
+    else if (query.start_date.has_value())
     {
         DisplayField("Start Date", utils::FormatDate(*query.start_date), context);
     }
-
-    if (query.end_date.has_value())
+    else if (query.end_date.has_value())
     {
         DisplayField("End Date", utils::FormatDate(*query.end_date), context);
     }
