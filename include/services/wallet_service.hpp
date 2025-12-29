@@ -8,7 +8,7 @@
 
 namespace services
 {
-class AuthenticationService;
+class UserService;
 }
 
 namespace persistence
@@ -22,17 +22,17 @@ class WalletService
   public:
     WalletService() = delete;
     WalletService(std::shared_ptr<persistence::TransactionDataAdapter> adapter,
-                  std::shared_ptr<services::AuthenticationService> auth_service);
+                  std::shared_ptr<services::UserService> user_service);
     ~WalletService() = default;
-    utils::ServiceResult<std::map<std::string, double, std::less<>>> GetBalances() const;
-    utils::ServiceResult<double> GetBalance(std::string_view currency) const;
-    utils::ServiceResult<double> GetTotalBalanceInUSD() const;
-    utils::ServiceResult<double> Deposit(std::string_view currency, double amount);
-    utils::ServiceResult<double> Withdraw(std::string_view currency, double amount);
+    utils::ServiceResult<std::map<std::string, double, std::less<>>> GetBalances(int user_id) const;
+    utils::ServiceResult<double> GetBalance(int user_id, std::string_view currency) const;
+    utils::ServiceResult<double> GetTotalBalanceInUSD(int user_id) const;
+    utils::ServiceResult<double> Deposit(int user_id, std::string_view currency, double amount);
+    utils::ServiceResult<double> Withdraw(int user_id, std::string_view currency, double amount);
 
   private:
     std::shared_ptr<persistence::TransactionDataAdapter> adapter_;
-    std::shared_ptr<services::AuthenticationService> auth_service_;
+    std::shared_ptr<services::UserService> user_service_;
     std::map<std::string, double, std::less<>> CalculateBalances(int user_id) const;
 };
 } // namespace services

@@ -155,6 +155,29 @@ utils::ServiceResult<bool> UserService::IsLoggedIn() const
     return {true, "Login status retrieved successfully", auth_service_->IsAuthenticated()};
 }
 
+utils::ServiceResult<void> UserService::ValidateUserId(int user_id) const
+{
+    if (user_id <= 0)
+    {
+        return utils::ServiceResult<void>::Failure("Invalid user id");
+    }
+
+    bool found = false;
+    adapter_->ReadWithProcessor(
+        [user_id](const UserRecord& record) { return record.id == user_id; },
+        [&found](const UserRecord& record) {
+            (void)record;
+            found = true;
+        });
+
+    if (!found)
+    {
+        return utils::ServiceResult<void>::Failure("User not found");
+    }
+
+    return utils::ServiceResult<void>::Success("User id is valid");
+}
+
 std::uint64_t UserService::HashPassword(std::string_view password)
 {
     // NOTE: I intentionally do NOT use std::hash here.

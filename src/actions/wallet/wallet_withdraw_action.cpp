@@ -11,9 +11,17 @@ wallet_forms::WalletOperationForm WalletWithdrawAction::CreateForm(ActionContext
 {
     std::set<std::string, std::less<>> allowed_currencies;
 
+    auto au = context.auth_service->GetAuthenticatedUser();
+    if (!au.success)
+    {
+        WriteLine("Please log in first to access the wallet", context);
+        return wallet_forms::WalletOperationForm(context.form_input_provider, context.output,
+                                                 allowed_currencies);
+    }
+
     // Allow withdrawing only currencies present in the user's wallet history.
     // (Effectively: currencies the user has deposited/held at some point.)
-    auto balances_result = wallet_service_->GetBalances();
+    auto balances_result = wallet_service_->GetBalances(au.data->id);
     if (balances_result.success && balances_result.data.has_value())
     {
         for (const auto& [currency, amount] : *balances_result.data)
@@ -34,13 +42,14 @@ wallet_forms::WalletOperationForm WalletWithdrawAction::CreateForm(ActionContext
 utils::ServiceResult<double> WalletWithdrawAction::ExecuteService(const dto::WalletOperation& data,
                                                                   ActionContext& context)
 {
-    if (!context.auth_service->IsAuthenticated())
+    auto au = context.auth_service->GetAuthenticatedUser();
+    if (!au.success)
     {
         return utils::ServiceResult<double>::Failure("Please log in first to access the wallet");
     }
 
     double amount = std::stod(data.amount);
-    return wallet_service_->Withdraw(data.currency, amount);
+    return wallet_service_->Withdraw(au.data->id, data.currency, amount);
 }
 void WalletWithdrawAction::DisplayResults(const utils::ServiceResult<double>& result,
                                           const dto::WalletOperation& data, ActionContext& context)

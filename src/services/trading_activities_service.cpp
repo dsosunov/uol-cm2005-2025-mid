@@ -81,6 +81,8 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
         return utils::ServiceResult<TradingSimulationSummary>::Failure(user.message);
     }
 
+    int user_id = user.data->id;
+
     std::set<std::string, std::less<>> product_pairs;
     std::map<std::string, services::OrderRecord, std::less<>> latest_by_pair;
 
@@ -207,7 +209,7 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
             continue;
         }
 
-        auto bal = wallet_service_->GetBalance(currency);
+        auto bal = wallet_service_->GetBalance(user_id, currency);
         if (!bal.success)
         {
             return utils::ServiceResult<TradingSimulationSummary>::Failure(bal.message);
@@ -239,13 +241,13 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
         if (effect.is_bid)
         {
             double spend = effect.price * effect.amount;
-            auto w = wallet_service_->Withdraw(effect.quote, spend);
+            auto w = wallet_service_->Withdraw(user_id, effect.quote, spend);
             if (!w.success)
             {
                 return utils::ServiceResult<TradingSimulationSummary>::Failure(w.message);
             }
 
-            auto d = wallet_service_->Deposit(effect.base, effect.amount);
+            auto d = wallet_service_->Deposit(user_id, effect.base, effect.amount);
             if (!d.success)
             {
                 return utils::ServiceResult<TradingSimulationSummary>::Failure(d.message);
@@ -253,14 +255,14 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
         }
         else
         {
-            auto w = wallet_service_->Withdraw(effect.base, effect.amount);
+            auto w = wallet_service_->Withdraw(user_id, effect.base, effect.amount);
             if (!w.success)
             {
                 return utils::ServiceResult<TradingSimulationSummary>::Failure(w.message);
             }
 
             double receive = effect.price * effect.amount;
-            auto d = wallet_service_->Deposit(effect.quote, receive);
+            auto d = wallet_service_->Deposit(user_id, effect.quote, receive);
             if (!d.success)
             {
                 return utils::ServiceResult<TradingSimulationSummary>::Failure(d.message);

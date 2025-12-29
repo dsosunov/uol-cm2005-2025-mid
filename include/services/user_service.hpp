@@ -51,6 +51,7 @@ class UserService
     utils::ServiceResult<User> GetCurrentUser() const;
     utils::ServiceResult<void> Logout();
     utils::ServiceResult<bool> IsLoggedIn() const;
+    utils::ServiceResult<void> ValidateUserId(int user_id) const;
 
   private:
     std::shared_ptr<persistence::UserDataAdapter> adapter_;

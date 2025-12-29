@@ -16,13 +16,14 @@ shared_forms::EmptyForm WalletViewBalanceAction::CreateForm(ActionContext& conte
 utils::ServiceResult<std::map<std::string, double, std::less<>>> WalletViewBalanceAction::
     ExecuteService(const EmptyRequest& data, ActionContext& context)
 {
-    if (!context.auth_service->IsAuthenticated())
+    auto au = context.auth_service->GetAuthenticatedUser();
+    if (!au.success)
     {
         return utils::ServiceResult<std::map<std::string, double, std::less<>>>::Failure(
             "Please log in first to access the wallet");
     }
 
-    return wallet_service_->GetBalances();
+    return wallet_service_->GetBalances(au.data->id);
 }
 
 void WalletViewBalanceAction::DisplayResults(
@@ -52,7 +53,15 @@ void WalletViewBalanceAction::DisplayResults(
             WriteLine(std::format("{:<12} {:<12.4f}", currency, amount), context);
         }
         WriteEmptyLine(context);
-        auto total_result = wallet_service_->GetTotalBalanceInUSD();
+
+        auto au = context.auth_service->GetAuthenticatedUser();
+        if (!au.success)
+        {
+            DisplayResultFooter(context);
+            return;
+        }
+
+        auto total_result = wallet_service_->GetTotalBalanceInUSD(au.data->id);
         if (total_result.success && total_result.data.has_value())
         {
             WriteLine(std::format("Total (USD equivalent): {:.4f} USD", *total_result.data),

@@ -2,8 +2,8 @@
 
 #include "core/utils/time_utils.hpp"
 #include "persistence/transaction_data_adapter.hpp"
-#include "services/authentication_service.hpp"
-#include "services/transactions_service.hpp"
+#include "services/transactions_service.hpp" // for WalletTransaction
+#include "services/user_service.hpp"
 
 #include <stdexcept>
 
@@ -11,16 +11,16 @@ namespace services
 {
 
 WalletService::WalletService(std::shared_ptr<persistence::TransactionDataAdapter> adapter,
-                             std::shared_ptr<services::AuthenticationService> auth_service)
-    : adapter_(std::move(adapter)), auth_service_(std::move(auth_service))
+                             std::shared_ptr<services::UserService> user_service)
+    : adapter_(std::move(adapter)), user_service_(std::move(user_service))
 {
     if (!adapter_)
     {
         throw std::invalid_argument("TransactionDataAdapter is required");
     }
-    if (!auth_service_)
+    if (!user_service_)
     {
-        throw std::invalid_argument("AuthenticationService is required");
+        throw std::invalid_argument("UserService is required");
     }
 }
 
@@ -45,30 +45,29 @@ std::map<std::string, double, std::less<>> WalletService::CalculateBalances(int 
     return balances;
 }
 
-utils::ServiceResult<std::map<std::string, double, std::less<>>> WalletService::GetBalances() const
+utils::ServiceResult<std::map<std::string, double, std::less<>>> WalletService::GetBalances(
+    int user_id) const
 {
-    auto user_result = auth_service_->GetAuthenticatedUser();
-    if (!user_result.success)
+    auto validate = user_service_->ValidateUserId(user_id);
+    if (!validate.success)
     {
         return utils::ServiceResult<std::map<std::string, double, std::less<>>>::Failure(
-            user_result.message);
+            validate.message);
     }
 
-    int effective_id = user_result.data.value().id;
-    auto balances = CalculateBalances(effective_id);
+    auto balances = CalculateBalances(user_id);
     return {true, "Balances retrieved successfully", balances};
 }
 
-utils::ServiceResult<double> WalletService::GetBalance(std::string_view currency) const
+utils::ServiceResult<double> WalletService::GetBalance(int user_id, std::string_view currency) const
 {
-    auto user_result = auth_service_->GetAuthenticatedUser();
-    if (!user_result.success)
+    auto validate = user_service_->ValidateUserId(user_id);
+    if (!validate.success)
     {
-        return utils::ServiceResult<double>::Failure(user_result.message);
+        return utils::ServiceResult<double>::Failure(validate.message);
     }
 
-    int effective_id = user_result.data.value().id;
-    auto balances = CalculateBalances(effective_id);
+    auto balances = CalculateBalances(user_id);
 
     if (auto it = balances.find(currency); it != balances.end())
     {
@@ -78,16 +77,15 @@ utils::ServiceResult<double> WalletService::GetBalance(std::string_view currency
     return {true, "No balance found for currency", 0.0};
 }
 
-utils::ServiceResult<double> WalletService::GetTotalBalanceInUSD() const
+utils::ServiceResult<double> WalletService::GetTotalBalanceInUSD(int user_id) const
 {
-    auto user_result = auth_service_->GetAuthenticatedUser();
-    if (!user_result.success)
+    auto validate = user_service_->ValidateUserId(user_id);
+    if (!validate.success)
     {
-        return utils::ServiceResult<double>::Failure(user_result.message);
+        return utils::ServiceResult<double>::Failure(validate.message);
     }
 
-    int effective_id = user_result.data.value().id;
-    auto balances = CalculateBalances(effective_id);
+    auto balances = CalculateBalances(user_id);
 
     if (auto it = balances.find("USD"); it != balances.end())
     {
@@ -97,55 +95,53 @@ utils::ServiceResult<double> WalletService::GetTotalBalanceInUSD() const
     return {true, "No USD balance found", 0.0};
 }
 
-utils::ServiceResult<double> WalletService::Deposit(std::string_view currency, double amount)
+utils::ServiceResult<double> WalletService::Deposit(int user_id, std::string_view currency,
+                                                    double amount)
 {
     if (amount <= 0)
     {
         return utils::ServiceResult<double>::Failure("Amount must be positive");
     }
 
-    auto user_result = auth_service_->GetAuthenticatedUser();
-    if (!user_result.success)
+    auto validate = user_service_->ValidateUserId(user_id);
+    if (!validate.success)
     {
-        return utils::ServiceResult<double>::Failure(user_result.message);
+        return utils::ServiceResult<double>::Failure(validate.message);
     }
-
-    int effective_id = user_result.data.value().id;
 
     WalletTransaction txn;
     txn.currency = std::string(currency);
     txn.type = "Deposit";
     txn.amount = amount;
     txn.timestamp = utils::Now();
-    txn.user_id = effective_id;
+    txn.user_id = user_id;
 
     if (!adapter_->Add(txn))
     {
         return utils::ServiceResult<double>::Failure("Failed to write transaction");
     }
 
-    auto balances = CalculateBalances(effective_id);
+    auto balances = CalculateBalances(user_id);
     double new_balance = balances[std::string(currency)];
 
     return utils::ServiceResult<double>::Success(new_balance, "Deposit successful");
 }
 
-utils::ServiceResult<double> WalletService::Withdraw(std::string_view currency, double amount)
+utils::ServiceResult<double> WalletService::Withdraw(int user_id, std::string_view currency,
+                                                     double amount)
 {
     if (amount <= 0)
     {
         return utils::ServiceResult<double>::Failure("Amount must be positive");
     }
 
-    auto user_result = auth_service_->GetAuthenticatedUser();
-    if (!user_result.success)
+    auto validate = user_service_->ValidateUserId(user_id);
+    if (!validate.success)
     {
-        return utils::ServiceResult<double>::Failure(user_result.message);
+        return utils::ServiceResult<double>::Failure(validate.message);
     }
 
-    int effective_id = user_result.data.value().id;
-
-    if (auto balance_result = GetBalance(currency);
+    if (auto balance_result = GetBalance(user_id, currency);
         !balance_result.success || balance_result.data.value() < amount)
     {
         return utils::ServiceResult<double>::Failure("Insufficient balance");
@@ -156,14 +152,14 @@ utils::ServiceResult<double> WalletService::Withdraw(std::string_view currency, 
     txn.type = "Withdraw";
     txn.amount = amount;
     txn.timestamp = utils::Now();
-    txn.user_id = effective_id;
+    txn.user_id = user_id;
 
     if (!adapter_->Add(txn))
     {
         return utils::ServiceResult<double>::Failure("Failed to write transaction");
     }
 
-    auto balances = CalculateBalances(effective_id);
+    auto balances = CalculateBalances(user_id);
     double new_balance = balances[std::string(currency)];
 
     return utils::ServiceResult<double>::Success(new_balance, "Withdrawal successful");

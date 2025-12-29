@@ -19,7 +19,6 @@
 #include "services/user_service.hpp"
 #include "services/wallet_service.hpp"
 
-
 ServiceContainer::ServiceContainer()
 {
     auto auth_context = std::make_shared<services::AuthenticationContext>();
@@ -44,8 +43,9 @@ ServiceContainer::ServiceContainer()
     Register(auth_service);
     Register(trading_adapter);
 
-    Register(std::make_shared<services::UserService>(user_adapter, auth_service));
-    Register(std::make_shared<services::WalletService>(transaction_adapter, auth_service));
+    auto user_service = std::make_shared<services::UserService>(user_adapter, auth_service);
+    Register(user_service);
+    Register(std::make_shared<services::WalletService>(transaction_adapter, user_service));
     Register(std::make_shared<services::TransactionsService>(transaction_adapter, auth_service));
     Register(std::make_shared<services::TradingService>(trading_adapter));
     Register(std::make_shared<services::TradingActivitiesService>(
