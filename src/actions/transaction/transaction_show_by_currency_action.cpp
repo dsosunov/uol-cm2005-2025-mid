@@ -5,16 +5,14 @@
 #include <format>
 
 TransactionShowByCurrencyAction::TransactionShowByCurrencyAction(
-    std::shared_ptr<services::TransactionsService> transactions_service,
-    std::shared_ptr<services::TradingService> trading_service)
-    : transactions_service_(std::move(transactions_service)),
-      trading_service_(std::move(trading_service))
+    std::shared_ptr<services::TransactionsService> transactions_service)
+    : transactions_service_(std::move(transactions_service))
 {
 }
 
 transaction_forms::CurrencyForm TransactionShowByCurrencyAction::CreateForm(ActionContext& context)
 {
-    auto result = trading_service_->GetAvailableProducts();
+    auto result = transactions_service_->GetAvailableCurrencies();
     std::set<std::string, std::less<>> allowed_currencies;
     if (result.success && result.data.has_value())
     {
@@ -48,6 +46,7 @@ void TransactionShowByCurrencyAction::DisplayResults(
 
     const auto& transactions = *result.data;
     DisplaySuccessHeader(context);
+
     DisplayField("Currency", data.currency, context);
     WriteEmptyLine(context);
 

@@ -59,9 +59,7 @@ std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
         .AddLeaf("Show last 5", std::make_unique<TransactionShowLast5Action>(transactions_service),
                  true)
         .AddLeaf("Show by currency",
-                 std::make_unique<TransactionShowByCurrencyAction>(transactions_service,
-                                                                   trading_service),
-                 true)
+                 std::make_unique<TransactionShowByCurrencyAction>(transactions_service), true)
         .AddLeaf("Show summary",
                  std::make_unique<TransactionActivitySummaryAction>(transactions_service), true)
         .Parent()

@@ -3,11 +3,14 @@
 #include "core/utils/time_utils.hpp"
 #include "dto/constants.hpp"
 
+#include <algorithm>
 #include <any>
+#include <cctype>
 #include <functional>
 #include <optional>
 #include <stdexcept>
 #include <string>
+
 
 namespace form
 {
@@ -34,6 +37,31 @@ template <typename T, typename FieldType> class SimpleFieldBinder
   private:
     MemberPtr member_ptr_;
 };
+
+template <typename T> class UppercaseStringFieldBinder
+{
+  public:
+    using MemberPtr = std::string T::*;
+
+    explicit UppercaseStringFieldBinder(MemberPtr member_ptr) : member_ptr_(member_ptr)
+    {
+    }
+
+    void operator()(std::any& target, const std::any& value, const FormContext&) const
+    {
+        auto& obj = std::any_cast<std::reference_wrapper<T>>(target).get();
+
+        std::string bound_value = std::any_cast<std::string>(value);
+        std::transform(bound_value.begin(), bound_value.end(), bound_value.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
+
+        obj.*member_ptr_ = std::move(bound_value);
+    }
+
+  private:
+    MemberPtr member_ptr_;
+};
+
 template <typename T> class DateFieldBinder
 {
   public:

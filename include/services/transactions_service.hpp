@@ -6,10 +6,10 @@
 
 #include <memory>
 #include <optional>
+#include <set>
 #include <string>
 #include <string_view>
 #include <vector>
-
 
 namespace services
 {
@@ -52,6 +52,8 @@ class TransactionsService
 
     utils::ServiceResult<std::vector<std::string>> GetDateSamples(
         dto::Timeframe timeframe, const DateQueryOptions& options) const;
+
+    utils::ServiceResult<std::set<std::string, std::less<>>> GetAvailableCurrencies() const;
 
   private:
     std::shared_ptr<persistence::TransactionDataAdapter> adapter_;

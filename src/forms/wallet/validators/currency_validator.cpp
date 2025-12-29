@@ -1,5 +1,7 @@
 ﻿#include "forms/wallet/validators/currency_validator.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <format>
 
 namespace wallet_forms
@@ -13,7 +15,11 @@ CurrencyValidator::CurrencyValidator(std::set<std::string, std::less<>> allowed_
 form::ValidationResult CurrencyValidator::Validate(const std::string& value,
                                                    const form::FormContext& context) const
 {
-    if (!allowed_currencies_.contains(value))
+    std::string upper_value = value;
+    std::transform(upper_value.begin(), upper_value.end(), upper_value.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
+
+    if (!allowed_currencies_.contains(upper_value))
     {
         return form::ValidationResult::Invalid(std::format("Unknown currency: {}", value));
     }

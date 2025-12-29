@@ -182,4 +182,27 @@ utils::ServiceResult<std::vector<std::string>> TransactionsService::GetDateSampl
     return {true, "Date samples retrieved successfully", filtered};
 }
 
+utils::ServiceResult<std::set<std::string, std::less<>>> TransactionsService::
+    GetAvailableCurrencies() const
+{
+    auto user_result = auth_service_->GetAuthenticatedUser();
+    if (!user_result.success)
+    {
+        return utils::ServiceResult<std::set<std::string, std::less<>>>::Failure(
+            user_result.message);
+    }
+
+    int effective_id = user_result.data.value().id;
+
+    std::set<std::string, std::less<>> currencies;
+    adapter_->ReadWithProcessor([&currencies, effective_id](const WalletTransaction& transaction) {
+        if (transaction.user_id == effective_id)
+        {
+            currencies.insert(transaction.currency);
+        }
+    });
+
+    return {true, "Available currencies retrieved successfully", currencies};
+}
+
 } // namespace services

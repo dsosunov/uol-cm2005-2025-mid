@@ -15,6 +15,11 @@ CurrencyValidator::CurrencyValidator(std::set<std::string, std::less<>> allowed_
 form::ValidationResult CurrencyValidator::Validate(const std::string& value,
                                                    const form::FormContext& context) const
 {
+    if (allowed_currencies_.empty())
+    {
+        return form::ValidationResult::Valid();
+    }
+
     std::string upper_value = value;
     std::transform(upper_value.begin(), upper_value.end(), upper_value.begin(), ::toupper);
 

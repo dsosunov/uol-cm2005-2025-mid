@@ -2,7 +2,6 @@
 #include "core/actions/form_based_action.hpp"
 #include "dto/transaction_query.hpp"
 #include "forms/transaction/currency_form.hpp"
-#include "services/trading_service.hpp"
 #include "services/transactions_service.hpp"
 
 #include <memory>
@@ -15,8 +14,7 @@ class TransactionShowByCurrencyAction
 {
   public:
     explicit TransactionShowByCurrencyAction(
-        std::shared_ptr<services::TransactionsService> transactions_service,
-        std::shared_ptr<services::TradingService> trading_service);
+        std::shared_ptr<services::TransactionsService> transactions_service);
 
   protected:
     transaction_forms::CurrencyForm CreateForm(ActionContext& context) override;
@@ -32,5 +30,4 @@ class TransactionShowByCurrencyAction
 
   private:
     std::shared_ptr<services::TransactionsService> transactions_service_;
-    std::shared_ptr<services::TradingService> trading_service_;
 };
