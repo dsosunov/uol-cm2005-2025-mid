@@ -14,6 +14,8 @@ FetchContent_MakeAvailable(googletest)
 add_executable(menu_tests
     test_full_name_validator.cpp
     test_menu_auth_visibility.cpp
+    test_timeframe_date_binders.cpp
+    test_candlestick_service_e2e.cpp
 )
 
 # Link against gtest and the MenuSystemLib library

@@ -38,7 +38,7 @@ void CandlestickSummaryAction::DisplayResults(
         return;
     }
 
-    if (!result.data.has_value() || result.data->periods.empty())
+    if (!result.data.has_value() || result.data->candlesticks.empty())
     {
         DisplayFailureHeader("No data available", context);
         return;
@@ -71,7 +71,7 @@ void CandlestickSummaryAction::DisplayResults(
               context);
     WriteLine(std::string(12 + 15 + 15 + 15 + 15 + 15 + 15 + 10 + 7, '-'), context);
 
-    for (const auto& period : result.data->periods)
+    for (const auto& period : result.data->candlesticks)
     {
         WriteLine(
             std::format("{:<12} {:<15.4f} {:<15.4f} {:<15.4f} {:<15.4f} {:<15.4f} {:<15.4f} {:<10}",
@@ -81,5 +81,5 @@ void CandlestickSummaryAction::DisplayResults(
     }
 
     WriteEmptyLine(context);
-    WriteLine(std::format("Total periods analyzed: {}", result.data->periods.size()), context);
+    WriteLine(std::format("Total periods analyzed: {}", result.data->candlesticks.size()), context);
 }

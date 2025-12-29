@@ -114,16 +114,17 @@ utils::ServiceResult<CandlestickSummaryData> TradingService::GetCandlestickSumma
             "No data found for the specified currency pair and date range");
     }
 
-    std::vector<PeriodSummary> periods;
-    periods.reserve(aggregated_data.size());
+    std::vector<Candlestick> candlesticks;
+    candlesticks.reserve(aggregated_data.size());
     for (const auto& [period, stats] : aggregated_data)
     {
-        periods.emplace_back(period, stats.open, stats.high, stats.low, stats.close,
-                             stats.total_volume, stats.total_volume / stats.count, stats.count);
+        candlesticks.emplace_back(period, stats.open, stats.high, stats.low, stats.close,
+                                  stats.total_volume, stats.total_volume / stats.count,
+                                  stats.count);
     }
 
     CandlestickSummaryData data{
-        periods, std::string(currency_base) + "/" + std::string(currency_quote), timeframe};
+        candlesticks, std::string(currency_base) + "/" + std::string(currency_quote), timeframe};
 
     return utils::ServiceResult<CandlestickSummaryData>::Success(data,
                                                                  "Summary generated successfully");

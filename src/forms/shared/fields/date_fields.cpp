@@ -11,7 +11,7 @@ template <typename TDTO>
 StartDateField<TDTO>::StartDateField(std::shared_ptr<form::DataSource> data_source,
                                      MemberPtr member_ptr)
     : form::SelectionField("start_date", "Select start date", std::move(data_source),
-                           form::DateFieldBinder<TDTO>(member_ptr))
+                           form::StartDateFieldBinder<TDTO>(member_ptr))
 {
 }
 
@@ -19,7 +19,7 @@ template <typename TDTO>
 EndDateField<TDTO>::EndDateField(std::shared_ptr<form::DataSource> data_source,
                                  MemberPtr member_ptr)
     : form::SelectionField("end_date", "Select end_date", std::move(data_source),
-                           form::DateFieldBinder<TDTO>(member_ptr))
+                           form::EndDateFieldBinder<TDTO>(member_ptr))
 {
 }
 

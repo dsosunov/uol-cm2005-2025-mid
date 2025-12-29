@@ -12,7 +12,6 @@
 #include <string_view>
 #include <vector>
 
-
 namespace persistence
 {
 class TradingDataAdapter;
@@ -26,20 +25,6 @@ struct OrderRecord
     dto::OrderType order_type;
     double price;
     double amount;
-};
-struct CandlestickData
-{
-    utils::TimePoint timestamp;
-    double open;
-    double high;
-    double low;
-    double close;
-    double volume;
-};
-struct CandlestickMetadata
-{
-    std::string product_pair;
-    dto::Timeframe timeframe;
 };
 struct GenerationData
 {
@@ -59,7 +44,7 @@ struct GenerationData
     GenerationData(const GenerationData&) = default;
     GenerationData& operator=(const GenerationData&) = default;
 };
-struct PeriodSummary
+struct Candlestick
 {
     std::string period;
     double open;
@@ -73,7 +58,7 @@ struct PeriodSummary
 
 struct CandlestickSummaryData
 {
-    std::vector<PeriodSummary> periods;
+    std::vector<Candlestick> candlesticks;
     std::string product_pair;
     dto::Timeframe timeframe;
 };
