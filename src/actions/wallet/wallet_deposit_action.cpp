@@ -37,7 +37,7 @@ void WalletDepositAction::DisplayResults(const utils::ServiceResult<double>& res
                   context);
         WriteLine(std::string(12 + 1 + 12 + 1 + 12, '-'), context);
 
-        WriteLine(std::format("{:<12} {:<12.2f} {:<12.2f}", data.currency, amount,
+        WriteLine(std::format("{:<12} {:<12.4f} {:<12.4f}", data.currency, amount,
                               result.data.value_or(0.0)),
                   context);
         DisplayResultFooter(context);

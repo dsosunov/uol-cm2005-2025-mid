@@ -63,7 +63,7 @@ void TransactionShowByCurrencyAction::DisplayResults(
         int index = 1;
         for (const auto& transaction : transactions)
         {
-            WriteLine(std::format("{:<4} {:<14} {:<12.2f} {:<20}", index, transaction.type,
+            WriteLine(std::format("{:<4} {:<14} {:<12.4f} {:<20}", index, transaction.type,
                                   transaction.amount,
                                   utils::FormatTimestamp(transaction.timestamp)),
                       context);

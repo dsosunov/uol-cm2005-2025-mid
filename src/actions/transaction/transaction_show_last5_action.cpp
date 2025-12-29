@@ -57,7 +57,7 @@ void TransactionShowLast5Action::DisplayResults(
         int index = 1;
         for (const auto& transaction : transactions)
         {
-            WriteLine(std::format("{:<4} {:<12} {:<12} {:<12.2f} {:<20}", index,
+            WriteLine(std::format("{:<4} {:<12} {:<12} {:<12.4f} {:<20}", index,
                                   transaction.currency, transaction.type, transaction.amount,
                                   utils::FormatTimestamp(transaction.timestamp)),
                       context);

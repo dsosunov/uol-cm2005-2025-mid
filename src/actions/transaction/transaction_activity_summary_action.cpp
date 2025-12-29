@@ -72,9 +72,9 @@ void TransactionActivitySummaryAction::DisplayResults(
     WriteLine(
         std::format("{:<28} {}", "Total Transactions", std::format("{}", stats.total_transactions)),
         context);
-    WriteLine(std::format("{:<28} {}", "Total Volume", std::format("${:.2f}", stats.total_volume)),
+    WriteLine(std::format("{:<28} {}", "Total Volume", std::format("${:.4f}", stats.total_volume)),
               context);
     WriteLine(std::format("{:<28} {}", "Average Transaction Size",
-                          std::format("${:.2f}", stats.average_transaction_size)),
+                          std::format("${:.4f}", stats.average_transaction_size)),
               context);
 }

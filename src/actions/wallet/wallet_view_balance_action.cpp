@@ -49,13 +49,13 @@ void WalletViewBalanceAction::DisplayResults(
 
         for (const auto& [currency, amount] : balances)
         {
-            WriteLine(std::format("{:<12} {:<12.2f}", currency, amount), context);
+            WriteLine(std::format("{:<12} {:<12.4f}", currency, amount), context);
         }
         WriteEmptyLine(context);
         auto total_result = wallet_service_->GetTotalBalanceInUSD();
         if (total_result.success && total_result.data.has_value())
         {
-            WriteLine(std::format("Total (USD equivalent): {:.2f} USD", *total_result.data),
+            WriteLine(std::format("Total (USD equivalent): {:.4f} USD", *total_result.data),
                       context);
         }
     }
