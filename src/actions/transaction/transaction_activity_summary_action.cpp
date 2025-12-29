@@ -32,7 +32,8 @@ utils::ServiceResult<services::ActivityStats> TransactionActivitySummaryAction::
             "Please log in first to view transactions");
     }
 
-    return transactions_service_->GetActivitySummary(data.timeframe, std::nullopt, std::nullopt);
+    return transactions_service_->GetActivitySummary(data.timeframe, data.start_date,
+                                                     data.end_date);
 }
 
 void TransactionActivitySummaryAction::DisplayResults(
