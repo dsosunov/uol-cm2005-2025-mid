@@ -1,11 +1,14 @@
 ﻿#include "core/ui/menu/menu_renderer.hpp"
 
 #include "core/utils/output_formatter.hpp"
+#include "services/authentication_service.hpp"
 
 #include <format>
 #include <string>
 
-MenuRenderer::MenuRenderer(std::shared_ptr<Output> output) : output_(std::move(output))
+MenuRenderer::MenuRenderer(std::shared_ptr<Output> output,
+                           std::shared_ptr<services::AuthenticationService> auth_service)
+    : output_(std::move(output)), auth_service_(std::move(auth_service))
 {
 }
 
@@ -36,27 +39,39 @@ void MenuRenderer::RenderMenu(const MenuNode& current, std::string_view status_l
         output_->WriteLine(std::string(status_line));
     }
 
-    const auto& items = current.Children();
-    for (size_t i = 0; i < items.size(); ++i)
+    const bool is_authenticated = auth_service_ && auth_service_->IsAuthenticated();
+
+    std::vector<const MenuNode*> visible_items;
+    visible_items.reserve(current.Children().size());
+    for (const auto& child : current.Children())
+    {
+        if (child->IsVisibleTo(is_authenticated))
+        {
+            visible_items.push_back(child.get());
+        }
+    }
+
+    for (size_t i = 0; i < visible_items.size(); ++i)
     {
         const size_t index = i + 1;
         const bool is_default = default_option.has_value() && *default_option == index;
-        output_->WriteLine(
-            std::format("{}) {}{}", index, items[i]->Title(), is_default ? " [default]" : ""));
+        output_->WriteLine(std::format("{}) {}{}", index, visible_items[i]->Title(),
+                                       is_default ? " [default]" : ""));
     }
 
     output_->WriteLine(std::format("0) {}", current.IsRoot() ? "Exit" : "Back"));
     output_->WriteLine("───────────────────────────────────────");
 
-    if (default_option.has_value() && *default_option >= 1 && *default_option <= items.size())
+    if (default_option.has_value() && *default_option >= 1 &&
+        *default_option <= visible_items.size())
     {
-        const auto& label = items[*default_option - 1]->Title();
+        const auto& label = visible_items[*default_option - 1]->Title();
         output_->Write(std::format("Choose an option (0-{}). Press Enter for default ({}: {}): ",
-                                   items.size(), *default_option, label));
+                                   visible_items.size(), *default_option, label));
     }
     else
     {
-        output_->Write(std::format("Choose an option (0-{}): ", items.size()));
+        output_->Write(std::format("Choose an option (0-{}): ", visible_items.size()));
     }
 }
 

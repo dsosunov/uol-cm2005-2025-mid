@@ -11,7 +11,7 @@ class MenuNode
 {
   public:
     explicit MenuNode(std::string title, std::unique_ptr<MenuAction> action = nullptr,
-                      std::any value = std::any());
+                      std::any value = std::any(), bool requires_authenticated_user = false);
     const std::string& Title() const;
     const std::any& Value() const;
     MenuNode& AddChild(std::unique_ptr<MenuNode> child);
@@ -21,6 +21,8 @@ class MenuNode
     MenuNode* Parent() const;
     void ExecuteAction(ActionContext& context) const;
     const std::vector<std::unique_ptr<MenuNode>>& Children() const;
+    bool RequiresAuthenticatedUser() const;
+    bool IsVisibleTo(bool is_authenticated) const;
 
   private:
     std::string title_;
@@ -28,4 +30,5 @@ class MenuNode
     std::unique_ptr<MenuAction> action_;
     std::vector<std::unique_ptr<MenuNode>> children_;
     MenuNode* parent_ = nullptr;
+    bool requires_authenticated_user_ = false;
 };

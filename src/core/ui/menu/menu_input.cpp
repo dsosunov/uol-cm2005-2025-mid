@@ -1,13 +1,17 @@
 ﻿#include "core/ui/menu/menu_input.hpp"
 
+#include "services/authentication_service.hpp"
+
 #include <algorithm>
 #include <cctype>
 #include <ranges>
 #include <string>
 #include <string_view>
 
-MenuInput::MenuInput(std::shared_ptr<Input> input, std::shared_ptr<MenuRenderer> renderer)
-    : input_(std::move(input)), renderer_(std::move(renderer))
+MenuInput::MenuInput(std::shared_ptr<Input> input, std::shared_ptr<MenuRenderer> renderer,
+                     std::shared_ptr<services::AuthenticationService> auth_service)
+    : input_(std::move(input)), renderer_(std::move(renderer)),
+      auth_service_(std::move(auth_service))
 {
 }
 
@@ -46,7 +50,18 @@ MenuNode* MenuInput::ReadSelection(const MenuNode& current,
             }
         }
 
-        const size_t childCount = current.Children().size();
+        const bool is_authenticated = auth_service_ && auth_service_->IsAuthenticated();
+        std::vector<MenuNode*> visible_children;
+        visible_children.reserve(current.Children().size());
+        for (const auto& child : current.Children())
+        {
+            if (child->IsVisibleTo(is_authenticated))
+            {
+                visible_children.push_back(child.get());
+            }
+        }
+
+        const size_t childCount = visible_children.size();
 
         if (option == 0)
         {
@@ -62,6 +77,6 @@ MenuNode* MenuInput::ReadSelection(const MenuNode& current,
             continue;
         }
 
-        return current.Children()[static_cast<size_t>(index)].get();
+        return visible_children[static_cast<size_t>(index)];
     }
 }

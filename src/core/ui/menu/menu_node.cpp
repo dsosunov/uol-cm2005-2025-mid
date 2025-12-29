@@ -2,8 +2,10 @@
 
 #include "core/actions/menu_action.hpp"
 
-MenuNode::MenuNode(std::string title, std::unique_ptr<MenuAction> action, std::any value)
-    : title_(std::move(title)), value_(std::move(value)), action_(std::move(action))
+MenuNode::MenuNode(std::string title, std::unique_ptr<MenuAction> action, std::any value,
+                   bool requires_authenticated_user)
+    : title_(std::move(title)), value_(std::move(value)), action_(std::move(action)),
+      requires_authenticated_user_(requires_authenticated_user)
 {
 }
 
@@ -54,4 +56,14 @@ void MenuNode::ExecuteAction(ActionContext& context) const
 const std::vector<std::unique_ptr<MenuNode>>& MenuNode::Children() const
 {
     return children_;
+}
+
+bool MenuNode::RequiresAuthenticatedUser() const
+{
+    return requires_authenticated_user_;
+}
+
+bool MenuNode::IsVisibleTo(bool is_authenticated) const
+{
+    return !requires_authenticated_user_ || is_authenticated;
 }

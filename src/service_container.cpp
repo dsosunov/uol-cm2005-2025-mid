@@ -46,8 +46,8 @@ ServiceContainer::ServiceContainer()
 
     auto output = std::make_shared<StandardOutput>();
     auto input = std::make_shared<StandardInput>();
-    auto renderer = std::make_shared<MenuRenderer>(output);
-    auto menu_input = std::make_shared<MenuInput>(input, renderer);
+    auto renderer = std::make_shared<MenuRenderer>(output, auth_service);
+    auto menu_input = std::make_shared<MenuInput>(input, renderer, auth_service);
 
     auto form_input_provider =
         std::make_shared<form::MenuFormInputProvider>(input, renderer, menu_input);
