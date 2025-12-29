@@ -4,6 +4,8 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
+#include <string_view>
 
 namespace services
 {
@@ -29,6 +31,7 @@ class TradingDataAdapter : public BaseDataAdapter<services::OrderRecord>
 
   private:
     static data::CsvRecord TransformFromOrderRecord(const services::OrderRecord& order);
-    static std::string CleanNumericField(const std::string& field);
+    static std::string_view TrimWhitespace(std::string_view text);
+    static std::optional<double> ParseStrictDouble(std::string_view text);
 };
 } // namespace persistence

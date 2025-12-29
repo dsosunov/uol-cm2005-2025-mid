@@ -5,9 +5,62 @@
 #include "services/trading_service.hpp"
 
 #include <algorithm>
+#include <cctype>
+#include <charconv>
+#include <cmath>
+#include <string_view>
 
 namespace persistence
 {
+
+std::string_view TradingDataAdapter::TrimWhitespace(std::string_view text)
+{
+    while (!text.empty() && std::isspace(static_cast<unsigned char>(text.front())))
+    {
+        text.remove_prefix(1);
+    }
+
+    while (!text.empty() && std::isspace(static_cast<unsigned char>(text.back())))
+    {
+        text.remove_suffix(1);
+    }
+
+    return text;
+}
+
+std::optional<double> TradingDataAdapter::ParseStrictDouble(std::string_view text)
+{
+    text = TrimWhitespace(text);
+    if (text.empty())
+    {
+        return std::nullopt;
+    }
+
+    // Fast, allocation-free parse. from_chars does not skip whitespace, so we trimmed above.
+    double value = 0.0;
+    const char* begin = text.data();
+    const char* end = text.data() + text.size();
+    auto [ptr, ec] = std::from_chars(begin, end, value, std::chars_format::general);
+    if (ec != std::errc{})
+    {
+        return std::nullopt;
+    }
+
+    std::string_view remainder{ptr, static_cast<std::size_t>(end - ptr)};
+    remainder = TrimWhitespace(remainder);
+    if (!remainder.empty())
+    {
+        // Reject values like "0.021873a78" instead of mutating them.
+        return std::nullopt;
+    }
+
+    if (!std::isfinite(value))
+    {
+        return std::nullopt;
+    }
+
+    return value;
+}
 
 TradingDataAdapter::TradingDataAdapter(std::shared_ptr<data::CsvReader> reader)
     : BaseDataAdapter<services::OrderRecord>(reader)
@@ -68,29 +121,17 @@ std::optional<services::OrderRecord> TradingDataAdapter::TransformToEntity(
 
     order.timestamp = *parsed_time;
 
-    try
-    {
-        std::string clean_price = CleanNumericField(record.fields[3]);
-        std::string clean_amount = CleanNumericField(record.fields[4]);
-
-        if (clean_price.empty() || clean_amount.empty())
-        {
-            return std::nullopt;
-        }
-
-        order.price = std::stod(clean_price);
-        order.amount = std::stod(clean_amount);
-
-        return order;
-    }
-    catch (const std::invalid_argument&)
+    auto parsed_price = ParseStrictDouble(record.fields[3]);
+    auto parsed_amount = ParseStrictDouble(record.fields[4]);
+    if (!parsed_price.has_value() || !parsed_amount.has_value())
     {
         return std::nullopt;
     }
-    catch (const std::out_of_range&)
-    {
-        return std::nullopt;
-    }
+
+    order.price = *parsed_price;
+    order.amount = *parsed_amount;
+
+    return order;
 }
 
 data::CsvRecord TradingDataAdapter::TransformFromOrderRecord(const services::OrderRecord& order)
@@ -113,13 +154,6 @@ data::CsvRecord TradingDataAdapter::TransformFromOrderRecord(const services::Ord
     record.fields.push_back(std::to_string(order.amount));
 
     return record;
-}
-
-std::string TradingDataAdapter::CleanNumericField(const std::string& field)
-{
-    std::string cleaned = field;
-    std::erase_if(cleaned, [](char c) { return !std::isdigit(c) && c != '.' && c != '-'; });
-    return cleaned;
 }
 
 } // namespace persistence
