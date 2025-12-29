@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "core/utils/service_result.hpp"
 
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
@@ -31,7 +32,7 @@ struct UserRecord
     std::string username;
     std::string full_name;
     std::string email;
-    size_t password_hash;
+    std::uint64_t password_hash;
 };
 class UserService
 {
@@ -54,7 +55,7 @@ class UserService
   private:
     std::shared_ptr<persistence::UserDataAdapter> adapter_;
     std::shared_ptr<services::AuthenticationService> auth_service_;
-    static size_t HashPassword(std::string_view password);
+    static std::uint64_t HashPassword(std::string_view password);
     static User ToUser(const UserRecord& record);
 };
 } // namespace services

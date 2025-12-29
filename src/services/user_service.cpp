@@ -3,6 +3,7 @@
 #include "persistence/user_data_adapter.hpp"
 #include "services/authentication_service.hpp"
 
+#include <cstdint>
 #include <format>
 #include <functional>
 #include <random>
@@ -95,7 +96,7 @@ utils::ServiceResult<std::string> UserService::RemindUsername(std::string_view e
 utils::ServiceResult<User> UserService::LoginUser(std::string_view username,
                                                   std::string_view password)
 {
-    size_t password_hash = HashPassword(password);
+    std::uint64_t password_hash = HashPassword(password);
     auto user_record = adapter_->FindByUsername(username);
 
     if (!user_record)
@@ -154,9 +155,22 @@ utils::ServiceResult<bool> UserService::IsLoggedIn() const
     return {true, "Login status retrieved successfully", auth_service_->IsAuthenticated()};
 }
 
-size_t UserService::HashPassword(std::string_view password)
+std::uint64_t UserService::HashPassword(std::string_view password)
 {
-    return std::hash<std::string_view>{}(password);
+    // NOTE: I intentionally do NOT use std::hash here.
+    // - The C++ standard does not require std::hash to be stable across compilers, standard
+    //   library implementations, builds, or platforms.
+    // - That makes it a poor choice for values that are persisted to disk (CSV) and must compare
+    //   consistently when the program is rebuilt.
+    // This is a deterministic, compiler-independent hash (FNV-1a 64-bit).
+    // Security note: this is NOT a secure password hashing algorithm.
+    std::uint64_t hash = 14695981039346656037ULL; // FNV offset basis
+    for (unsigned char ch : password)
+    {
+        hash ^= static_cast<std::uint64_t>(ch);
+        hash *= 1099511628211ULL; // FNV prime
+    }
+    return hash;
 }
 
 User UserService::ToUser(const UserRecord& record)
