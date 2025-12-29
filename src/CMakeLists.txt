@@ -3,6 +3,7 @@ set(SOURCES
     actions/summary/candlestick_summary_action.cpp
     actions/user/user_register_action.cpp
     actions/user/user_login_action.cpp
+    actions/user/user_logoff_action.cpp
     actions/user/user_reset_action.cpp
     actions/user/user_remind_username_action.cpp
     actions/wallet/wallet_view_balance_action.cpp

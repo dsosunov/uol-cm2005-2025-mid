@@ -11,6 +11,12 @@ MenuRenderer::MenuRenderer(std::shared_ptr<Output> output) : output_(std::move(o
 
 void MenuRenderer::RenderMenu(const MenuNode& current, std::optional<size_t> default_option) const
 {
+    RenderMenu(current, std::string_view{}, default_option);
+}
+
+void MenuRenderer::RenderMenu(const MenuNode& current, std::string_view status_line,
+                              std::optional<size_t> default_option) const
+{
     output_->WriteLine("");
 
     std::string title;
@@ -24,6 +30,11 @@ void MenuRenderer::RenderMenu(const MenuNode& current, std::optional<size_t> def
     }
 
     output_->WriteLine(utils::OutputFormatter::SectionHeader(title));
+
+    if (!status_line.empty())
+    {
+        output_->WriteLine(std::string(status_line));
+    }
 
     const auto& items = current.Children();
     for (size_t i = 0; i < items.size(); ++i)

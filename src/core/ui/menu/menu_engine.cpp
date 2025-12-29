@@ -1,4 +1,7 @@
 ﻿#include "core/ui/menu/menu_engine.hpp"
+
+#include <format>
+
 MenuEngine::MenuEngine(std::unique_ptr<MenuNode> root, std::shared_ptr<MenuRenderer> renderer,
                        std::shared_ptr<MenuInput> input, std::shared_ptr<ActionContext> context)
     : root_(std::move(root)), renderer_(std::move(renderer)), input_(std::move(input)),
@@ -13,7 +16,14 @@ void MenuEngine::Run()
     {
         const auto* current = stack_.back();
 
-        renderer_->RenderMenu(*current);
+        const auto current_user = context_->auth_service->GetCurrentUser().data.value();
+        const bool is_authenticated = context_->auth_service->IsAuthenticated();
+        const std::string user_label =
+            is_authenticated ? std::format("{} ({})", current_user.username, current_user.full_name)
+                             : "Guest";
+        const std::string status_line = std::format("Current user: {}", user_label);
+
+        renderer_->RenderMenu(*current, status_line);
         MenuNode* selected = input_->ReadSelection(*current);
 
         if (!selected)

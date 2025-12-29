@@ -9,6 +9,11 @@
 #include <string_view>
 #include <vector>
 
+namespace services
+{
+class AuthenticationService;
+}
+
 namespace persistence
 {
 class TransactionDataAdapter;
@@ -33,20 +38,18 @@ struct ActivityStats
 class TransactionsService
 {
   public:
-    explicit TransactionsService(std::shared_ptr<persistence::TransactionDataAdapter> adapter);
+    TransactionsService(std::shared_ptr<persistence::TransactionDataAdapter> adapter,
+                        std::shared_ptr<services::AuthenticationService> auth_service);
     ~TransactionsService() = default;
-    utils::ServiceResult<std::vector<WalletTransaction>> GetLastTransactions(
-        int count, std::optional<int> user_id = std::nullopt) const;
+    utils::ServiceResult<std::vector<WalletTransaction>> GetLastTransactions(int count) const;
     utils::ServiceResult<std::vector<WalletTransaction>> GetTransactionsByCurrency(
-        std::string_view currency, std::optional<int> user_id = std::nullopt) const;
+        std::string_view currency) const;
     utils::ServiceResult<ActivityStats> GetActivitySummary(
         dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
-        const std::optional<utils::TimePoint>& end_date,
-        std::optional<int> user_id = std::nullopt) const;
+        const std::optional<utils::TimePoint>& end_date) const;
 
   private:
     std::shared_ptr<persistence::TransactionDataAdapter> adapter_;
-    int default_user_id_ = 1;
-    int GetEffectiveUserId(std::optional<int> user_id) const;
+    std::shared_ptr<services::AuthenticationService> auth_service_;
 };
 } // namespace services

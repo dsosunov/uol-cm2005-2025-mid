@@ -26,6 +26,12 @@ transaction_forms::ActivitySummaryForm TransactionActivitySummaryAction::CreateF
 utils::ServiceResult<services::ActivityStats> TransactionActivitySummaryAction::ExecuteService(
     const dto::ActivitySummary& data, ActionContext& context)
 {
+    if (!context.auth_service->IsAuthenticated())
+    {
+        return utils::ServiceResult<services::ActivityStats>::Failure(
+            "Please log in first to view transactions");
+    }
+
     return transactions_service_->GetActivitySummary(data.timeframe, std::nullopt, std::nullopt);
 }
 

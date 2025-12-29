@@ -2,6 +2,12 @@
 #include "core/utils/service_result.hpp"
 
 #include <memory>
+
+namespace services
+{
+class AuthenticationService;
+}
+
 #include <optional>
 #include <string>
 #include <string_view>
@@ -31,7 +37,8 @@ struct UserRecord
 class UserService
 {
   public:
-    explicit UserService(std::shared_ptr<persistence::UserDataAdapter> adapter);
+    UserService(std::shared_ptr<persistence::UserDataAdapter> adapter,
+                std::shared_ptr<services::AuthenticationService> auth_service);
     ~UserService() = default;
     std::string GenerateUsername() const;
     utils::ServiceResult<User> RegisterUser(std::string_view username, std::string_view full_name,
@@ -47,7 +54,7 @@ class UserService
 
   private:
     std::shared_ptr<persistence::UserDataAdapter> adapter_;
-    std::optional<User> current_user_;
+    std::shared_ptr<services::AuthenticationService> auth_service_;
     static size_t HashPassword(std::string_view password);
     static User ToUser(const UserRecord& record);
 };

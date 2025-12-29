@@ -1,30 +1,41 @@
 ﻿#include "services/transactions_service.hpp"
 
 #include "core/utils/date_filter.hpp"
-#include "core/utils/service_utils.hpp"
 #include "dto/constants.hpp"
 #include "persistence/transaction_data_adapter.hpp"
+#include "services/authentication_service.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 
 namespace services
 {
 
 TransactionsService::TransactionsService(
-    std::shared_ptr<persistence::TransactionDataAdapter> adapter)
-    : adapter_(adapter)
+    std::shared_ptr<persistence::TransactionDataAdapter> adapter,
+    std::shared_ptr<services::AuthenticationService> auth_service)
+    : adapter_(std::move(adapter)), auth_service_(std::move(auth_service))
 {
-}
-
-int TransactionsService::GetEffectiveUserId(std::optional<int> user_id) const
-{
-    return ServiceUtils::GetEffectiveUserId(user_id, default_user_id_);
+    if (!adapter_)
+    {
+        throw std::invalid_argument("TransactionDataAdapter is required");
+    }
+    if (!auth_service_)
+    {
+        throw std::invalid_argument("AuthenticationService is required");
+    }
 }
 
 utils::ServiceResult<std::vector<WalletTransaction>> TransactionsService::GetLastTransactions(
-    int count, std::optional<int> user_id) const
+    int count) const
 {
-    int effective_id = GetEffectiveUserId(user_id);
+    auto user_result = auth_service_->GetAuthenticatedUser();
+    if (!user_result.success)
+    {
+        return utils::ServiceResult<std::vector<WalletTransaction>>::Failure(user_result.message);
+    }
+
+    int effective_id = user_result.data.value().id;
     std::vector<WalletTransaction> result;
 
     adapter_->ReadWithProcessor(
@@ -43,9 +54,15 @@ utils::ServiceResult<std::vector<WalletTransaction>> TransactionsService::GetLas
 }
 
 utils::ServiceResult<std::vector<WalletTransaction>> TransactionsService::GetTransactionsByCurrency(
-    std::string_view currency, std::optional<int> user_id) const
+    std::string_view currency) const
 {
-    int effective_id = GetEffectiveUserId(user_id);
+    auto user_result = auth_service_->GetAuthenticatedUser();
+    if (!user_result.success)
+    {
+        return utils::ServiceResult<std::vector<WalletTransaction>>::Failure(user_result.message);
+    }
+
+    int effective_id = user_result.data.value().id;
     std::vector<WalletTransaction> result;
 
     adapter_->ReadWithProcessor(
@@ -61,9 +78,15 @@ utils::ServiceResult<std::vector<WalletTransaction>> TransactionsService::GetTra
 
 utils::ServiceResult<ActivityStats> TransactionsService::GetActivitySummary(
     [[maybe_unused]] dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
-    const std::optional<utils::TimePoint>& end_date, std::optional<int> user_id) const
+    const std::optional<utils::TimePoint>& end_date) const
 {
-    int effective_id = GetEffectiveUserId(user_id);
+    auto user_result = auth_service_->GetAuthenticatedUser();
+    if (!user_result.success)
+    {
+        return utils::ServiceResult<ActivityStats>::Failure(user_result.message);
+    }
+
+    int effective_id = user_result.data.value().id;
     int total = 0;
     double total_volume = 0.0;
 

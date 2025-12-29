@@ -27,6 +27,12 @@ transaction_forms::CurrencyForm TransactionShowByCurrencyAction::CreateForm(Acti
 utils::ServiceResult<std::vector<services::WalletTransaction>> TransactionShowByCurrencyAction::
     ExecuteService(const dto::TransactionQuery& data, ActionContext& context)
 {
+    if (!context.auth_service->IsAuthenticated())
+    {
+        return utils::ServiceResult<std::vector<services::WalletTransaction>>::Failure(
+            "Please log in first to view transactions");
+    }
+
     return transactions_service_->GetTransactionsByCurrency(data.currency);
 }
 

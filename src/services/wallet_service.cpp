@@ -1,21 +1,27 @@
 ﻿#include "services/wallet_service.hpp"
 
-#include "core/utils/service_utils.hpp"
 #include "core/utils/time_utils.hpp"
 #include "persistence/transaction_data_adapter.hpp"
+#include "services/authentication_service.hpp"
 #include "services/transactions_service.hpp"
+
+#include <stdexcept>
 
 namespace services
 {
 
-WalletService::WalletService(std::shared_ptr<persistence::TransactionDataAdapter> adapter)
-    : adapter_(adapter)
+WalletService::WalletService(std::shared_ptr<persistence::TransactionDataAdapter> adapter,
+                             std::shared_ptr<services::AuthenticationService> auth_service)
+    : adapter_(std::move(adapter)), auth_service_(std::move(auth_service))
 {
-}
-
-int WalletService::GetEffectiveUserId(std::optional<int> user_id) const
-{
-    return ServiceUtils::GetEffectiveUserId(user_id, default_user_id_);
+    if (!adapter_)
+    {
+        throw std::invalid_argument("TransactionDataAdapter is required");
+    }
+    if (!auth_service_)
+    {
+        throw std::invalid_argument("AuthenticationService is required");
+    }
 }
 
 std::map<std::string, double, std::less<>> WalletService::CalculateBalances(int user_id) const
@@ -39,18 +45,29 @@ std::map<std::string, double, std::less<>> WalletService::CalculateBalances(int 
     return balances;
 }
 
-utils::ServiceResult<std::map<std::string, double, std::less<>>> WalletService::GetBalances(
-    std::optional<int> user_id) const
+utils::ServiceResult<std::map<std::string, double, std::less<>>> WalletService::GetBalances() const
 {
-    int effective_id = GetEffectiveUserId(user_id);
+    auto user_result = auth_service_->GetAuthenticatedUser();
+    if (!user_result.success)
+    {
+        return utils::ServiceResult<std::map<std::string, double, std::less<>>>::Failure(
+            user_result.message);
+    }
+
+    int effective_id = user_result.data.value().id;
     auto balances = CalculateBalances(effective_id);
     return {true, "Balances retrieved successfully", balances};
 }
 
-utils::ServiceResult<double> WalletService::GetBalance(std::string_view currency,
-                                                       std::optional<int> user_id) const
+utils::ServiceResult<double> WalletService::GetBalance(std::string_view currency) const
 {
-    int effective_id = GetEffectiveUserId(user_id);
+    auto user_result = auth_service_->GetAuthenticatedUser();
+    if (!user_result.success)
+    {
+        return utils::ServiceResult<double>::Failure(user_result.message);
+    }
+
+    int effective_id = user_result.data.value().id;
     auto balances = CalculateBalances(effective_id);
 
     if (auto it = balances.find(currency); it != balances.end())
@@ -61,9 +78,15 @@ utils::ServiceResult<double> WalletService::GetBalance(std::string_view currency
     return {true, "No balance found for currency", 0.0};
 }
 
-utils::ServiceResult<double> WalletService::GetTotalBalanceInUSD(std::optional<int> user_id) const
+utils::ServiceResult<double> WalletService::GetTotalBalanceInUSD() const
 {
-    int effective_id = GetEffectiveUserId(user_id);
+    auto user_result = auth_service_->GetAuthenticatedUser();
+    if (!user_result.success)
+    {
+        return utils::ServiceResult<double>::Failure(user_result.message);
+    }
+
+    int effective_id = user_result.data.value().id;
     auto balances = CalculateBalances(effective_id);
 
     if (auto it = balances.find("USD"); it != balances.end())
@@ -74,15 +97,20 @@ utils::ServiceResult<double> WalletService::GetTotalBalanceInUSD(std::optional<i
     return {true, "No USD balance found", 0.0};
 }
 
-utils::ServiceResult<double> WalletService::Deposit(std::string_view currency, double amount,
-                                                    std::optional<int> user_id)
+utils::ServiceResult<double> WalletService::Deposit(std::string_view currency, double amount)
 {
     if (amount <= 0)
     {
         return utils::ServiceResult<double>::Failure("Amount must be positive");
     }
 
-    int effective_id = GetEffectiveUserId(user_id);
+    auto user_result = auth_service_->GetAuthenticatedUser();
+    if (!user_result.success)
+    {
+        return utils::ServiceResult<double>::Failure(user_result.message);
+    }
+
+    int effective_id = user_result.data.value().id;
 
     WalletTransaction txn;
     txn.currency = std::string(currency);
@@ -102,19 +130,23 @@ utils::ServiceResult<double> WalletService::Deposit(std::string_view currency, d
     return utils::ServiceResult<double>::Success(new_balance, "Deposit successful");
 }
 
-utils::ServiceResult<double> WalletService::Withdraw(std::string_view currency, double amount,
-                                                     std::optional<int> user_id)
+utils::ServiceResult<double> WalletService::Withdraw(std::string_view currency, double amount)
 {
     if (amount <= 0)
     {
         return utils::ServiceResult<double>::Failure("Amount must be positive");
     }
 
-    int effective_id = GetEffectiveUserId(user_id);
+    auto user_result = auth_service_->GetAuthenticatedUser();
+    if (!user_result.success)
+    {
+        return utils::ServiceResult<double>::Failure(user_result.message);
+    }
 
-    auto balance_result = GetBalance(currency, user_id);
-    if (!balance_result.success || !balance_result.data.has_value() ||
-        *balance_result.data < amount)
+    int effective_id = user_result.data.value().id;
+
+    auto balance_result = GetBalance(currency);
+    if (!balance_result.success || balance_result.data.value() < amount)
     {
         return utils::ServiceResult<double>::Failure("Insufficient balance");
     }

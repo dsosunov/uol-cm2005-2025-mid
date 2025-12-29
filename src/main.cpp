@@ -4,6 +4,7 @@
 #include "actions/transaction/transaction_show_by_currency_action.hpp"
 #include "actions/transaction/transaction_show_last5_action.hpp"
 #include "actions/user/user_login_action.hpp"
+#include "actions/user/user_logoff_action.hpp"
 #include "actions/user/user_register_action.hpp"
 #include "actions/user/user_remind_username_action.hpp"
 #include "actions/user/user_reset_action.hpp"
@@ -27,7 +28,10 @@ std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
         .AddLeaf("Candlestick summary", std::make_unique<CandlestickSummaryAction>(trading_service))
         .AddBranch("User")
         .AddLeaf("Register", std::make_unique<UserRegisterAction>(user_service))
-        .AddLeaf("Login", std::make_unique<UserLoginAction>(user_service))
+        .AddBranch("Login")
+        .AddLeaf("Log in", std::make_unique<UserLoginAction>(user_service))
+        .AddLeaf("Log off", std::make_unique<UserLogoffAction>(user_service))
+        .Parent()
         .AddLeaf("Remind a user name", std::make_unique<UserRemindUsernameAction>(user_service))
         .AddLeaf("Change a password by name", std::make_unique<UserResetAction>(user_service))
         .Parent()

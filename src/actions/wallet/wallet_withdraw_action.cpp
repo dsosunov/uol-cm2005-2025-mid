@@ -17,6 +17,11 @@ wallet_forms::WalletOperationForm WalletWithdrawAction::CreateForm(ActionContext
 utils::ServiceResult<double> WalletWithdrawAction::ExecuteService(const dto::WalletOperation& data,
                                                                   ActionContext& context)
 {
+    if (!context.auth_service->IsAuthenticated())
+    {
+        return utils::ServiceResult<double>::Failure("Please log in first to access the wallet");
+    }
+
     double amount = std::stod(data.amount);
     return wallet_service_->Withdraw(data.currency, amount);
 }

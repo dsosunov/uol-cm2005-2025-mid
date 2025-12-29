@@ -11,6 +11,8 @@
 #include "persistence/trading_data_adapter.hpp"
 #include "persistence/transaction_data_adapter.hpp"
 #include "persistence/user_data_adapter.hpp"
+#include "services/authentication_context.hpp"
+#include "services/authentication_service.hpp"
 #include "services/trading_service.hpp"
 #include "services/transactions_service.hpp"
 #include "services/user_service.hpp"
@@ -18,6 +20,9 @@
 
 ServiceContainer::ServiceContainer()
 {
+    auto auth_context = std::make_shared<services::AuthenticationContext>();
+    auto auth_service = std::make_shared<services::AuthenticationService>(auth_context);
+
     auto csv_reader = std::make_shared<data::CsvReader>("data/20200317.csv");
     auto trading_adapter = std::make_shared<persistence::TradingDataAdapter>(csv_reader);
 
@@ -31,9 +36,12 @@ ServiceContainer::ServiceContainer()
     auto transaction_adapter = std::make_shared<persistence::TransactionDataAdapter>(
         transaction_csv_reader, transaction_csv_writer);
 
-    Register(std::make_shared<services::UserService>(user_adapter));
-    Register(std::make_shared<services::WalletService>(transaction_adapter));
-    Register(std::make_shared<services::TransactionsService>(transaction_adapter));
+    Register(auth_context);
+    Register(auth_service);
+
+    Register(std::make_shared<services::UserService>(user_adapter, auth_service));
+    Register(std::make_shared<services::WalletService>(transaction_adapter, auth_service));
+    Register(std::make_shared<services::TransactionsService>(transaction_adapter, auth_service));
     Register(std::make_shared<services::TradingService>(trading_adapter));
 
     auto output = std::make_shared<StandardOutput>();
@@ -43,7 +51,7 @@ ServiceContainer::ServiceContainer()
 
     auto form_input_provider =
         std::make_shared<form::MenuFormInputProvider>(input, renderer, menu_input);
-    auto context = std::make_shared<ActionContext>(output, form_input_provider);
+    auto context = std::make_shared<ActionContext>(output, form_input_provider, auth_service);
 
     Register(output);
     Register(input);

@@ -16,6 +16,12 @@ shared_forms::EmptyForm WalletViewBalanceAction::CreateForm(ActionContext& conte
 utils::ServiceResult<std::map<std::string, double, std::less<>>> WalletViewBalanceAction::
     ExecuteService(const EmptyRequest& data, ActionContext& context)
 {
+    if (!context.auth_service->IsAuthenticated())
+    {
+        return utils::ServiceResult<std::map<std::string, double, std::less<>>>::Failure(
+            "Please log in first to access the wallet");
+    }
+
     return wallet_service_->GetBalances();
 }
 

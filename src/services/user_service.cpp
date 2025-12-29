@@ -1,17 +1,28 @@
 ﻿#include "services/user_service.hpp"
 
 #include "persistence/user_data_adapter.hpp"
+#include "services/authentication_service.hpp"
 
 #include <format>
 #include <functional>
 #include <random>
+#include <stdexcept>
 
 namespace services
 {
 
-UserService::UserService(std::shared_ptr<persistence::UserDataAdapter> adapter)
-    : adapter_(std::move(adapter))
+UserService::UserService(std::shared_ptr<persistence::UserDataAdapter> adapter,
+                         std::shared_ptr<services::AuthenticationService> auth_service)
+    : adapter_(std::move(adapter)), auth_service_(std::move(auth_service))
 {
+    if (!adapter_)
+    {
+        throw std::invalid_argument("UserDataAdapter is required");
+    }
+    if (!auth_service_)
+    {
+        throw std::invalid_argument("AuthenticationService is required");
+    }
 }
 
 std::string UserService::GenerateUsername() const
@@ -97,9 +108,11 @@ utils::ServiceResult<User> UserService::LoginUser(std::string_view username,
         return utils::ServiceResult<User>::Failure("Invalid password");
     }
 
-    current_user_ = ToUser(*user_record);
+    auto user = ToUser(*user_record);
+    auth_service_->SetCurrentUser(
+        services::AuthenticatedUser{user.id, user.username, user.full_name, user.email});
 
-    return utils::ServiceResult<User>::Success(*current_user_, "Login successful");
+    return utils::ServiceResult<User>::Success(user, "Login successful");
 }
 
 utils::ServiceResult<void> UserService::ResetPassword(std::string_view username,
@@ -124,22 +137,21 @@ utils::ServiceResult<void> UserService::ResetPassword(std::string_view username,
 
 utils::ServiceResult<User> UserService::GetCurrentUser() const
 {
-    if (current_user_.has_value())
-    {
-        return {true, "Current user retrieved successfully", *current_user_};
-    }
-    return utils::ServiceResult<User>::Failure("No user logged in");
+    auto user_result = auth_service_->GetCurrentUser();
+    const auto& au = user_result.data.value();
+    return utils::ServiceResult<User>::Success(User{au.id, au.username, au.full_name, au.email},
+                                               "Current user retrieved successfully");
 }
 
 utils::ServiceResult<void> UserService::Logout()
 {
-    current_user_ = std::nullopt;
+    auth_service_->Logout();
     return {true, "Logout successful"};
 }
 
 utils::ServiceResult<bool> UserService::IsLoggedIn() const
 {
-    return {true, "Login status retrieved successfully", current_user_.has_value()};
+    return {true, "Login status retrieved successfully", auth_service_->IsAuthenticated()};
 }
 
 size_t UserService::HashPassword(std::string_view password)

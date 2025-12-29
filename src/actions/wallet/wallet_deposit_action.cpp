@@ -17,6 +17,11 @@ wallet_forms::WalletOperationForm WalletDepositAction::CreateForm(ActionContext&
 utils::ServiceResult<double> WalletDepositAction::ExecuteService(const dto::WalletOperation& data,
                                                                  ActionContext& context)
 {
+    if (!context.auth_service->IsAuthenticated())
+    {
+        return utils::ServiceResult<double>::Failure("Please log in first to access the wallet");
+    }
+
     double amount = std::stod(data.amount);
     return wallet_service_->Deposit(data.currency, amount);
 }

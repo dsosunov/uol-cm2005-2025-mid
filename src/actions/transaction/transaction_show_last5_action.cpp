@@ -19,6 +19,12 @@ shared_forms::EmptyForm TransactionShowLast5Action::CreateForm(ActionContext& co
 utils::ServiceResult<std::vector<services::WalletTransaction>> TransactionShowLast5Action::
     ExecuteService([[maybe_unused]] const EmptyRequest& data, ActionContext& context)
 {
+    if (!context.auth_service->IsAuthenticated())
+    {
+        return utils::ServiceResult<std::vector<services::WalletTransaction>>::Failure(
+            "Please log in first to view transactions");
+    }
+
     return transactions_service_->GetLastTransactions(5);
 }
 

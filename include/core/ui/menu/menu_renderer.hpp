@@ -11,6 +11,8 @@ class MenuRenderer
     explicit MenuRenderer(std::shared_ptr<Output> output);
     void RenderMenu(const MenuNode& current,
                     std::optional<size_t> default_option = std::nullopt) const;
+    void RenderMenu(const MenuNode& current, std::string_view status_line,
+                    std::optional<size_t> default_option = std::nullopt) const;
     void RenderActionHeader(const MenuNode& node) const;
     void RenderInvalidChoice() const;
 
