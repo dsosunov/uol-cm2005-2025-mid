@@ -6,6 +6,7 @@
 #include "services/authentication_service.hpp"
 
 #include <algorithm>
+#include <set>
 #include <stdexcept>
 
 namespace services
@@ -105,6 +106,80 @@ utils::ServiceResult<ActivityStats> TransactionsService::GetActivitySummary(
 
     return {true, "Activity summary retrieved successfully",
             ActivityStats{total, total_volume, average}};
+}
+
+utils::ServiceResult<std::vector<std::string>> TransactionsService::GetDateSamples(
+    dto::Timeframe timeframe, const DateQueryOptions& options) const
+{
+    auto user_result = auth_service_->GetAuthenticatedUser();
+    if (!user_result.success)
+    {
+        return utils::ServiceResult<std::vector<std::string>>::Failure(user_result.message);
+    }
+
+    int effective_id = user_result.data.value().id;
+
+    std::set<std::string, std::less<>> unique_dates;
+
+    adapter_->ReadWithProcessor(
+        [&unique_dates, &options, &timeframe, effective_id](const WalletTransaction& transaction) {
+            if (transaction.user_id != effective_id)
+            {
+                return;
+            }
+
+            if (options.start_date.has_value() && transaction.timestamp < *options.start_date)
+            {
+                return;
+            }
+
+            if (options.end_date.has_value() && transaction.timestamp > *options.end_date)
+            {
+                return;
+            }
+
+            std::string formatted_date = utils::FormatDate(transaction.timestamp);
+
+            if (timeframe == dto::Timeframe::Yearly && formatted_date.length() >= 4)
+            {
+                unique_dates.insert(formatted_date.substr(0, 4));
+            }
+            else if (timeframe == dto::Timeframe::Monthly && formatted_date.length() >= 7)
+            {
+                unique_dates.insert(formatted_date.substr(0, 7));
+            }
+            else if (formatted_date.length() >= 10)
+            {
+                unique_dates.insert(formatted_date.substr(0, 10));
+            }
+        });
+
+    if (unique_dates.empty())
+    {
+        return {true, "No date samples found", {}};
+    }
+
+    std::vector<std::string> result(unique_dates.begin(), unique_dates.end());
+    std::vector<std::string> filtered;
+    int skipped = 0;
+
+    for (const auto& date : result)
+    {
+        if (skipped < options.offset)
+        {
+            skipped++;
+            continue;
+        }
+
+        filtered.push_back(date);
+
+        if (options.limit.has_value() && filtered.size() >= static_cast<size_t>(*options.limit))
+        {
+            break;
+        }
+    }
+
+    return {true, "Date samples retrieved successfully", filtered};
 }
 
 } // namespace services

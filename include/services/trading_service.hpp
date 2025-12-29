@@ -2,6 +2,7 @@
 #include "core/utils/service_result.hpp"
 #include "core/utils/time_utils.hpp"
 #include "dto/constants.hpp"
+#include "services/date_query_options.hpp"
 
 #include <map>
 #include <memory>
@@ -10,6 +11,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
 
 namespace persistence
 {
@@ -56,13 +58,6 @@ struct GenerationData
     GenerationData& operator=(GenerationData&&) noexcept = default;
     GenerationData(const GenerationData&) = default;
     GenerationData& operator=(const GenerationData&) = default;
-};
-struct DateQueryOptions
-{
-    std::optional<utils::TimePoint> start_date;
-    std::optional<utils::TimePoint> end_date;
-    std::optional<int> limit;
-    int offset = 0;
 };
 struct PeriodSummary
 {

@@ -7,10 +7,8 @@
 #include <format>
 
 TransactionActivitySummaryAction::TransactionActivitySummaryAction(
-    std::shared_ptr<services::TransactionsService> transactions_service,
-    std::shared_ptr<services::TradingService> trading_service)
-    : transactions_service_(std::move(transactions_service)),
-      trading_service_(std::move(trading_service))
+    std::shared_ptr<services::TransactionsService> transactions_service)
+    : transactions_service_(std::move(transactions_service))
 {
 }
 
@@ -18,7 +16,7 @@ transaction_forms::ActivitySummaryForm TransactionActivitySummaryAction::CreateF
     ActionContext& context)
 {
     auto form_data_provider =
-        std::make_shared<transaction_forms::ActivitySummaryFormDataProvider>(trading_service_);
+        std::make_shared<transaction_forms::ActivitySummaryFormDataProvider>(transactions_service_);
     return transaction_forms::ActivitySummaryForm(context.form_input_provider, context.output,
                                                   form_data_provider);
 }

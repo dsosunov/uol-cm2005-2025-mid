@@ -1,13 +1,12 @@
 ﻿#include "forms/transaction/activity_summary_form_data_provider.hpp"
 
-#include "core/utils/time_utils.hpp"
 #include "dto/constants.hpp"
 
 namespace transaction_forms
 {
 ActivitySummaryFormDataProvider::ActivitySummaryFormDataProvider(
-    std::shared_ptr<services::TradingService> trading_service)
-    : trading_service_(std::move(trading_service))
+    std::shared_ptr<services::TransactionsService> transactions_service)
+    : transactions_service_(std::move(transactions_service))
 {
 }
 
@@ -17,7 +16,7 @@ std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormData
     services::DateQueryOptions options;
     options.limit = 100;
 
-    auto date_result = trading_service_->GetDateSamples(timeframe, options);
+    auto date_result = transactions_service_->GetDateSamples(timeframe, options);
     if (!date_result.success || !date_result.data.has_value())
     {
         return {};
@@ -30,8 +29,7 @@ std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormData
 
     for (const auto& date : dates)
     {
-        auto time_point = utils::ParseTimestamp(date);
-        pairs.emplace_back(date, time_point);
+        pairs.emplace_back(date, date);
     }
 
     return pairs;
@@ -49,7 +47,7 @@ std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormData
 
     options.limit = 100;
 
-    auto date_result = trading_service_->GetDateSamples(timeframe, options);
+    auto date_result = transactions_service_->GetDateSamples(timeframe, options);
     if (!date_result.success || !date_result.data.has_value())
     {
         return {};
@@ -62,8 +60,7 @@ std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormData
 
     for (const auto& date : dates)
     {
-        auto time_point = utils::ParseTimestamp(date);
-        pairs.emplace_back(date, time_point);
+        pairs.emplace_back(date, date);
     }
 
     return pairs;

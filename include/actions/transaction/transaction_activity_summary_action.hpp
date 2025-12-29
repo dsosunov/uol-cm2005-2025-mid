@@ -2,7 +2,6 @@
 #include "core/actions/form_based_action.hpp"
 #include "dto/activity_summary.hpp"
 #include "forms/transaction/activity_summary_form.hpp"
-#include "services/trading_service.hpp"
 #include "services/transactions_service.hpp"
 
 #include <memory>
@@ -13,8 +12,7 @@ class TransactionActivitySummaryAction
 {
   public:
     explicit TransactionActivitySummaryAction(
-        std::shared_ptr<services::TransactionsService> transactions_service,
-        std::shared_ptr<services::TradingService> trading_service);
+        std::shared_ptr<services::TransactionsService> transactions_service);
 
   protected:
     transaction_forms::ActivitySummaryForm CreateForm(ActionContext& context) override;
@@ -29,5 +27,4 @@ class TransactionActivitySummaryAction
 
   private:
     std::shared_ptr<services::TransactionsService> transactions_service_;
-    std::shared_ptr<services::TradingService> trading_service_;
 };

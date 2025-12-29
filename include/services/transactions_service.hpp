@@ -2,12 +2,14 @@
 #include "core/utils/service_result.hpp"
 #include "core/utils/time_utils.hpp"
 #include "dto/constants.hpp"
+#include "services/date_query_options.hpp"
 
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
+
 
 namespace services
 {
@@ -47,6 +49,9 @@ class TransactionsService
     utils::ServiceResult<ActivityStats> GetActivitySummary(
         dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
         const std::optional<utils::TimePoint>& end_date) const;
+
+    utils::ServiceResult<std::vector<std::string>> GetDateSamples(
+        dto::Timeframe timeframe, const DateQueryOptions& options) const;
 
   private:
     std::shared_ptr<persistence::TransactionDataAdapter> adapter_;
