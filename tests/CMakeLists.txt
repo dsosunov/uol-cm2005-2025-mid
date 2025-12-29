@@ -16,6 +16,7 @@ add_executable(menu_tests
     test_menu_auth_visibility.cpp
     test_timeframe_date_binders.cpp
     test_candlestick_service_e2e.cpp
+    test_form_read_retries.cpp
 )
 
 # Link against gtest and the MenuSystemLib library
