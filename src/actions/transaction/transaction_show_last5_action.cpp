@@ -48,11 +48,17 @@ void TransactionShowLast5Action::DisplayResults(
     else
     {
         std::reverse(transactions.begin(), transactions.end());
+
+        WriteLine(std::format("{:<4} {:<12} {:<12} {:<12} {:<20}", "#", "Currency", "Type",
+                              "Amount", "Timestamp"),
+                  context);
+        WriteLine(std::string(4 + 12 + 12 + 12 + 20 + 4, '-'), context);
+
         int index = 1;
         for (const auto& transaction : transactions)
         {
-            WriteLine(std::format("{}. {} - {} - {:.2f} - {}", index, transaction.currency,
-                                  transaction.type, transaction.amount,
+            WriteLine(std::format("{:<4} {:<12} {:<12} {:<12.2f} {:<20}", index,
+                                  transaction.currency, transaction.type, transaction.amount,
                                   utils::FormatTimestamp(transaction.timestamp)),
                       context);
             ++index;

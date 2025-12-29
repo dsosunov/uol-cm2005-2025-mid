@@ -47,8 +47,14 @@ void TransactionActivitySummaryAction::DisplayResults(
     const auto& stats = *result.data;
     DisplaySuccessHeader(context);
 
-    DisplayField("Total Transactions", std::format("{}", stats.total_transactions), context);
-    DisplayField("Total Volume", std::format("${:.2f}", stats.total_volume), context);
-    DisplayField("Average Transaction Size", std::format("${:.2f}", stats.average_transaction_size),
-                 context);
+    WriteLine(std::format("{:<28} {}", "Metric", "Value"), context);
+    WriteLine(std::string(28 + 1 + 24, '-'), context);
+    WriteLine(
+        std::format("{:<28} {}", "Total Transactions", std::format("{}", stats.total_transactions)),
+        context);
+    WriteLine(std::format("{:<28} {}", "Total Volume", std::format("${:.2f}", stats.total_volume)),
+              context);
+    WriteLine(std::format("{:<28} {}", "Average Transaction Size",
+                          std::format("${:.2f}", stats.average_transaction_size)),
+              context);
 }
