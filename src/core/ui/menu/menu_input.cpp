@@ -2,7 +2,9 @@
 
 #include <algorithm>
 #include <cctype>
+#include <ranges>
 #include <string>
+#include <string_view>
 
 MenuInput::MenuInput(std::shared_ptr<Input> input, std::shared_ptr<MenuRenderer> renderer)
     : input_(std::move(input)), renderer_(std::move(renderer))
@@ -11,10 +13,10 @@ MenuInput::MenuInput(std::shared_ptr<Input> input, std::shared_ptr<MenuRenderer>
 
 namespace
 {
-bool IsBlankLine(const std::string& s)
+bool IsBlankLine(std::string_view s)
 {
-    return std::all_of(s.begin(), s.end(),
-                       [](unsigned char c) { return static_cast<bool>(std::isspace(c)); });
+    return std::ranges::all_of(s,
+                               [](unsigned char c) { return static_cast<bool>(std::isspace(c)); });
 }
 } // namespace
 

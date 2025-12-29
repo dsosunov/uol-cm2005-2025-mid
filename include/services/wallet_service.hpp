@@ -1,16 +1,15 @@
 ﻿#pragma once
 #include "core/utils/service_result.hpp"
 
+#include <map>
 #include <memory>
+#include <string>
+#include <string_view>
 
 namespace services
 {
 class AuthenticationService;
 }
-
-#include <map>
-#include <string>
-#include <string_view>
 
 namespace persistence
 {

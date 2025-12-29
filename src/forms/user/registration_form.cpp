@@ -16,7 +16,7 @@ RegistrationForm::RegistrationForm(std::shared_ptr<form::FormInputProvider> inpu
 
 RegistrationForm::RegistrationForm(std::shared_ptr<form::FormInputProvider> input_provider,
                                    std::shared_ptr<Output> output,
-                                   std::optional<std::string> default_username)
+                                   const std::optional<std::string>& default_username)
     : form::Form(SetupFormLayout(default_username), input_provider, output)
 {
 }

@@ -2,16 +2,15 @@
 #include "core/utils/service_result.hpp"
 
 #include <memory>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace services
 {
 class AuthenticationService;
 }
-
-#include <optional>
-#include <string>
-#include <string_view>
-#include <vector>
 
 namespace persistence
 {

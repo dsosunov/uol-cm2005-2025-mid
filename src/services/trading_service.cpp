@@ -24,36 +24,6 @@ struct PeriodStats
     int count = 0;
 };
 
-void ProcessCandlestickOrder(const OrderRecord& order, std::string_view product_pair,
-                             const utils::DateFilter& date_filter,
-                             std::map<utils::TimePoint, CandlestickData>& candlestick_map)
-{
-    if (order.product_pair != product_pair)
-        return;
-
-    if (!date_filter.IsInRange(order.timestamp))
-        return;
-
-    auto& candle = candlestick_map[order.timestamp];
-    if (candle.timestamp == utils::TimePoint{})
-    {
-        candle.timestamp = order.timestamp;
-        candle.open = order.price;
-        candle.high = order.price;
-        candle.low = order.price;
-        candle.close = order.price;
-        candle.volume = 0.0;
-    }
-    else
-    {
-        candle.high = std::max(candle.high, order.price);
-        candle.low = std::min(candle.low, order.price);
-        candle.close = order.price;
-    }
-
-    candle.volume += order.amount;
-}
-
 void ProcessSummaryOrder(const OrderRecord& order, std::string_view product_pair,
                          const utils::DateFilter& date_filter, dto::Timeframe timeframe,
                          std::map<std::string, PeriodStats, std::less<>>& aggregated_data)

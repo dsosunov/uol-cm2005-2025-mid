@@ -16,7 +16,8 @@ class RegistrationForm : public form::Form
     RegistrationForm(std::shared_ptr<form::FormInputProvider> input_provider,
                      std::shared_ptr<Output> output);
     RegistrationForm(std::shared_ptr<form::FormInputProvider> input_provider,
-                     std::shared_ptr<Output> output, std::optional<std::string> default_username);
+                     std::shared_ptr<Output> output,
+                     const std::optional<std::string>& default_username);
 
   private:
     static std::vector<std::shared_ptr<form::Field>> SetupFormLayout(

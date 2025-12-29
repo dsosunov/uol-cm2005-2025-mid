@@ -60,8 +60,9 @@ void MenuRenderer::RenderMenu(const MenuNode& current, std::string_view status_l
     }
 }
 
-void MenuRenderer::RenderActionHeader(const MenuNode& node) const
+void MenuRenderer::RenderActionHeader([[maybe_unused]] const MenuNode& node) const
 {
+    // Intentionally empty: action header rendering is not used in the current UI.
 }
 
 void MenuRenderer::RenderInvalidChoice() const
