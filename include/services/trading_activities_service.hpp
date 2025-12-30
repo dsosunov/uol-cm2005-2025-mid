@@ -4,15 +4,13 @@
 
 #include <memory>
 #include <string>
-
-namespace persistence
-{
-class TradingDataAdapter;
-}
+#include <utility>
+#include <vector>
 
 namespace services
 {
 class AuthenticationService;
+class TradingService;
 class WalletService;
 
 struct TradingSimulationSummary
@@ -20,6 +18,7 @@ struct TradingSimulationSummary
     int product_pairs = 0;
     int orders_created = 0;
     int orders_per_pair = 0;
+    std::vector<std::string> simulated_pairs;
 };
 
 class TradingActivitiesService
@@ -27,15 +26,17 @@ class TradingActivitiesService
   public:
     TradingActivitiesService(std::shared_ptr<AuthenticationService> auth_service,
                              std::shared_ptr<WalletService> wallet_service,
-                             std::shared_ptr<persistence::TradingDataAdapter> trading_adapter);
+                             std::shared_ptr<TradingService> trading_service);
 
     utils::ServiceResult<TradingSimulationSummary> SimulateUserTradingActivities(
         int orders_per_side_per_pair = 5);
 
   private:
+    std::vector<std::pair<std::string, std::string>> GetSimulationProductPairs() const;
+
     std::shared_ptr<AuthenticationService> auth_service_;
     std::shared_ptr<WalletService> wallet_service_;
-    std::shared_ptr<persistence::TradingDataAdapter> trading_adapter_;
+    std::shared_ptr<TradingService> trading_service_;
 };
 
 } // namespace services

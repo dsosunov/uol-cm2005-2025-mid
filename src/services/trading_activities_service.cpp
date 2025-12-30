@@ -1,56 +1,46 @@
 #include "services/trading_activities_service.hpp"
 
+#include "app_constants.hpp"
 #include "core/utils/time_utils.hpp"
-#include "persistence/trading_data_adapter.hpp"
 #include "services/authentication_service.hpp"
-#include "services/trading_service.hpp" // for OrderRecord
+#include "services/trading_service.hpp" // for OrderRecord + service methods
 #include "services/wallet_service.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <format>
 #include <map>
-#include <set>
 #include <string>
-#include <string_view>
+#include <utility>
 #include <vector>
 
 namespace services
 {
-namespace
+std::vector<std::pair<std::string, std::string>> TradingActivitiesService::
+    GetSimulationProductPairs() const
 {
-struct ParsedPair
-{
-    std::string base;
-    std::string quote;
-};
+    std::vector<std::pair<std::string, std::string>> pairs;
 
-std::optional<ParsedPair> SplitPair(std::string_view product_pair)
-{
-    auto slash = product_pair.find('/');
-    if (slash == std::string_view::npos)
+    for (const auto& base : app::kSupportedCurrencies)
     {
-        return std::nullopt;
+        for (const auto& quote : app::kSupportedCurrencies)
+        {
+            if (base == quote)
+            {
+                continue;
+            }
+            pairs.emplace_back(base, quote);
+        }
     }
 
-    ParsedPair out{std::string(product_pair.substr(0, slash)),
-                   std::string(product_pair.substr(slash + 1))};
-
-    if (out.base.empty() || out.quote.empty())
-    {
-        return std::nullopt;
-    }
-
-    return out;
+    return pairs;
 }
-} // namespace
 
 TradingActivitiesService::TradingActivitiesService(
     std::shared_ptr<AuthenticationService> auth_service,
-    std::shared_ptr<WalletService> wallet_service,
-    std::shared_ptr<persistence::TradingDataAdapter> trading_adapter)
+    std::shared_ptr<WalletService> wallet_service, std::shared_ptr<TradingService> trading_service)
     : auth_service_(std::move(auth_service)), wallet_service_(std::move(wallet_service)),
-      trading_adapter_(std::move(trading_adapter))
+      trading_service_(std::move(trading_service))
 {
     if (!auth_service_)
     {
@@ -60,9 +50,9 @@ TradingActivitiesService::TradingActivitiesService(
     {
         throw std::invalid_argument("WalletService is required");
     }
-    if (!trading_adapter_)
+    if (!trading_service_)
     {
-        throw std::invalid_argument("TradingDataAdapter is required");
+        throw std::invalid_argument("TradingService is required");
     }
 }
 
@@ -83,36 +73,22 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
 
     int user_id = user.data->id;
 
-    std::set<std::string, std::less<>> product_pairs;
-    std::map<std::string, services::OrderRecord, std::less<>> latest_by_pair;
-
-    trading_adapter_->ReadWithProcessor([&](const services::OrderRecord& order) {
-        product_pairs.insert(order.product_pair);
-
-        auto it = latest_by_pair.find(order.product_pair);
-        if (it == latest_by_pair.end() || order.timestamp > it->second.timestamp)
-        {
-            latest_by_pair[order.product_pair] = order;
-        }
-    });
-
-    if (product_pairs.empty())
+    const auto simulation_pairs = GetSimulationProductPairs();
+    if (simulation_pairs.empty())
     {
         return utils::ServiceResult<TradingSimulationSummary>::Failure(
-            "No products found in trading CSV");
+            "No simulation product pairs configured");
     }
 
     constexpr double kBaseSpread = 0.002;  // 0.2%
     constexpr double kStepSpread = 0.0005; // 0.05%
     constexpr double kAmount = 1.0;
 
-    const std::set<std::string, std::less<>> allowed_currencies = {"BTC", "DOGE", "ETH", "USDT"};
-
     auto now = utils::Now();
     long long micros_offset = 0;
 
     std::vector<services::OrderRecord> new_orders;
-    new_orders.reserve(product_pairs.size() * orders_per_side_per_pair * 2);
+    new_orders.reserve(simulation_pairs.size() * orders_per_side_per_pair * 2);
 
     struct WalletEffect
     {
@@ -123,39 +99,23 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
         double amount;
     };
     std::vector<WalletEffect> wallet_effects;
-    wallet_effects.reserve(product_pairs.size() * orders_per_side_per_pair * 2);
+    wallet_effects.reserve(simulation_pairs.size() * orders_per_side_per_pair * 2);
 
     std::map<std::string, double, std::less<>> required;
 
-    std::set<std::string, std::less<>> supported_pairs;
+    std::vector<std::string> supported_pairs;
+    supported_pairs.reserve(simulation_pairs.size());
 
-    for (const auto& pair : product_pairs)
+    for (const auto& [base, quote] : simulation_pairs)
     {
-        auto parsed = SplitPair(pair);
-        if (!parsed.has_value())
-        {
-            continue;
-        }
-
-        if (!allowed_currencies.contains(parsed->base) ||
-            !allowed_currencies.contains(parsed->quote))
-        {
-            continue;
-        }
-
-        auto it = latest_by_pair.find(pair);
-        if (it == latest_by_pair.end())
-        {
-            continue;
-        }
-
-        double ref = it->second.price;
+        double ref = app::SyntheticPrice(base, quote);
         if (!std::isfinite(ref) || ref <= 0.0)
         {
             continue;
         }
 
-        supported_pairs.insert(pair);
+        std::string product_pair = base + "/" + quote;
+        supported_pairs.push_back(product_pair);
 
         for (int i = 0; i < orders_per_side_per_pair; ++i)
         {
@@ -166,32 +126,31 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
             ask = std::max(ask, ref * 0.0000001);
 
             services::OrderRecord bid_order;
-            bid_order.product_pair = pair;
+            bid_order.product_pair = product_pair;
             bid_order.order_type = dto::OrderType::Bids;
             bid_order.price = bid;
             bid_order.amount = kAmount;
             bid_order.timestamp = now + std::chrono::microseconds{micros_offset++};
             new_orders.push_back(bid_order);
-            wallet_effects.push_back(WalletEffect{parsed->base, parsed->quote, true, bid, kAmount});
-            required[parsed->quote] += bid * kAmount;
+            wallet_effects.push_back(WalletEffect{base, quote, true, bid, kAmount});
+            required[quote] += bid * kAmount;
 
             services::OrderRecord ask_order;
-            ask_order.product_pair = pair;
+            ask_order.product_pair = product_pair;
             ask_order.order_type = dto::OrderType::Asks;
             ask_order.price = ask;
             ask_order.amount = kAmount;
             ask_order.timestamp = now + std::chrono::microseconds{micros_offset++};
             new_orders.push_back(ask_order);
-            wallet_effects.push_back(
-                WalletEffect{parsed->base, parsed->quote, false, ask, kAmount});
-            required[parsed->base] += kAmount;
+            wallet_effects.push_back(WalletEffect{base, quote, false, ask, kAmount});
+            required[base] += kAmount;
         }
     }
 
     if (supported_pairs.empty())
     {
         return utils::ServiceResult<TradingSimulationSummary>::Failure(
-            "No supported product pairs found for simulation (BTC/DOGE/ETH/USDT only)");
+            "No supported product pairs found for simulation");
     }
 
     if (new_orders.empty())
@@ -270,16 +229,17 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
         }
     }
 
-    if (!trading_adapter_->AddAll(new_orders))
+    auto append = trading_service_->AppendOrders(new_orders);
+    if (!append.success)
     {
-        return utils::ServiceResult<TradingSimulationSummary>::Failure(
-            "Failed to append simulated orders");
+        return utils::ServiceResult<TradingSimulationSummary>::Failure(append.message);
     }
 
     TradingSimulationSummary summary;
     summary.product_pairs = static_cast<int>(supported_pairs.size());
     summary.orders_created = static_cast<int>(new_orders.size());
     summary.orders_per_pair = orders_per_side_per_pair * 2;
+    summary.simulated_pairs = supported_pairs;
 
     return utils::ServiceResult<TradingSimulationSummary>::Success(summary, "Simulation completed");
 }

@@ -11,7 +11,6 @@
 #include <utility>
 #include <vector>
 
-
 namespace transaction_forms
 {
 class ActivitySummaryFormDataProvider
@@ -19,12 +18,13 @@ class ActivitySummaryFormDataProvider
   public:
     using OptionPair = std::pair<std::string, std::any>;
     explicit ActivitySummaryFormDataProvider(
-        std::shared_ptr<services::TransactionsService> transactions_service);
+        std::shared_ptr<services::TransactionsService> transactions_service, int user_id);
     std::vector<OptionPair> GetStartDates(dto::Timeframe timeframe) const;
     std::vector<OptionPair> GetEndDates(dto::Timeframe timeframe,
                                         std::optional<utils::TimePoint> start_date) const;
 
   private:
     std::shared_ptr<services::TransactionsService> transactions_service_;
+    int user_id_ = 0;
 };
 } // namespace transaction_forms

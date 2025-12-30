@@ -13,9 +13,9 @@
 #include "actions/wallet/wallet_withdraw_action.hpp"
 #include "core/ui/menu/menu_builder.hpp"
 #include "core/ui/menu/menu_engine.hpp"
-#include "persistence/trading_data_adapter.hpp"
 #include "service_container.hpp"
 #include "services/trading_activities_service.hpp"
+#include "services/user_registration_service.hpp"
 
 #include <memory>
 
@@ -41,13 +41,14 @@
 std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
 {
     auto user_service = container.Resolve<services::UserService>();
+    auto user_registration_service = container.Resolve<services::UserRegistrationService>();
     auto wallet_service = container.Resolve<services::WalletService>();
     auto transactions_service = container.Resolve<services::TransactionsService>();
     auto trading_service = container.Resolve<services::TradingService>();
     auto trading_activities_service = container.Resolve<services::TradingActivitiesService>();
 
     return MenuBuilder("Trading Platform")
-        .AddLeaf("Register", std::make_unique<UserRegisterAction>(user_service))
+        .AddLeaf("Register", std::make_unique<UserRegisterAction>(user_registration_service))
         .AddBranch("Login")
         .AddLeaf("Log in", std::make_unique<UserLoginAction>(user_service))
         .AddLeaf("Remind a user name", std::make_unique<UserRemindUsernameAction>(user_service))

@@ -1,7 +1,7 @@
 #include "persistence/user_data_adapter.hpp"
 
 #include "core/data/csv_writer.hpp"
-#include "services/user_service.hpp"
+#include "services/user_models.hpp"
 
 #include <cstdint>
 #include <sstream>

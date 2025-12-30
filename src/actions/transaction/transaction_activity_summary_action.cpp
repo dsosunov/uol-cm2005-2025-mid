@@ -15,8 +15,19 @@ TransactionActivitySummaryAction::TransactionActivitySummaryAction(
 transaction_forms::ActivitySummaryForm TransactionActivitySummaryAction::CreateForm(
     ActionContext& context)
 {
-    auto form_data_provider =
-        std::make_shared<transaction_forms::ActivitySummaryFormDataProvider>(transactions_service_);
+    int user_id = 0;
+    auto au = context.auth_service->GetAuthenticatedUser();
+    if (au.success)
+    {
+        user_id = au.data->id;
+    }
+    else
+    {
+        WriteLine("Please log in first to view transactions", context);
+    }
+
+    auto form_data_provider = std::make_shared<transaction_forms::ActivitySummaryFormDataProvider>(
+        transactions_service_, user_id);
     return transaction_forms::ActivitySummaryForm(context.form_input_provider, context.output,
                                                   form_data_provider);
 }
@@ -24,13 +35,14 @@ transaction_forms::ActivitySummaryForm TransactionActivitySummaryAction::CreateF
 utils::ServiceResult<services::ActivityStats> TransactionActivitySummaryAction::ExecuteService(
     const dto::ActivitySummary& data, ActionContext& context)
 {
-    if (!context.auth_service->IsAuthenticated())
+    auto au = context.auth_service->GetAuthenticatedUser();
+    if (!au.success)
     {
         return utils::ServiceResult<services::ActivityStats>::Failure(
             "Please log in first to view transactions");
     }
 
-    return transactions_service_->GetActivitySummary(data.timeframe, data.start_date,
+    return transactions_service_->GetActivitySummary(au.data->id, data.timeframe, data.start_date,
                                                      data.end_date);
 }
 

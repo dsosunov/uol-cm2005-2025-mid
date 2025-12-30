@@ -55,6 +55,7 @@ class TradingService
     utils::ServiceResult<std::set<std::string, std::less<>>> GetAvailableProducts() const;
     utils::ServiceResult<std::vector<std::string>> GetDateSamples(
         dto::Timeframe timeframe, const DateQueryOptions& options) const;
+    utils::ServiceResult<void> AppendOrders(const std::vector<OrderRecord>& orders) const;
 
   private:
     std::shared_ptr<persistence::TradingDataAdapter> adapter_;

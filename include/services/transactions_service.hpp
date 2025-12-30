@@ -13,7 +13,7 @@
 
 namespace services
 {
-class AuthenticationService;
+class UserService;
 }
 
 namespace persistence
@@ -22,10 +22,14 @@ class TransactionDataAdapter;
 }
 namespace services
 {
+// Wallet transaction type values persisted in CSV.
+inline constexpr std::string_view kWalletTransactionTypeDeposit = "Deposit";
+inline constexpr std::string_view kWalletTransactionTypeWithdraw = "Withdraw";
+
 struct WalletTransaction
 {
     std::string currency;
-    std::string type; // "Deposit" or "Withdraw"
+    std::string type; // One of kWalletTransactionTypeDeposit / kWalletTransactionTypeWithdraw
     double amount;
     utils::TimePoint timestamp;
     int user_id;
@@ -41,22 +45,29 @@ class TransactionsService
 {
   public:
     TransactionsService(std::shared_ptr<persistence::TransactionDataAdapter> adapter,
-                        std::shared_ptr<services::AuthenticationService> auth_service);
+                        std::shared_ptr<services::UserService> user_service);
     ~TransactionsService() = default;
-    utils::ServiceResult<std::vector<WalletTransaction>> GetLastTransactions(int count) const;
+    utils::ServiceResult<std::vector<WalletTransaction>> GetLastTransactions(int user_id,
+                                                                             int count) const;
     utils::ServiceResult<std::vector<WalletTransaction>> GetTransactionsByCurrency(
-        std::string_view currency) const;
+        int user_id, std::string_view currency) const;
     utils::ServiceResult<ActivityStats> GetActivitySummary(
-        dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
+        int user_id, dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
         const std::optional<utils::TimePoint>& end_date) const;
 
     utils::ServiceResult<std::vector<std::string>> GetDateSamples(
-        dto::Timeframe timeframe, const DateQueryOptions& options) const;
+        int user_id, dto::Timeframe timeframe, const DateQueryOptions& options) const;
 
-    utils::ServiceResult<std::set<std::string, std::less<>>> GetAvailableCurrencies() const;
+    utils::ServiceResult<std::set<std::string, std::less<>>> GetAvailableCurrencies(
+        int user_id) const;
+
+    utils::ServiceResult<std::vector<WalletTransaction>> GetAllTransactions(int user_id) const;
+    utils::ServiceResult<void> AddTransaction(int user_id, std::string_view currency,
+                                              std::string_view type, double amount,
+                                              utils::TimePoint timestamp) const;
 
   private:
     std::shared_ptr<persistence::TransactionDataAdapter> adapter_;
-    std::shared_ptr<services::AuthenticationService> auth_service_;
+    std::shared_ptr<services::UserService> user_service_;
 };
 } // namespace services

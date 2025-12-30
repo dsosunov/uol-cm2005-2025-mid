@@ -2,22 +2,24 @@
 
 #include <format>
 
-UserRegisterAction::UserRegisterAction(std::shared_ptr<services::UserService> user_service)
-    : user_service_(std::move(user_service))
+UserRegisterAction::UserRegisterAction(
+    std::shared_ptr<services::UserRegistrationService> user_registration_service)
+    : user_registration_service_(std::move(user_registration_service))
 {
 }
 
 user_forms::RegistrationForm UserRegisterAction::CreateForm(ActionContext& context)
 {
     // Generate a suggested username that can be accepted by pressing Enter.
-    auto suggested_username = user_service_->GenerateUsername();
+    auto suggested_username = user_registration_service_->GenerateUsername();
     return user_forms::RegistrationForm(context.form_input_provider, context.output,
                                         suggested_username);
 }
 utils::ServiceResult<services::User> UserRegisterAction::ExecuteService(
     const dto::UserRegistration& data, ActionContext& context)
 {
-    return user_service_->RegisterUser(data.username, data.full_name, data.email, data.password);
+    return user_registration_service_->RegisterUser(data.username, data.full_name, data.email,
+                                                    data.password);
 }
 void UserRegisterAction::DisplayResults(const utils::ServiceResult<services::User>& result,
                                         const dto::UserRegistration& data, ActionContext& context)

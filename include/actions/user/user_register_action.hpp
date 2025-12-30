@@ -2,7 +2,7 @@
 #include "core/actions/form_based_action.hpp"
 #include "dto/user_registration.hpp"
 #include "forms/user/registration_form.hpp"
-#include "services/user_service.hpp"
+#include "services/user_registration_service.hpp"
 
 #include <memory>
 
@@ -11,7 +11,8 @@ class UserRegisterAction
                                       utils::ServiceResult<services::User>>
 {
   public:
-    explicit UserRegisterAction(std::shared_ptr<services::UserService> user_service);
+    explicit UserRegisterAction(
+        std::shared_ptr<services::UserRegistrationService> user_registration_service);
 
   protected:
     user_forms::RegistrationForm CreateForm(ActionContext& context) override;
@@ -25,5 +26,5 @@ class UserRegisterAction
     }
 
   private:
-    std::shared_ptr<services::UserService> user_service_;
+    std::shared_ptr<services::UserRegistrationService> user_registration_service_;
 };

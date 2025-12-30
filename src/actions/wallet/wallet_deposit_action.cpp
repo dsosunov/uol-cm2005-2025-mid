@@ -1,5 +1,7 @@
 #include "actions/wallet/wallet_deposit_action.hpp"
 
+#include "app_constants.hpp"
+
 #include <format>
 
 WalletDepositAction::WalletDepositAction(std::shared_ptr<services::WalletService> wallet_service)
@@ -10,7 +12,7 @@ WalletDepositAction::WalletDepositAction(std::shared_ptr<services::WalletService
 wallet_forms::WalletOperationForm WalletDepositAction::CreateForm(ActionContext& context)
 {
     // Deposit supports only trading currencies.
-    std::set<std::string, std::less<>> allowed_currencies = {"BTC", "DOGE", "ETH", "USDT"};
+    std::set<std::string, std::less<>> allowed_currencies = app::kSupportedCurrencies;
     return wallet_forms::WalletOperationForm(context.form_input_provider, context.output,
                                              allowed_currencies);
 }

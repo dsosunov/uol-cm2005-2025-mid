@@ -16,6 +16,7 @@
 #include "services/trading_activities_service.hpp"
 #include "services/trading_service.hpp"
 #include "services/transactions_service.hpp"
+#include "services/user_registration_service.hpp"
 #include "services/user_service.hpp"
 #include "services/wallet_service.hpp"
 
@@ -41,15 +42,25 @@ ServiceContainer::ServiceContainer()
 
     Register(auth_context);
     Register(auth_service);
-    Register(trading_adapter);
 
     auto user_service = std::make_shared<services::UserService>(user_adapter, auth_service);
     Register(user_service);
-    Register(std::make_shared<services::WalletService>(transaction_adapter, user_service));
-    Register(std::make_shared<services::TransactionsService>(transaction_adapter, auth_service));
-    Register(std::make_shared<services::TradingService>(trading_adapter));
+
+    auto transactions_service =
+        std::make_shared<services::TransactionsService>(transaction_adapter, user_service);
+    Register(transactions_service);
+
+    auto wallet_service =
+        std::make_shared<services::WalletService>(transactions_service, user_service);
+    Register(wallet_service);
+
+    auto user_registration_service =
+        std::make_shared<services::UserRegistrationService>(user_adapter, wallet_service);
+    Register(user_registration_service);
+    auto trading_service = std::make_shared<services::TradingService>(trading_adapter);
+    Register(trading_service);
     Register(std::make_shared<services::TradingActivitiesService>(
-        auth_service, Resolve<services::WalletService>(), trading_adapter));
+        auth_service, Resolve<services::WalletService>(), trading_service));
 
     auto output = std::make_shared<StandardOutput>();
     auto input = std::make_shared<StandardInput>();

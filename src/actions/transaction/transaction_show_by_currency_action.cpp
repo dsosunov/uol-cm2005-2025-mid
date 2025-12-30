@@ -12,7 +12,16 @@ TransactionShowByCurrencyAction::TransactionShowByCurrencyAction(
 
 transaction_forms::CurrencyForm TransactionShowByCurrencyAction::CreateForm(ActionContext& context)
 {
-    auto result = transactions_service_->GetAvailableCurrencies();
+    auto au = context.auth_service->GetAuthenticatedUser();
+    if (!au.success)
+    {
+        WriteLine("Please log in first to view transactions", context);
+        std::set<std::string, std::less<>> allowed_currencies;
+        return transaction_forms::CurrencyForm(context.form_input_provider, context.output,
+                                               allowed_currencies);
+    }
+
+    auto result = transactions_service_->GetAvailableCurrencies(au.data->id);
     std::set<std::string, std::less<>> allowed_currencies;
     if (result.success && result.data.has_value())
     {
@@ -25,13 +34,14 @@ transaction_forms::CurrencyForm TransactionShowByCurrencyAction::CreateForm(Acti
 utils::ServiceResult<std::vector<services::WalletTransaction>> TransactionShowByCurrencyAction::
     ExecuteService(const dto::TransactionQuery& data, ActionContext& context)
 {
-    if (!context.auth_service->IsAuthenticated())
+    auto au = context.auth_service->GetAuthenticatedUser();
+    if (!au.success)
     {
         return utils::ServiceResult<std::vector<services::WalletTransaction>>::Failure(
             "Please log in first to view transactions");
     }
 
-    return transactions_service_->GetTransactionsByCurrency(data.currency);
+    return transactions_service_->GetTransactionsByCurrency(au.data->id, data.currency);
 }
 
 void TransactionShowByCurrencyAction::DisplayResults(

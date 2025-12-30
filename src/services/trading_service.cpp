@@ -1,5 +1,6 @@
 ﻿#include "services/trading_service.hpp"
 
+#include "app_constants.hpp"
 #include "core/utils/date_filter.hpp"
 #include "dto/constants.hpp"
 #include "persistence/trading_data_adapter.hpp"
@@ -7,6 +8,7 @@
 #include <algorithm>
 #include <limits>
 #include <map>
+
 
 namespace services
 {
@@ -133,20 +135,9 @@ utils::ServiceResult<CandlestickSummaryData> TradingService::GetCandlestickSumma
 utils::ServiceResult<std::set<std::string, std::less<>>> TradingService::GetAvailableProducts()
     const
 {
-    std::set<std::string, std::less<>> currencies;
-
-    adapter_->ReadWithProcessor([&currencies](const OrderRecord& order) {
-        const auto& product = order.product_pair;
-        size_t slash_pos = product.find('/');
-
-        if (slash_pos != std::string::npos)
-        {
-            currencies.insert(product.substr(0, slash_pos));
-            currencies.insert(product.substr(slash_pos + 1));
-        }
-    });
-
-    return {true, "Available products retrieved successfully", currencies};
+    // Supported currencies are defined at the app level to keep behavior stable even when the
+    // system starts with no market data.
+    return {true, "Available products retrieved successfully", app::kSupportedCurrencies};
 }
 
 utils::ServiceResult<std::vector<std::string>> TradingService::GetDateSamples(
@@ -201,6 +192,22 @@ utils::ServiceResult<std::vector<std::string>> TradingService::GetDateSamples(
     }
 
     return {true, "Date samples retrieved successfully", filtered};
+}
+
+utils::ServiceResult<void> TradingService::AppendOrders(
+    const std::vector<OrderRecord>& orders) const
+{
+    if (orders.empty())
+    {
+        return utils::ServiceResult<void>::Success("No orders to append");
+    }
+
+    if (!adapter_->AddAll(orders))
+    {
+        return utils::ServiceResult<void>::Failure("Failed to append orders");
+    }
+
+    return utils::ServiceResult<void>::Success("Orders appended successfully");
 }
 
 } // namespace services

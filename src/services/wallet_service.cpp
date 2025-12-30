@@ -1,7 +1,6 @@
 ﻿#include "services/wallet_service.hpp"
 
 #include "core/utils/time_utils.hpp"
-#include "persistence/transaction_data_adapter.hpp"
 #include "services/transactions_service.hpp" // for WalletTransaction
 #include "services/user_service.hpp"
 
@@ -9,14 +8,13 @@
 
 namespace services
 {
-
-WalletService::WalletService(std::shared_ptr<persistence::TransactionDataAdapter> adapter,
+WalletService::WalletService(std::shared_ptr<services::TransactionsService> transactions_service,
                              std::shared_ptr<services::UserService> user_service)
-    : adapter_(std::move(adapter)), user_service_(std::move(user_service))
+    : transactions_service_(std::move(transactions_service)), user_service_(std::move(user_service))
 {
-    if (!adapter_)
+    if (!transactions_service_)
     {
-        throw std::invalid_argument("TransactionDataAdapter is required");
+        throw std::invalid_argument("TransactionsService is required");
     }
     if (!user_service_)
     {
@@ -28,19 +26,23 @@ std::map<std::string, double, std::less<>> WalletService::CalculateBalances(int 
 {
     std::map<std::string, double, std::less<>> balances;
 
-    adapter_->ReadWithProcessor([&balances, user_id](const WalletTransaction& txn) {
-        if (txn.user_id == user_id)
+    auto all = transactions_service_->GetAllTransactions(user_id);
+    if (!all.success || !all.data.has_value())
+    {
+        return balances;
+    }
+
+    for (const auto& txn : *all.data)
+    {
+        if (txn.type == kWalletTransactionTypeDeposit)
         {
-            if (txn.type == "Deposit")
-            {
-                balances[txn.currency] += txn.amount;
-            }
-            else if (txn.type == "Withdraw")
-            {
-                balances[txn.currency] -= txn.amount;
-            }
+            balances[txn.currency] += txn.amount;
         }
-    });
+        else if (txn.type == kWalletTransactionTypeWithdraw)
+        {
+            balances[txn.currency] -= txn.amount;
+        }
+    }
 
     return balances;
 }
@@ -109,16 +111,12 @@ utils::ServiceResult<double> WalletService::Deposit(int user_id, std::string_vie
         return utils::ServiceResult<double>::Failure(validate.message);
     }
 
-    WalletTransaction txn;
-    txn.currency = std::string(currency);
-    txn.type = "Deposit";
-    txn.amount = amount;
-    txn.timestamp = utils::Now();
-    txn.user_id = user_id;
-
-    if (!adapter_->Add(txn))
+    auto add =
+        transactions_service_->AddTransaction(user_id, currency, kWalletTransactionTypeDeposit,
+                                              amount, utils::Now());
+    if (!add.success)
     {
-        return utils::ServiceResult<double>::Failure("Failed to write transaction");
+        return utils::ServiceResult<double>::Failure(add.message);
     }
 
     auto balances = CalculateBalances(user_id);
@@ -147,16 +145,12 @@ utils::ServiceResult<double> WalletService::Withdraw(int user_id, std::string_vi
         return utils::ServiceResult<double>::Failure("Insufficient balance");
     }
 
-    WalletTransaction txn;
-    txn.currency = std::string(currency);
-    txn.type = "Withdraw";
-    txn.amount = amount;
-    txn.timestamp = utils::Now();
-    txn.user_id = user_id;
-
-    if (!adapter_->Add(txn))
+    auto add =
+        transactions_service_->AddTransaction(user_id, currency, kWalletTransactionTypeWithdraw,
+                                              amount, utils::Now());
+    if (!add.success)
     {
-        return utils::ServiceResult<double>::Failure("Failed to write transaction");
+        return utils::ServiceResult<double>::Failure(add.message);
     }
 
     auto balances = CalculateBalances(user_id);

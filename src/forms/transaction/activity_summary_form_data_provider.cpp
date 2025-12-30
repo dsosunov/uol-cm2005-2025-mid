@@ -5,8 +5,8 @@
 namespace transaction_forms
 {
 ActivitySummaryFormDataProvider::ActivitySummaryFormDataProvider(
-    std::shared_ptr<services::TransactionsService> transactions_service)
-    : transactions_service_(std::move(transactions_service))
+    std::shared_ptr<services::TransactionsService> transactions_service, int user_id)
+    : transactions_service_(std::move(transactions_service)), user_id_(user_id)
 {
 }
 
@@ -16,7 +16,7 @@ std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormData
     services::DateQueryOptions options;
     options.limit = 100;
 
-    auto date_result = transactions_service_->GetDateSamples(timeframe, options);
+    auto date_result = transactions_service_->GetDateSamples(user_id_, timeframe, options);
     if (!date_result.success || !date_result.data.has_value())
     {
         return {};
@@ -47,7 +47,7 @@ std::vector<ActivitySummaryFormDataProvider::OptionPair> ActivitySummaryFormData
 
     options.limit = 100;
 
-    auto date_result = transactions_service_->GetDateSamples(timeframe, options);
+    auto date_result = transactions_service_->GetDateSamples(user_id_, timeframe, options);
     if (!date_result.success || !date_result.data.has_value())
     {
         return {};

@@ -2,15 +2,22 @@
 
 #include "persistence/user_data_adapter.hpp"
 #include "services/authentication_service.hpp"
+#include "services/user_password_hash.hpp"
 
 #include <cstdint>
-#include <format>
 #include <functional>
-#include <random>
 #include <stdexcept>
 
 namespace services
 {
+
+namespace
+{
+User ToUser(const UserRecord& record)
+{
+    return User{record.id, record.username, record.full_name, record.email};
+}
+} // namespace
 
 UserService::UserService(std::shared_ptr<persistence::UserDataAdapter> adapter,
                          std::shared_ptr<services::AuthenticationService> auth_service)
@@ -24,61 +31,6 @@ UserService::UserService(std::shared_ptr<persistence::UserDataAdapter> adapter,
     {
         throw std::invalid_argument("AuthenticationService is required");
     }
-}
-
-std::string UserService::GenerateUsername() const
-{
-    std::random_device rd;
-    std::mt19937_64 gen(rd());
-    std::uniform_int_distribution<uint64_t> dist(0ULL, 9999999999ULL);
-
-    for (int attempt = 0; attempt < 200; ++attempt)
-    {
-        std::string username = std::format("{:010}", dist(gen));
-        if (!adapter_->ExistsByUsername(username))
-        {
-            return username;
-        }
-    }
-
-    // Fallback (extremely unlikely): scan sequentially.
-    for (uint64_t n = 0; n <= 9999999999ULL; ++n)
-    {
-        std::string username = std::format("{:010}", n);
-        if (!adapter_->ExistsByUsername(username))
-        {
-            return username;
-        }
-    }
-
-    return "0000000000";
-}
-
-utils::ServiceResult<User> UserService::RegisterUser(std::string_view username,
-                                                     std::string_view full_name,
-                                                     std::string_view email,
-                                                     std::string_view password) const
-{
-    if (adapter_->ExistsByUsername(username))
-    {
-        return utils::ServiceResult<User>::Failure("Username already registered");
-    }
-
-    // Email must be unique so we can reliably remind usernames by email.
-    if (adapter_->ExistsByEmail(email))
-    {
-        return utils::ServiceResult<User>::Failure("Email already registered");
-    }
-
-    UserRecord new_record{0, std::string(username), std::string(full_name), std::string(email),
-                          HashPassword(password)};
-
-    if (!adapter_->Insert(new_record))
-    {
-        return utils::ServiceResult<User>::Failure("Failed to save user");
-    }
-
-    return utils::ServiceResult<User>::Success(ToUser(new_record), "Registration successful");
 }
 
 utils::ServiceResult<std::string> UserService::RemindUsername(std::string_view email) const
@@ -96,7 +48,7 @@ utils::ServiceResult<std::string> UserService::RemindUsername(std::string_view e
 utils::ServiceResult<User> UserService::LoginUser(std::string_view username,
                                                   std::string_view password)
 {
-    std::uint64_t password_hash = HashPassword(password);
+    std::uint64_t password_hash = internal::HashPassword(password);
     auto user_record = adapter_->FindByUsername(username);
 
     if (!user_record)
@@ -126,7 +78,7 @@ utils::ServiceResult<void> UserService::ResetPassword(std::string_view username,
         return utils::ServiceResult<void>::Failure("User not found");
     }
 
-    user_record->password_hash = HashPassword(new_password);
+    user_record->password_hash = internal::HashPassword(new_password);
 
     if (!adapter_->Update(*user_record))
     {
@@ -176,29 +128,6 @@ utils::ServiceResult<void> UserService::ValidateUserId(int user_id) const
     }
 
     return utils::ServiceResult<void>::Success("User id is valid");
-}
-
-std::uint64_t UserService::HashPassword(std::string_view password)
-{
-    // NOTE: I intentionally do NOT use std::hash here.
-    // - The C++ standard does not require std::hash to be stable across compilers, standard
-    //   library implementations, builds, or platforms.
-    // - That makes it a poor choice for values that are persisted to disk (CSV) and must compare
-    //   consistently when the program is rebuilt.
-    // This is a deterministic, compiler-independent hash (FNV-1a 64-bit).
-    // Security note: this is NOT a secure password hashing algorithm.
-    std::uint64_t hash = 14695981039346656037ULL; // FNV offset basis
-    for (unsigned char ch : password)
-    {
-        hash ^= static_cast<std::uint64_t>(ch);
-        hash *= 1099511628211ULL; // FNV prime
-    }
-    return hash;
-}
-
-User UserService::ToUser(const UserRecord& record)
-{
-    return User{record.id, record.username, record.full_name, record.email};
 }
 
 } // namespace services

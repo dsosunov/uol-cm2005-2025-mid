@@ -14,6 +14,7 @@ set(SOURCES
     actions/transaction/transaction_activity_summary_action.cpp
     actions/trading/trading_simulation_action.cpp
     services/user_service.cpp
+    services/user_registration_service.cpp
     services/wallet_service.cpp
     services/transactions_service.cpp
     services/trading_service.cpp

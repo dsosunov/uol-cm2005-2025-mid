@@ -28,6 +28,15 @@ void TradingSimulationAction::Execute(ActionContext& context)
         DisplayField("Product pairs", result.data->product_pairs, context);
         DisplayField("Orders created", result.data->orders_created, context);
         DisplayField("Orders per pair", result.data->orders_per_pair, context);
+
+        if (!result.data->simulated_pairs.empty())
+        {
+            WriteLine("Simulated pairs:", context);
+            for (const auto& pair : result.data->simulated_pairs)
+            {
+                WriteLine(std::string("- ") + pair, context);
+            }
+        }
     }
     WriteLine(result.message, context);
     DisplayResultFooter(context);
