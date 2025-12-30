@@ -16,8 +16,7 @@ transaction_forms::ActivitySummaryForm TransactionActivitySummaryAction::CreateF
     ActionContext& context)
 {
     int user_id = 0;
-    auto au = context.auth_service->GetAuthenticatedUser();
-    if (au.success)
+    if (auto au = context.auth_service->GetAuthenticatedUser(); au.success)
     {
         user_id = au.data->id;
     }
@@ -35,15 +34,14 @@ transaction_forms::ActivitySummaryForm TransactionActivitySummaryAction::CreateF
 utils::ServiceResult<services::ActivityStats> TransactionActivitySummaryAction::ExecuteService(
     const dto::ActivitySummary& data, ActionContext& context)
 {
-    auto au = context.auth_service->GetAuthenticatedUser();
-    if (!au.success)
+    if (auto au = context.auth_service->GetAuthenticatedUser(); au.success)
     {
-        return utils::ServiceResult<services::ActivityStats>::Failure(
-            "Please log in first to view transactions");
+        return transactions_service_->GetActivitySummary(au.data->id, data.timeframe,
+                                                         data.start_date, data.end_date);
     }
 
-    return transactions_service_->GetActivitySummary(au.data->id, data.timeframe, data.start_date,
-                                                     data.end_date);
+    return utils::ServiceResult<services::ActivityStats>::Failure(
+        "Please log in first to view transactions");
 }
 
 void TransactionActivitySummaryAction::DisplayResults(

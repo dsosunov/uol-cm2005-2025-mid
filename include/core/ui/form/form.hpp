@@ -133,8 +133,7 @@ inline std::optional<std::any> Form::ReadValidatedValue(const Field& field)
             return std::nullopt;
         }
 
-        const auto validation = field.Validate(*input, context_);
-        if (!validation.is_valid)
+        if (const auto validation = field.Validate(*input, context_); !validation.is_valid)
         {
             output_->WriteLine(std::format("Error: {}", validation.error_message));
             continue;

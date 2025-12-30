@@ -21,8 +21,8 @@ wallet_forms::WalletOperationForm WalletWithdrawAction::CreateForm(ActionContext
 
     // Allow withdrawing only currencies present in the user's wallet history.
     // (Effectively: currencies the user has deposited/held at some point.)
-    auto balances_result = wallet_service_->GetBalances(au.data->id);
-    if (balances_result.success && balances_result.data.has_value())
+    if (auto balances_result = wallet_service_->GetBalances(au.data->id);
+        balances_result.success && balances_result.data.has_value())
     {
         for (const auto& [currency, amount] : *balances_result.data)
         {

@@ -3,12 +3,15 @@
 #include "services/authentication_context.hpp"
 #include "services/authentication_service.hpp"
 
+#include <algorithm>
 #include <any>
 #include <gtest/gtest.h>
 #include <memory>
+#include <ranges>
 #include <string>
 #include <utility>
 #include <vector>
+
 
 namespace
 {
@@ -27,23 +30,8 @@ class TestOutput final : public Output
 
     bool ContainsSubstring(const std::string& needle) const
     {
-        for (const auto& l : lines_)
-        {
-            if (l.contains(needle))
-            {
-                return true;
-            }
-        }
-
-        for (const auto& c : chunks_)
-        {
-            if (c.contains(needle))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        const auto contains = [&needle](const std::string& text) { return text.contains(needle); };
+        return std::ranges::any_of(lines_, contains) || std::ranges::any_of(chunks_, contains);
     }
 
   private:

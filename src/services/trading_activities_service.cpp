@@ -123,9 +123,9 @@ void TradingActivitiesService::GenerateOrdersAndEffects(
 
     // Generate up to `orders_per_pair` orders by alternating bid/ask per level.
     const int levels = (orders_per_pair + 1) / 2;
-    for (int i = 0; i < levels && static_cast<int>(new_orders.size()) < orders_per_pair; ++i)
+    int created = 0;
+    for (int i = 0; i < levels && created < orders_per_pair; ++i)
     {
-        const int remaining = orders_per_pair - static_cast<int>(new_orders.size());
         const double level_spread = kBaseSpread + i * kStepSpread;
         double bid = reference_price * (1.0 - level_spread);
         double ask = reference_price * (1.0 + level_spread);
@@ -135,20 +135,22 @@ void TradingActivitiesService::GenerateOrdersAndEffects(
 
         const double amount = kBaseAmount * (1.0 + i * kAmountStep);
 
-        if (remaining >= 1)
+        if (created < orders_per_pair)
         {
             new_orders.emplace_back(services::OrderRecord{
                 product_pair, now + std::chrono::microseconds{micros_offset++},
                 dto::OrderType::Bids, bid, amount});
             wallet_effects.emplace_back(base, quote, true, bid, amount);
+            ++created;
         }
 
-        if (remaining >= 2)
+        if (created < orders_per_pair)
         {
             new_orders.emplace_back(services::OrderRecord{
                 product_pair, now + std::chrono::microseconds{micros_offset++},
                 dto::OrderType::Asks, ask, amount});
             wallet_effects.emplace_back(base, quote, false, ask, amount);
+            ++created;
         }
     }
 }
@@ -240,29 +242,25 @@ utils::ServiceResult<void> TradingActivitiesService::ApplyWalletEffects(
         if (effect.is_bid)
         {
             double spend = effect.price * effect.amount;
-            auto w = wallet_service_->Withdraw(user_id, effect.quote, spend);
-            if (!w.success)
+            if (auto w = wallet_service_->Withdraw(user_id, effect.quote, spend); !w.success)
             {
                 return utils::ServiceResult<void>::Failure(w.message);
             }
 
-            auto d = wallet_service_->Deposit(user_id, effect.base, effect.amount);
-            if (!d.success)
+            if (auto d = wallet_service_->Deposit(user_id, effect.base, effect.amount); !d.success)
             {
                 return utils::ServiceResult<void>::Failure(d.message);
             }
         }
         else
         {
-            auto w = wallet_service_->Withdraw(user_id, effect.base, effect.amount);
-            if (!w.success)
+            if (auto w = wallet_service_->Withdraw(user_id, effect.base, effect.amount); !w.success)
             {
                 return utils::ServiceResult<void>::Failure(w.message);
             }
 
             double receive = effect.price * effect.amount;
-            auto d = wallet_service_->Deposit(user_id, effect.quote, receive);
-            if (!d.success)
+            if (auto d = wallet_service_->Deposit(user_id, effect.quote, receive); !d.success)
             {
                 return utils::ServiceResult<void>::Failure(d.message);
             }
@@ -275,8 +273,7 @@ utils::ServiceResult<void> TradingActivitiesService::ApplyWalletEffects(
 utils::ServiceResult<void> TradingActivitiesService::AppendOrders(
     const std::vector<services::OrderRecord>& new_orders) const
 {
-    auto append = trading_service_->AppendOrders(new_orders);
-    if (!append.success)
+    if (auto append = trading_service_->AppendOrders(new_orders); !append.success)
     {
         return utils::ServiceResult<void>::Failure(append.message);
     }
@@ -329,20 +326,17 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
             "No valid products/prices found to simulate");
     }
 
-    auto balances_ok = EnsureSufficientBalances(user_id, wallet_effects);
-    if (!balances_ok.success)
+    if (auto balances_ok = EnsureSufficientBalances(user_id, wallet_effects); !balances_ok.success)
     {
         return utils::ServiceResult<TradingSimulationSummary>::Failure(balances_ok.message);
     }
 
-    auto apply_ok = ApplyWalletEffects(user_id, wallet_effects);
-    if (!apply_ok.success)
+    if (auto apply_ok = ApplyWalletEffects(user_id, wallet_effects); !apply_ok.success)
     {
         return utils::ServiceResult<TradingSimulationSummary>::Failure(apply_ok.message);
     }
 
-    auto append_ok = AppendOrders(new_orders);
-    if (!append_ok.success)
+    if (auto append_ok = AppendOrders(new_orders); !append_ok.success)
     {
         return utils::ServiceResult<TradingSimulationSummary>::Failure(append_ok.message);
     }

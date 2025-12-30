@@ -92,13 +92,13 @@ utils::ServiceResult<CandlestickSummaryData> AnalyticService::GetCandlestickSumm
     std::map<std::string, PeriodStats, std::less<>> aggregated_data;
     utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
 
-    auto read_result =
-        trading_service_->ForEachOrder(order_type, [this, &product_pair, &date_filter, &timeframe,
-                                                    &aggregated_data](const OrderRecord& order) {
-            ProcessSummaryOrder(order, product_pair, date_filter, timeframe, aggregated_data);
-        });
-
-    if (!read_result.success)
+    if (auto read_result = trading_service_->ForEachOrder(
+            order_type,
+            [this, &product_pair, &date_filter, &timeframe,
+             &aggregated_data](const OrderRecord& order) {
+                ProcessSummaryOrder(order, product_pair, date_filter, timeframe, aggregated_data);
+            });
+        !read_result.success)
     {
         return utils::ServiceResult<CandlestickSummaryData>::Failure(read_result.message);
     }

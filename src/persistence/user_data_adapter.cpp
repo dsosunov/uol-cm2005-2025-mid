@@ -101,7 +101,7 @@ std::optional<services::UserRecord> UserDataAdapter::TransformToEntity(
         user.username = record.fields[1];
         user.full_name = record.fields[2];
         user.email = record.fields[3];
-        user.password_hash = static_cast<std::uint64_t>(std::stoull(record.fields[4]));
+        user.password_hash = std::stoull(record.fields[4]);
     }
     catch (const std::invalid_argument&)
     {
@@ -124,7 +124,7 @@ data::CsvRecord UserDataAdapter::TransformFromUserRecord(const services::UserRec
     record.fields.push_back(user.username);
     record.fields.push_back(user.full_name);
     record.fields.push_back(user.email);
-    record.fields.push_back(std::to_string(static_cast<unsigned long long>(user.password_hash)));
+    record.fields.push_back(std::to_string(user.password_hash));
 
     return record;
 }

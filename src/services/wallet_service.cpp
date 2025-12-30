@@ -61,8 +61,7 @@ double WalletService::ExchangeRateToUSD(std::string_view currency) const
 utils::ServiceResult<std::map<std::string, double, std::less<>>> WalletService::GetBalances(
     int user_id) const
 {
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<std::map<std::string, double, std::less<>>>::Failure(
             validate.message);
@@ -74,8 +73,7 @@ utils::ServiceResult<std::map<std::string, double, std::less<>>> WalletService::
 
 utils::ServiceResult<double> WalletService::GetBalance(int user_id, std::string_view currency) const
 {
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<double>::Failure(validate.message);
     }
@@ -92,8 +90,7 @@ utils::ServiceResult<double> WalletService::GetBalance(int user_id, std::string_
 
 utils::ServiceResult<double> WalletService::GetTotalBalanceInUSD(int user_id) const
 {
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<double>::Failure(validate.message);
     }
@@ -125,15 +122,14 @@ utils::ServiceResult<double> WalletService::Deposit(int user_id, std::string_vie
         return utils::ServiceResult<double>::Failure("Amount must be positive");
     }
 
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<double>::Failure(validate.message);
     }
 
-    auto add = transactions_service_->AddTransaction(
-        user_id, currency, kWalletTransactionTypeDeposit, amount, utils::Now());
-    if (!add.success)
+    if (auto add = transactions_service_->AddTransaction(
+            user_id, currency, kWalletTransactionTypeDeposit, amount, utils::Now());
+        !add.success)
     {
         return utils::ServiceResult<double>::Failure(add.message);
     }
@@ -152,8 +148,7 @@ utils::ServiceResult<double> WalletService::Withdraw(int user_id, std::string_vi
         return utils::ServiceResult<double>::Failure("Amount must be positive");
     }
 
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<double>::Failure(validate.message);
     }
@@ -164,9 +159,9 @@ utils::ServiceResult<double> WalletService::Withdraw(int user_id, std::string_vi
         return utils::ServiceResult<double>::Failure("Insufficient balance");
     }
 
-    auto add = transactions_service_->AddTransaction(
-        user_id, currency, kWalletTransactionTypeWithdraw, amount, utils::Now());
-    if (!add.success)
+    if (auto add = transactions_service_->AddTransaction(
+            user_id, currency, kWalletTransactionTypeWithdraw, amount, utils::Now());
+        !add.success)
     {
         return utils::ServiceResult<double>::Failure(add.message);
     }

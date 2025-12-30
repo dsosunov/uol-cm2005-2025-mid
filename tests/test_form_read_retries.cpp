@@ -3,13 +3,17 @@
 #include "core/ui/form/form_input_provider.hpp"
 #include "core/ui/form/validator.hpp"
 
+#include <algorithm>
 #include <any>
 #include <gtest/gtest.h>
 #include <memory>
 #include <optional>
+#include <ranges>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
+
 
 namespace
 {
@@ -59,22 +63,16 @@ class CollectingOutput final : public Output
 
     bool ContainsLineSubstring(const std::string& needle) const
     {
-        for (const auto& l : lines_)
-        {
-            if (l.contains(needle))
-            {
-                return true;
-            }
-        }
-        return false;
+        return std::ranges::any_of(
+            lines_, [&needle](const std::string& line) { return line.contains(needle); });
     }
 
-    size_t CountPromptWrites(const std::string& prompt_prefix) const
+    size_t CountPromptWrites(std::string_view prompt_prefix) const
     {
         size_t count = 0;
         for (const auto& c : chunks_)
         {
-            if (c.rfind(prompt_prefix, 0) == 0)
+            if (c.starts_with(prompt_prefix))
             {
                 ++count;
             }

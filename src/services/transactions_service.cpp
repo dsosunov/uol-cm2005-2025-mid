@@ -70,8 +70,7 @@ TransactionsService::TransactionsService(
 utils::ServiceResult<std::vector<WalletTransaction>> TransactionsService::GetLastTransactions(
     int user_id, int count) const
 {
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<std::vector<WalletTransaction>>::Failure(validate.message);
     }
@@ -94,8 +93,7 @@ utils::ServiceResult<std::vector<WalletTransaction>> TransactionsService::GetLas
 utils::ServiceResult<std::vector<WalletTransaction>> TransactionsService::GetTransactionsByCurrency(
     int user_id, std::string_view currency) const
 {
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<std::vector<WalletTransaction>>::Failure(validate.message);
     }
@@ -116,8 +114,7 @@ utils::ServiceResult<ActivityStats> TransactionsService::GetActivitySummary(
     int user_id, dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
     const std::optional<utils::TimePoint>& end_date) const
 {
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<ActivityStats>::Failure(validate.message);
     }
@@ -162,8 +159,7 @@ utils::ServiceResult<ActivityStats> TransactionsService::GetActivitySummary(
 utils::ServiceResult<std::vector<std::string>> TransactionsService::GetDateSamples(
     int user_id, dto::Timeframe timeframe, const DateQueryOptions& options) const
 {
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<std::vector<std::string>>::Failure(validate.message);
     }
@@ -225,8 +221,7 @@ utils::ServiceResult<std::vector<std::string>> TransactionsService::GetDateSampl
 utils::ServiceResult<std::set<std::string, std::less<>>> TransactionsService::
     GetAvailableCurrencies(int user_id) const
 {
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<std::set<std::string, std::less<>>>::Failure(validate.message);
     }
@@ -245,8 +240,7 @@ utils::ServiceResult<std::set<std::string, std::less<>>> TransactionsService::
 utils::ServiceResult<std::vector<WalletTransaction>> TransactionsService::GetAllTransactions(
     int user_id) const
 {
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<std::vector<WalletTransaction>>::Failure(validate.message);
     }
@@ -268,8 +262,7 @@ utils::ServiceResult<void> TransactionsService::AddTransaction(int user_id,
                                                                std::string_view type, double amount,
                                                                utils::TimePoint timestamp) const
 {
-    auto validate = user_service_->ValidateUserId(user_id);
-    if (!validate.success)
+    if (auto validate = user_service_->ValidateUserId(user_id); !validate.success)
     {
         return utils::ServiceResult<void>::Failure(validate.message);
     }
