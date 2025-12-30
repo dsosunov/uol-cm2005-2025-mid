@@ -10,6 +10,7 @@
 #include <format>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -33,6 +34,8 @@ class Form
     static std::string BuildPrompt(const Field& field);
     static std::any ApplyDefaultForEmptyTextField(const Field& field, const std::any& value);
     static bool IsCancelInput(std::string_view input);
+
+    std::optional<std::any> ReadValidatedValue(const Field& field);
 
     std::vector<std::shared_ptr<Field>> fields_;
     std::shared_ptr<FormInputProvider> input_provider_;
@@ -100,6 +103,47 @@ inline bool Form::IsCancelInput(std::string_view input)
     }
     return true;
 }
+
+inline std::optional<std::any> Form::ReadValidatedValue(const Field& field)
+{
+    while (true)
+    {
+        const auto prompt = BuildPrompt(field);
+        output_->Write(std::format("{}: ", prompt));
+
+        const auto value_any = input_provider_->ReadField(field, context_);
+        if (!value_any)
+        {
+            // For menu selections, this typically means the user chose 0/back.
+            // Treat it as a cancellation request.
+            return std::nullopt;
+        }
+
+        // Apply default value for text fields when the user submits an empty line.
+        const auto value_to_bind = ApplyDefaultForEmptyTextField(field, *value_any);
+
+        const auto* input = std::any_cast<const std::string>(&value_to_bind);
+        if (!input)
+        {
+            return value_to_bind;
+        }
+
+        if (IsCancelInput(*input))
+        {
+            return std::nullopt;
+        }
+
+        const auto validation = field.Validate(*input, context_);
+        if (!validation.is_valid)
+        {
+            output_->WriteLine(std::format("Error: {}", validation.error_message));
+            continue;
+        }
+
+        return value_to_bind;
+    }
+}
+
 template <typename T> FormReadResult Form::Read(T& target)
 {
     output_->WriteLine("");
@@ -111,41 +155,14 @@ template <typename T> FormReadResult Form::Read(T& target)
     {
         WriteValidationHint(*output_, *field);
 
-        while (true)
+        auto value_to_bind = ReadValidatedValue(*field);
+        if (!value_to_bind)
         {
-            const auto prompt = BuildPrompt(*field);
-            output_->Write(std::format("{}: ", prompt));
-
-            const auto value_any = input_provider_->ReadField(*field, context_);
-            if (!value_any)
-            {
-                // For menu selections, this typically means the user chose 0/back.
-                // Treat it as a cancellation request.
-                return FormReadResult::kCancelled;
-            }
-
-            // Apply default value for text fields when the user submits an empty line.
-            const auto value_to_bind = ApplyDefaultForEmptyTextField(*field, *value_any);
-
-            if (const auto* input = std::any_cast<const std::string>(&value_to_bind))
-            {
-                if (IsCancelInput(*input))
-                {
-                    return FormReadResult::kCancelled;
-                }
-
-                const auto validation = field->Validate(*input, context_);
-                if (!validation.is_valid)
-                {
-                    output_->WriteLine(std::format("Error: {}", validation.error_message));
-                    continue;
-                }
-            }
-
-            field->BindValue(target_any, value_to_bind, context_);
-            context_.SetValue(field->GetName(), value_to_bind);
-            break;
+            return FormReadResult::kCancelled;
         }
+
+        field->BindValue(target_any, *value_to_bind, context_);
+        context_.SetValue(field->GetName(), *value_to_bind);
     }
     return FormReadResult::kSuccess;
 }
