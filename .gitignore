@@ -5,6 +5,8 @@ bin/
 lib/
 data/
 
+*.csv
+
 .scannerwork
 
 # CMake
