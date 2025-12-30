@@ -11,7 +11,6 @@
 #include <utility>
 #include <vector>
 
-
 namespace
 {
 class ScriptedFormInputProvider final : public form::FormInputProvider
@@ -30,8 +29,9 @@ class ScriptedFormInputProvider final : public form::FormInputProvider
             return std::any{std::string{}};
         }
 
-        auto v = scripted_[index_++];
-        if (!v)
+        auto v = scripted_[index_];
+        ++index_;
+        if (!v.has_value())
         {
             return std::nullopt;
         }
@@ -61,7 +61,7 @@ class CollectingOutput final : public Output
     {
         for (const auto& l : lines_)
         {
-            if (l.find(needle) != std::string::npos)
+            if (l.contains(needle))
             {
                 return true;
             }

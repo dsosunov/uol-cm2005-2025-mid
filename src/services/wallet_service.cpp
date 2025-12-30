@@ -118,7 +118,7 @@ utils::ServiceResult<double> WalletService::GetTotalBalanceInUSD(int user_id) co
 }
 
 utils::ServiceResult<double> WalletService::Deposit(int user_id, std::string_view currency,
-                                                    double amount)
+                                                    double amount) const
 {
     if (amount <= 0)
     {
@@ -145,7 +145,7 @@ utils::ServiceResult<double> WalletService::Deposit(int user_id, std::string_vie
 }
 
 utils::ServiceResult<double> WalletService::Withdraw(int user_id, std::string_view currency,
-                                                     double amount)
+                                                     double amount) const
 {
     if (amount <= 0)
     {

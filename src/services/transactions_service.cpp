@@ -13,6 +13,39 @@
 namespace services
 {
 
+static std::string MakeActivitySummaryKey(dto::Timeframe timeframe, utils::TimePoint timestamp)
+{
+    std::string formatted_date = utils::FormatDate(timestamp);
+
+    size_t key_len = formatted_date.length();
+    if (timeframe == dto::Timeframe::Yearly)
+    {
+        key_len = std::min<size_t>(4, key_len);
+    }
+    else if (timeframe == dto::Timeframe::Monthly)
+    {
+        key_len = std::min<size_t>(7, key_len);
+    }
+
+    formatted_date.resize(key_len);
+    return formatted_date;
+}
+
+static std::string MakeDateSampleKey(dto::Timeframe timeframe, utils::TimePoint timestamp)
+{
+    std::string formatted_date = utils::FormatDate(timestamp);
+    const size_t required_len = (timeframe == dto::Timeframe::Yearly)    ? 4
+                                : (timeframe == dto::Timeframe::Monthly) ? 7
+                                                                         : 10;
+    if (formatted_date.length() < required_len)
+    {
+        return {};
+    }
+
+    formatted_date.resize(required_len);
+    return formatted_date;
+}
+
 TransactionsService::TransactionsService(
     std::shared_ptr<persistence::TransactionDataAdapter> adapter,
     std::shared_ptr<services::UserService> user_service)
@@ -85,37 +118,24 @@ utils::ServiceResult<ActivityStats> TransactionsService::GetActivitySummary(
     int total = 0;
     double total_volume = 0.0;
 
-    std::map<std::string, std::pair<int, double>> buckets;
+    std::map<std::string, std::pair<int, double>, std::less<>> buckets;
 
     utils::DateFilter date_filter(start_date, end_date);
 
     adapter_->ReadWithProcessor([&total, &total_volume, &buckets, user_id, &date_filter,
                                  timeframe](const WalletTransaction& transaction) {
-        if (transaction.user_id == user_id && date_filter.IsInRange(transaction.timestamp))
+        if (transaction.user_id != user_id || !date_filter.IsInRange(transaction.timestamp))
         {
-            total++;
-            total_volume += transaction.amount;
-
-            std::string formatted_date = utils::FormatDate(transaction.timestamp);
-            std::string key;
-
-            if (timeframe == dto::Timeframe::Yearly)
-            {
-                key = (formatted_date.length() >= 4) ? formatted_date.substr(0, 4) : formatted_date;
-            }
-            else if (timeframe == dto::Timeframe::Monthly)
-            {
-                key = (formatted_date.length() >= 7) ? formatted_date.substr(0, 7) : formatted_date;
-            }
-            else
-            {
-                key = formatted_date;
-            }
-
-            auto& bucket = buckets[key];
-            bucket.first++;
-            bucket.second += transaction.amount;
+            return;
         }
+
+        ++total;
+        total_volume += transaction.amount;
+
+        const std::string key = MakeActivitySummaryKey(timeframe, transaction.timestamp);
+        auto& bucket = buckets[key];
+        ++bucket.first;
+        bucket.second += transaction.amount;
     });
 
     double average = (total > 0) ? (total_volume / total) : 0.0;
@@ -124,10 +144,9 @@ utils::ServiceResult<ActivityStats> TransactionsService::GetActivitySummary(
     per_period.reserve(buckets.size());
     for (const auto& [period, values] : buckets)
     {
-        const int count = values.first;
-        const double volume = values.second;
+        const auto& [count, volume] = values;
         const double avg = (count > 0) ? (volume / count) : 0.0;
-        per_period.push_back(ActivityStats::Period{period, count, volume, avg});
+        per_period.emplace_back(ActivityStats::Period{period, count, volume, avg});
     }
 
     return {true, "Activity summary retrieved successfully",
@@ -146,7 +165,7 @@ utils::ServiceResult<std::vector<std::string>> TransactionsService::GetDateSampl
     std::set<std::string, std::less<>> unique_dates;
 
     adapter_->ReadWithProcessor(
-        [&unique_dates, &options, &timeframe, user_id](const WalletTransaction& transaction) {
+        [&unique_dates, &options, timeframe, user_id](const WalletTransaction& transaction) {
             if (transaction.user_id != user_id)
             {
                 return;
@@ -162,19 +181,10 @@ utils::ServiceResult<std::vector<std::string>> TransactionsService::GetDateSampl
                 return;
             }
 
-            std::string formatted_date = utils::FormatDate(transaction.timestamp);
-
-            if (timeframe == dto::Timeframe::Yearly && formatted_date.length() >= 4)
+            std::string key = MakeDateSampleKey(timeframe, transaction.timestamp);
+            if (!key.empty())
             {
-                unique_dates.insert(formatted_date.substr(0, 4));
-            }
-            else if (timeframe == dto::Timeframe::Monthly && formatted_date.length() >= 7)
-            {
-                unique_dates.insert(formatted_date.substr(0, 7));
-            }
-            else if (formatted_date.length() >= 10)
-            {
-                unique_dates.insert(formatted_date.substr(0, 10));
+                unique_dates.insert(std::move(key));
             }
         });
 
@@ -195,7 +205,7 @@ utils::ServiceResult<std::vector<std::string>> TransactionsService::GetDateSampl
             continue;
         }
 
-        filtered.push_back(date);
+        filtered.emplace_back(date);
 
         if (options.limit.has_value() && filtered.size() >= static_cast<size_t>(*options.limit))
         {

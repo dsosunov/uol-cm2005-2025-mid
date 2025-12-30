@@ -8,6 +8,7 @@
 
 #include <chrono>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <gtest/gtest.h>
 #include <memory>
@@ -31,12 +32,13 @@ utils::TimePoint MakeTp(int year, unsigned month, unsigned day, int hour = 0, in
 std::filesystem::path WriteTempCsv(std::string_view prefix, const std::vector<std::string>& lines)
 {
     std::random_device rd;
-    auto suffix = std::to_string(static_cast<unsigned long long>(
-                      std::chrono::high_resolution_clock::now().time_since_epoch().count())) +
-                  "_" + std::to_string(static_cast<unsigned long long>(rd()));
+    auto suffix =
+        std::format("{}_{}",
+                    static_cast<unsigned long long>(
+                        std::chrono::high_resolution_clock::now().time_since_epoch().count()),
+                    static_cast<unsigned long long>(rd()));
 
-    auto path =
-        std::filesystem::temp_directory_path() / (std::string(prefix) + "_" + suffix + ".csv");
+    auto path = std::filesystem::temp_directory_path() / std::format("{}_{}.csv", prefix, suffix);
 
     std::ofstream out(path, std::ios::trunc);
     for (const auto& line : lines)

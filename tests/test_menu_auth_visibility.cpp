@@ -10,7 +10,6 @@
 #include <utility>
 #include <vector>
 
-
 namespace
 {
 class TestOutput final : public Output
@@ -30,7 +29,7 @@ class TestOutput final : public Output
     {
         for (const auto& l : lines_)
         {
-            if (l.find(needle) != std::string::npos)
+            if (l.contains(needle))
             {
                 return true;
             }
@@ -38,7 +37,7 @@ class TestOutput final : public Output
 
         for (const auto& c : chunks_)
         {
-            if (c.find(needle) != std::string::npos)
+            if (c.contains(needle))
             {
                 return true;
             }
@@ -65,7 +64,9 @@ class TestInput final : public Input
         {
             return "";
         }
-        return scripted_[index_++];
+        std::string line = scripted_[index_];
+        ++index_;
+        return line;
     }
 
   private:
