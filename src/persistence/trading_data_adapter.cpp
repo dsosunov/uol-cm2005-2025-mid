@@ -11,7 +11,6 @@
 #include <cmath>
 #include <string_view>
 
-
 namespace persistence
 {
 
@@ -149,7 +148,7 @@ std::optional<services::OrderRecord> TradingDataAdapter::TransformToEntity(
         return std::nullopt;
     }
 
-    auto parsed_time = utils::ParseTimestamp(record.fields[0]);
+    auto parsed_time = utils::TimestampParser::Parse(record.fields[0]);
     if (!parsed_time.has_value())
     {
         return std::nullopt;

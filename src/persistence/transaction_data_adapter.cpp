@@ -58,7 +58,7 @@ std::optional<services::WalletTransaction> TransactionDataAdapter::TransformToEn
 
     services::WalletTransaction txn;
 
-    auto parsed_time = utils::ParseTimestamp(record.fields[0]);
+    auto parsed_time = utils::TimestampParser::Parse(record.fields[0]);
     if (!parsed_time.has_value())
     {
         return std::nullopt;

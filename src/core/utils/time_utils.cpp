@@ -1,143 +1,169 @@
 ﻿#include "core/utils/time_utils.hpp"
 
+#include <cctype>
+#include <charconv>
 #include <ctime>
+#include <format>
 #include <iomanip>
 #include <sstream>
 
 namespace utils
 {
-std::optional<TimePoint> ParseTimestamp(std::string_view str)
+bool TimestampParser::IsDigit(char ch)
+{
+    return std::isdigit(static_cast<unsigned char>(ch)) != 0;
+}
+
+void TimestampParser::ConsumeWhitespace(std::string_view& sv)
+{
+    while (!sv.empty() && std::isspace(static_cast<unsigned char>(sv.front())))
+    {
+        sv.remove_prefix(1);
+    }
+}
+
+bool TimestampParser::ConsumeInt(std::string_view& sv, int& out)
+{
+    if (sv.empty() || !IsDigit(sv.front()))
+    {
+        return false;
+    }
+
+    const char* begin = sv.data();
+    const char* end = sv.data() + sv.size();
+    auto [ptr, ec] = std::from_chars(begin, end, out);
+    if (ec != std::errc{})
+    {
+        return false;
+    }
+
+    sv.remove_prefix(static_cast<size_t>(ptr - begin));
+    return true;
+}
+
+bool TimestampParser::ConsumeNonDigit(std::string_view& sv)
+{
+    if (sv.empty())
+    {
+        return false;
+    }
+
+    if (IsDigit(sv.front()))
+    {
+        return false;
+    }
+
+    sv.remove_prefix(1);
+    return true;
+}
+
+int TimestampParser::ParseMicrosPadded6(std::string_view& sv)
+{
+    int value = 0;
+    int digits = 0;
+    while (digits < 6 && !sv.empty() && IsDigit(sv.front()))
+    {
+        value = (value * 10) + (sv.front() - '0');
+        sv.remove_prefix(1);
+        ++digits;
+    }
+    while (digits < 6)
+    {
+        value *= 10;
+        ++digits;
+    }
+    return value;
+}
+
+void TimestampParser::TryParseTime(std::string_view sv, int& hour, int& minute, int& second,
+                                   int& microseconds)
+{
+    // Original behavior: invalid/partial time => 00:00:00(.000000)
+    hour = 0;
+    minute = 0;
+    second = 0;
+    microseconds = 0;
+
+    ConsumeWhitespace(sv);
+    if (sv.empty() || !IsDigit(sv.front()))
+    {
+        return;
+    }
+
+    int h = 0;
+    int m = 0;
+    int s = 0;
+    if (!ConsumeInt(sv, h) || sv.empty() || sv.front() != ':')
+    {
+        return;
+    }
+    sv.remove_prefix(1);
+
+    if (!ConsumeInt(sv, m) || sv.empty() || sv.front() != ':')
+    {
+        return;
+    }
+    sv.remove_prefix(1);
+
+    if (!ConsumeInt(sv, s))
+    {
+        return;
+    }
+
+    hour = h;
+    minute = m;
+    second = s;
+
+    if (!sv.empty() && sv.front() == '.')
+    {
+        sv.remove_prefix(1);
+        microseconds = ParseMicrosPadded6(sv);
+    }
+}
+
+std::optional<TimePoint> TimestampParser::Parse(std::string_view str)
 {
     if (str.empty())
     {
         return std::nullopt;
     }
 
-    std::tm tm = {};
-    std::istringstream ss{std::string(str)};
-
-    int microseconds = 0;
-
-    if (str.contains('/'))
-    {
-        char delim;
-        ss >> tm.tm_year >> delim >> tm.tm_mon >> delim >> tm.tm_mday;
-        if (ss.fail())
-        {
-            return std::nullopt;
-        }
-        tm.tm_year -= 1900;
-        tm.tm_mon -= 1;
-
-        ss >> std::ws;
-        if (std::isdigit(ss.peek()))
-        {
-            char time_delim;
-            ss >> tm.tm_hour >> time_delim >> tm.tm_min >> time_delim >> tm.tm_sec;
-            if (ss.fail())
-            {
-                tm.tm_hour = 0;
-                tm.tm_min = 0;
-                tm.tm_sec = 0;
-            }
-
-            if (ss.peek() == '.')
-            {
-                ss.get();
-                std::string frac;
-                frac.reserve(6);
-                while (std::isdigit(ss.peek()) && frac.size() < 6)
-                {
-                    frac.push_back(static_cast<char>(ss.get()));
-                }
-                while (frac.size() < 6)
-                {
-                    frac.push_back('0');
-                }
-
-                try
-                {
-                    microseconds = std::stoi(frac);
-                }
-                catch (...)
-                {
-                    microseconds = 0;
-                }
-            }
-        }
-    }
-    else if (str.contains('-'))
-    {
-        char delim;
-        ss >> tm.tm_year >> delim >> tm.tm_mon >> delim >> tm.tm_mday;
-        if (ss.fail())
-        {
-            return std::nullopt;
-        }
-        tm.tm_year -= 1900;
-        tm.tm_mon -= 1;
-
-        tm.tm_hour = 0;
-        tm.tm_min = 0;
-        tm.tm_sec = 0;
-
-        ss >> std::ws;
-        if (std::isdigit(ss.peek()))
-        {
-            char time_delim;
-            ss >> tm.tm_hour >> time_delim >> tm.tm_min >> time_delim >> tm.tm_sec;
-            if (ss.fail())
-            {
-                tm.tm_hour = 0;
-                tm.tm_min = 0;
-                tm.tm_sec = 0;
-            }
-
-            if (ss.peek() == '.')
-            {
-                ss.get();
-                std::string frac;
-                frac.reserve(6);
-                while (std::isdigit(ss.peek()) && frac.size() < 6)
-                {
-                    frac.push_back(static_cast<char>(ss.get()));
-                }
-                while (frac.size() < 6)
-                {
-                    frac.push_back('0');
-                }
-
-                try
-                {
-                    microseconds = std::stoi(frac);
-                }
-                catch (...)
-                {
-                    microseconds = 0;
-                }
-            }
-        }
-    }
-    else
+    // Keep original “must contain '-' or '/' somewhere” gating.
+    if (!str.contains('/') && !str.contains('-'))
     {
         return std::nullopt;
     }
 
-    tm.tm_isdst = -1;
+    auto sv = str;
 
-    auto ymd = std::chrono::year{tm.tm_year + 1900} /
-               std::chrono::month{static_cast<unsigned>(tm.tm_mon + 1)} /
-               std::chrono::day{static_cast<unsigned>(tm.tm_mday)};
-    auto hms = std::chrono::hours{tm.tm_hour} + std::chrono::minutes{tm.tm_min} +
-               std::chrono::seconds{tm.tm_sec};
-    auto days = std::chrono::sys_days{ymd};
+    // Parse date: YYYY{non-digit}MM{non-digit}DD
+    int year = 0;
+    int month = 0;
+    int day = 0;
+    if (!ConsumeInt(sv, year) || !ConsumeNonDigit(sv) || !ConsumeInt(sv, month) ||
+        !ConsumeNonDigit(sv) || !ConsumeInt(sv, day))
+    {
+        return std::nullopt;
+    }
 
+    int hour = 0;
+    int minute = 0;
+    int second = 0;
+    int microseconds = 0;
+    TryParseTime(sv, hour, minute, second, microseconds);
+
+    auto ymd = std::chrono::year{year} / std::chrono::month{static_cast<unsigned>(month)} /
+               std::chrono::day{static_cast<unsigned>(day)};
     if (!ymd.ok())
     {
         return std::nullopt;
     }
 
-    auto tp = std::chrono::time_point_cast<std::chrono::microseconds>(days + hms);
+    auto days_tp = std::chrono::sys_days{ymd};
+    auto tod =
+        std::chrono::hours{hour} + std::chrono::minutes{minute} + std::chrono::seconds{second};
+
+    auto tp = std::chrono::time_point_cast<std::chrono::microseconds>(days_tp + tod);
     if (microseconds != 0)
     {
         tp += std::chrono::microseconds{microseconds};

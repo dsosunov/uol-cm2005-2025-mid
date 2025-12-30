@@ -13,7 +13,6 @@
 #include <string>
 #include <string_view>
 
-
 namespace form
 {
 
@@ -49,7 +48,7 @@ class PeriodDateParser final
         }
 
         // Daily (or unknown): fall back to the existing timestamp parser.
-        return utils::ParseTimestamp(text);
+        return utils::TimestampParser::Parse(text);
     }
 
     static std::optional<utils::TimePoint> ParsePeriodEndExclusive(dto::Timeframe timeframe,
@@ -83,7 +82,7 @@ class PeriodDateParser final
         }
 
         // Daily (or unknown): interpret the selected day as inclusive, so end is next day.
-        if (auto day_start = utils::ParseTimestamp(text); day_start.has_value())
+        if (auto day_start = utils::TimestampParser::Parse(text); day_start.has_value())
         {
             return *day_start + std::chrono::days{1};
         }
@@ -233,7 +232,7 @@ template <typename T> class DateFieldBinder
         auto& obj = std::any_cast<std::reference_wrapper<T>>(target).get();
 
         const auto& date_string = std::any_cast<const std::string&>(value);
-        auto parsed = utils::ParseTimestamp(date_string);
+        auto parsed = utils::TimestampParser::Parse(date_string);
         obj.*member_ptr_ = parsed;
     }
 
@@ -257,7 +256,7 @@ template <typename T> class StartDateFieldBinder
         auto timeframe = context.GetValue<dto::Timeframe>("timeframe");
         if (!timeframe.has_value())
         {
-            obj.*member_ptr_ = utils::ParseTimestamp(date_string);
+            obj.*member_ptr_ = utils::TimestampParser::Parse(date_string);
             return;
         }
 
@@ -284,7 +283,7 @@ template <typename T> class EndDateFieldBinder
         auto timeframe = context.GetValue<dto::Timeframe>("timeframe");
         if (!timeframe.has_value())
         {
-            obj.*member_ptr_ = utils::ParseTimestamp(date_string);
+            obj.*member_ptr_ = utils::TimestampParser::Parse(date_string);
             return;
         }
 
