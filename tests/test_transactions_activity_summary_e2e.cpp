@@ -19,67 +19,71 @@
 #include <string>
 #include <vector>
 
-namespace
+class TransactionsActivitySummaryE2ETest : public ::testing::Test
 {
-utils::TimePoint MakeTp(int year, unsigned month, unsigned day, int hour = 0, int minute = 0,
-                        int second = 0)
-{
-    auto ymd = std::chrono::year{year} / std::chrono::month{month} / std::chrono::day{day};
-    auto days = std::chrono::sys_days{ymd};
-    auto hms =
-        std::chrono::hours{hour} + std::chrono::minutes{minute} + std::chrono::seconds{second};
-    return std::chrono::time_point_cast<std::chrono::microseconds>(days + hms);
-}
-
-std::filesystem::path WriteTempCsv(std::string_view prefix, const std::vector<std::string>& lines)
-{
-    std::random_device rd;
-    auto suffix =
-        std::format("{}_{}",
-                    static_cast<unsigned long long>(
-                        std::chrono::high_resolution_clock::now().time_since_epoch().count()),
-                    static_cast<unsigned long long>(rd()));
-
-    auto path = std::filesystem::temp_directory_path() / std::format("{}_{}.csv", prefix, suffix);
-
-    std::ofstream out(path, std::ios::trunc);
-    for (const auto& line : lines)
+  protected:
+    static utils::TimePoint MakeTp(int year, unsigned month, unsigned day, int hour = 0,
+                                   int minute = 0, int second = 0)
     {
-        out << line << "\n";
+        auto ymd = std::chrono::year{year} / std::chrono::month{month} / std::chrono::day{day};
+        auto days = std::chrono::sys_days{ymd};
+        auto hms =
+            std::chrono::hours{hour} + std::chrono::minutes{minute} + std::chrono::seconds{second};
+        return std::chrono::time_point_cast<std::chrono::microseconds>(days + hms);
     }
-    out.flush();
-    out.close();
 
-    return path;
-}
+    static std::filesystem::path WriteTempCsv(std::string_view prefix,
+                                              const std::vector<std::string>& lines)
+    {
+        std::random_device rd;
+        auto suffix =
+            std::format("{}_{}",
+                        static_cast<unsigned long long>(
+                            std::chrono::high_resolution_clock::now().time_since_epoch().count()),
+                        static_cast<unsigned long long>(rd()));
 
-std::shared_ptr<services::UserService> MakeUserService(const std::filesystem::path& users_csv,
-                                                       const std::filesystem::path& shadow_csv)
-{
-    auto reader = std::make_shared<data::CsvReader>(users_csv);
-    auto adapter = std::make_shared<persistence::UserDataAdapter>(reader, nullptr);
+        auto path =
+            std::filesystem::temp_directory_path() / std::format("{}_{}.csv", prefix, suffix);
 
-    auto shadow_reader = std::make_shared<data::CsvReader>(shadow_csv);
-    auto credentials_adapter =
-        std::make_shared<persistence::CredentialsDataAdapter>(shadow_reader, nullptr);
-    auto credentials_service = std::make_shared<services::CredentialsService>(credentials_adapter);
+        std::ofstream out(path, std::ios::trunc);
+        for (const auto& line : lines)
+        {
+            out << line << "\n";
+        }
+        out.flush();
+        out.close();
 
-    auto auth_ctx = std::make_shared<services::AuthenticationContext>();
-    auto auth_svc = std::make_shared<services::AuthenticationService>(auth_ctx);
+        return path;
+    }
 
-    return std::make_shared<services::UserService>(adapter, auth_svc, credentials_service);
-}
+    static std::shared_ptr<services::UserService> MakeUserService(
+        const std::filesystem::path& users_csv, const std::filesystem::path& shadow_csv)
+    {
+        auto reader = std::make_shared<data::CsvReader>(users_csv);
+        auto adapter = std::make_shared<persistence::UserDataAdapter>(reader, nullptr);
 
-services::TransactionsService MakeTransactionsService(const std::filesystem::path& txns_csv,
-                                                      std::shared_ptr<services::UserService> us)
-{
-    auto reader = std::make_shared<data::CsvReader>(txns_csv);
-    auto adapter = std::make_shared<persistence::TransactionDataAdapter>(reader, nullptr);
-    return services::TransactionsService(adapter, std::move(us));
-}
-} // namespace
+        auto shadow_reader = std::make_shared<data::CsvReader>(shadow_csv);
+        auto credentials_adapter =
+            std::make_shared<persistence::CredentialsDataAdapter>(shadow_reader, nullptr);
+        auto credentials_service =
+            std::make_shared<services::CredentialsService>(credentials_adapter);
 
-TEST(TransactionsActivitySummaryE2E, DailyGroupsByDay)
+        auto auth_ctx = std::make_shared<services::AuthenticationContext>();
+        auto auth_svc = std::make_shared<services::AuthenticationService>(auth_ctx);
+
+        return std::make_shared<services::UserService>(adapter, auth_svc, credentials_service);
+    }
+
+    static services::TransactionsService MakeTransactionsService(
+        const std::filesystem::path& txns_csv, std::shared_ptr<services::UserService> us)
+    {
+        auto reader = std::make_shared<data::CsvReader>(txns_csv);
+        auto adapter = std::make_shared<persistence::TransactionDataAdapter>(reader, nullptr);
+        return services::TransactionsService(adapter, std::move(us));
+    }
+};
+
+TEST_F(TransactionsActivitySummaryE2ETest, DailyGroupsByDay)
 {
     auto users_csv = WriteTempCsv("users", {
                                                "1,testuser,Test User,test@example.com",
@@ -120,7 +124,7 @@ TEST(TransactionsActivitySummaryE2E, DailyGroupsByDay)
     EXPECT_DOUBLE_EQ(stats.per_period[1].average_transaction_size, 2.0);
 }
 
-TEST(TransactionsActivitySummaryE2E, MonthlyGroupsByMonth)
+TEST_F(TransactionsActivitySummaryE2ETest, MonthlyGroupsByMonth)
 {
     auto users_csv = WriteTempCsv("users", {
                                                "1,testuser,Test User,test@example.com",
@@ -156,7 +160,7 @@ TEST(TransactionsActivitySummaryE2E, MonthlyGroupsByMonth)
     EXPECT_DOUBLE_EQ(stats.per_period[1].total_volume, 2.0);
 }
 
-TEST(TransactionsActivitySummaryE2E, YearlyGroupsByYear)
+TEST_F(TransactionsActivitySummaryE2ETest, YearlyGroupsByYear)
 {
     auto users_csv = WriteTempCsv("users", {
                                                "1,testuser,Test User,test@example.com",

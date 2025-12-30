@@ -11,13 +11,10 @@
 namespace services
 {
 
-namespace
-{
-User ToUser(const UserRecord& record)
+User UserService::ToUser(const UserRecord& record)
 {
     return User{record.id, record.username, record.full_name, record.email};
 }
-} // namespace
 
 UserService::UserService(std::shared_ptr<persistence::UserDataAdapter> adapter,
                          std::shared_ptr<services::AuthenticationService> auth_service,

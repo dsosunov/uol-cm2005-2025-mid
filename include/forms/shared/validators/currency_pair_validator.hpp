@@ -18,6 +18,7 @@ class CurrencyPairValidator : public form::Validator
     std::optional<std::string> GetHint() const override;
 
   private:
+    static std::string FormatAllowedCurrencies(const std::set<std::string, std::less<>>& allowed);
     std::set<std::string, std::less<>> allowed_currencies_;
 };
 } // namespace forms::shared

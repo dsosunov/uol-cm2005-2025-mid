@@ -9,17 +9,18 @@
 #include <optional>
 #include <string>
 
-namespace
+class TimeframeDateBindersTest : public ::testing::Test
 {
-utils::TimePoint MakeTp(int year, unsigned month, unsigned day)
-{
-    auto ymd = std::chrono::year{year} / std::chrono::month{month} / std::chrono::day{day};
-    auto days = std::chrono::sys_days{ymd};
-    return std::chrono::time_point_cast<std::chrono::microseconds>(days);
-}
-} // namespace
+  protected:
+    static utils::TimePoint MakeTp(int year, unsigned month, unsigned day)
+    {
+        auto ymd = std::chrono::year{year} / std::chrono::month{month} / std::chrono::day{day};
+        auto days = std::chrono::sys_days{ymd};
+        return std::chrono::time_point_cast<std::chrono::microseconds>(days);
+    }
+};
 
-TEST(TimeframeDateBinders, MonthlyStartParsesYearMonthToFirstDay)
+TEST_F(TimeframeDateBindersTest, MonthlyStartParsesYearMonthToFirstDay)
 {
     dto::CandlestickQuery query{};
     std::any target = std::ref(query);
@@ -36,7 +37,7 @@ TEST(TimeframeDateBinders, MonthlyStartParsesYearMonthToFirstDay)
     EXPECT_EQ(*query.start_date, MakeTp(2020, 3, 1));
 }
 
-TEST(TimeframeDateBinders, MonthlyEndParsesYearMonthToNextMonthExclusive)
+TEST_F(TimeframeDateBindersTest, MonthlyEndParsesYearMonthToNextMonthExclusive)
 {
     dto::CandlestickQuery query{};
     std::any target = std::ref(query);
@@ -53,7 +54,7 @@ TEST(TimeframeDateBinders, MonthlyEndParsesYearMonthToNextMonthExclusive)
     EXPECT_EQ(*query.end_date, MakeTp(2020, 4, 1));
 }
 
-TEST(TimeframeDateBinders, YearlyStartParsesYearToJanFirst)
+TEST_F(TimeframeDateBindersTest, YearlyStartParsesYearToJanFirst)
 {
     dto::CandlestickQuery query{};
     std::any target = std::ref(query);
@@ -70,7 +71,7 @@ TEST(TimeframeDateBinders, YearlyStartParsesYearToJanFirst)
     EXPECT_EQ(*query.start_date, MakeTp(2020, 1, 1));
 }
 
-TEST(TimeframeDateBinders, YearlyEndParsesYearToNextJanFirstExclusive)
+TEST_F(TimeframeDateBindersTest, YearlyEndParsesYearToNextJanFirstExclusive)
 {
     dto::CandlestickQuery query{};
     std::any target = std::ref(query);
@@ -87,7 +88,7 @@ TEST(TimeframeDateBinders, YearlyEndParsesYearToNextJanFirstExclusive)
     EXPECT_EQ(*query.end_date, MakeTp(2021, 1, 1));
 }
 
-TEST(TimeframeDateBinders, DailyEndIsNextDayExclusive)
+TEST_F(TimeframeDateBindersTest, DailyEndIsNextDayExclusive)
 {
     dto::CandlestickQuery query{};
     std::any target = std::ref(query);

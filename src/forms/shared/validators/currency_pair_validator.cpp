@@ -8,9 +8,8 @@
 namespace forms::shared
 {
 
-namespace
-{
-std::string FormatAllowedCurrencies(const std::set<std::string, std::less<>>& allowed)
+std::string CurrencyPairValidator::FormatAllowedCurrencies(
+    const std::set<std::string, std::less<>>& allowed)
 {
     if (allowed.empty())
     {
@@ -40,7 +39,6 @@ std::string FormatAllowedCurrencies(const std::set<std::string, std::less<>>& al
 
     return result;
 }
-} // namespace
 
 CurrencyPairValidator::CurrencyPairValidator(std::set<std::string, std::less<>> allowed_currencies)
     : allowed_currencies_(std::move(allowed_currencies))

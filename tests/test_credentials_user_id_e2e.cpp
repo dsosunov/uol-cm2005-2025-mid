@@ -22,32 +22,35 @@
 #include <string_view>
 #include <vector>
 
-namespace
+class CredentialsUserIdE2ETest : public ::testing::Test
 {
-std::filesystem::path WriteTempCsv(std::string_view prefix, const std::vector<std::string>& lines)
-{
-    std::random_device rd;
-    auto suffix =
-        std::format("{}_{}",
-                    static_cast<unsigned long long>(
-                        std::chrono::high_resolution_clock::now().time_since_epoch().count()),
-                    static_cast<unsigned long long>(rd()));
-
-    auto path = std::filesystem::temp_directory_path() / std::format("{}_{}.csv", prefix, suffix);
-
-    std::ofstream out(path, std::ios::trunc);
-    for (const auto& line : lines)
+  protected:
+    static std::filesystem::path WriteTempCsv(std::string_view prefix,
+                                              const std::vector<std::string>& lines)
     {
-        out << line << "\n";
+        std::random_device rd;
+        auto suffix =
+            std::format("{}_{}",
+                        static_cast<unsigned long long>(
+                            std::chrono::high_resolution_clock::now().time_since_epoch().count()),
+                        static_cast<unsigned long long>(rd()));
+
+        auto path =
+            std::filesystem::temp_directory_path() / std::format("{}_{}.csv", prefix, suffix);
+
+        std::ofstream out(path, std::ios::trunc);
+        for (const auto& line : lines)
+        {
+            out << line << "\n";
+        }
+        out.flush();
+        out.close();
+
+        return path;
     }
-    out.flush();
-    out.close();
+};
 
-    return path;
-}
-} // namespace
-
-TEST(CredentialsUserIdE2E, RegistrationAssignsUniqueUserIdsAndShadowEntries)
+TEST_F(CredentialsUserIdE2ETest, RegistrationAssignsUniqueUserIdsAndShadowEntries)
 {
     auto users_csv = WriteTempCsv("users", {});
     auto shadow_csv = WriteTempCsv("shadow", {});

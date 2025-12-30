@@ -14,107 +14,108 @@
 #include <utility>
 #include <vector>
 
-namespace
+class FormReadTest : public ::testing::Test
 {
-class ScriptedFormInputProvider final : public form::FormInputProvider
-{
-  public:
-    explicit ScriptedFormInputProvider(std::vector<std::optional<std::any>> scripted)
-        : scripted_(std::move(scripted))
+  protected:
+    class ScriptedFormInputProvider final : public form::FormInputProvider
     {
-    }
-
-    std::optional<std::any> ReadField(const form::Field&, const form::FormContext&) override
-    {
-        if (index_ >= scripted_.size())
+      public:
+        explicit ScriptedFormInputProvider(std::vector<std::optional<std::any>> scripted)
+            : scripted_(std::move(scripted))
         {
-            // Default to empty string if test forgets to provide enough input.
-            return std::any{std::string{}};
         }
 
-        auto v = scripted_[index_];
-        ++index_;
-        if (!v.has_value())
+        std::optional<std::any> ReadField(const form::Field&, const form::FormContext&) override
         {
-            return std::nullopt;
-        }
-
-        return *v;
-    }
-
-  private:
-    std::vector<std::optional<std::any>> scripted_;
-    size_t index_ = 0;
-};
-
-class CollectingOutput final : public Output
-{
-  public:
-    void Write(std::string_view text) override
-    {
-        chunks_.emplace_back(text);
-    }
-
-    void WriteLine(std::string_view text) override
-    {
-        lines_.emplace_back(text);
-    }
-
-    bool ContainsLineSubstring(std::string_view needle) const
-    {
-        return std::ranges::any_of(
-            lines_, [needle](std::string_view line) { return line.contains(needle); });
-    }
-
-    size_t CountPromptWrites(std::string_view prompt_prefix) const
-    {
-        size_t count = 0;
-        for (const auto& c : chunks_)
-        {
-            if (c.starts_with(prompt_prefix))
+            if (index_ >= scripted_.size())
             {
-                ++count;
+                // Default to empty string if test forgets to provide enough input.
+                return std::any{std::string{}};
             }
+
+            auto v = scripted_[index_];
+            ++index_;
+            if (!v.has_value())
+            {
+                return std::nullopt;
+            }
+
+            return *v;
         }
-        return count;
-    }
 
-  private:
-    std::vector<std::string> chunks_;
-    std::vector<std::string> lines_;
-};
+      private:
+        std::vector<std::optional<std::any>> scripted_;
+        size_t index_ = 0;
+    };
 
-class RejectOnceValidator final : public form::Validator
-{
-  public:
-    explicit RejectOnceValidator(std::string bad_value) : bad_value_(std::move(bad_value))
+    class CollectingOutput final : public Output
     {
-    }
-
-    form::ValidationResult Validate(const std::string& value,
-                                    const form::FormContext&) const override
-    {
-        if (!rejected_ && value == bad_value_)
+      public:
+        void Write(std::string_view text) override
         {
-            rejected_ = true;
-            return form::ValidationResult::Invalid("bad input");
+            chunks_.emplace_back(text);
         }
 
-        return form::ValidationResult::Valid();
-    }
+        void WriteLine(std::string_view text) override
+        {
+            lines_.emplace_back(text);
+        }
 
-  private:
-    std::string bad_value_;
-    mutable bool rejected_ = false;
+        bool ContainsLineSubstring(std::string_view needle) const
+        {
+            return std::ranges::any_of(
+                lines_, [needle](std::string_view line) { return line.contains(needle); });
+        }
+
+        size_t CountPromptWrites(std::string_view prompt_prefix) const
+        {
+            size_t count = 0;
+            for (const auto& c : chunks_)
+            {
+                if (c.starts_with(prompt_prefix))
+                {
+                    ++count;
+                }
+            }
+            return count;
+        }
+
+      private:
+        std::vector<std::string> chunks_;
+        std::vector<std::string> lines_;
+    };
+
+    class RejectOnceValidator final : public form::Validator
+    {
+      public:
+        explicit RejectOnceValidator(std::string bad_value) : bad_value_(std::move(bad_value))
+        {
+        }
+
+        form::ValidationResult Validate(const std::string& value,
+                                        const form::FormContext&) const override
+        {
+            if (!rejected_ && value == bad_value_)
+            {
+                rejected_ = true;
+                return form::ValidationResult::Invalid("bad input");
+            }
+
+            return form::ValidationResult::Valid();
+        }
+
+      private:
+        std::string bad_value_;
+        mutable bool rejected_ = false;
+    };
+
+    struct Target
+    {
+        std::string name;
+    };
 };
 
-struct Target
-{
-    std::string name;
-};
-} // namespace
-
-TEST(FormRead, RetriesTextFieldUntilValidOrCancelled)
+TEST_F(FormReadTest, RetriesTextFieldUntilValidOrCancelled)
 {
     Target t;
 

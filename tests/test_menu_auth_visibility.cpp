@@ -13,57 +13,58 @@
 #include <utility>
 #include <vector>
 
-namespace
+class MenuAuthVisibilityTest : public ::testing::Test
 {
-class TestOutput final : public Output
-{
-  public:
-    void Write(std::string_view text) override
+  protected:
+    class TestOutput final : public Output
     {
-        chunks_.emplace_back(text);
-    }
-
-    void WriteLine(std::string_view text) override
-    {
-        lines_.emplace_back(text);
-    }
-
-    bool ContainsSubstring(std::string_view needle) const
-    {
-        const auto contains = [needle](std::string_view text) { return text.contains(needle); };
-        return std::ranges::any_of(lines_, contains) || std::ranges::any_of(chunks_, contains);
-    }
-
-  private:
-    std::vector<std::string> lines_;
-    std::vector<std::string> chunks_;
-};
-
-class TestInput final : public Input
-{
-  public:
-    explicit TestInput(std::vector<std::string> scripted) : scripted_(std::move(scripted))
-    {
-    }
-
-    std::string ReadLine() override
-    {
-        if (index_ >= scripted_.size())
+      public:
+        void Write(std::string_view text) override
         {
-            return "";
+            chunks_.emplace_back(text);
         }
-        std::string line = scripted_[index_];
-        ++index_;
-        return line;
-    }
 
-  private:
-    std::vector<std::string> scripted_;
-    size_t index_ = 0;
+        void WriteLine(std::string_view text) override
+        {
+            lines_.emplace_back(text);
+        }
+
+        bool ContainsSubstring(std::string_view needle) const
+        {
+            const auto contains = [needle](std::string_view text) { return text.contains(needle); };
+            return std::ranges::any_of(lines_, contains) || std::ranges::any_of(chunks_, contains);
+        }
+
+      private:
+        std::vector<std::string> lines_;
+        std::vector<std::string> chunks_;
+    };
+
+    class TestInput final : public Input
+    {
+      public:
+        explicit TestInput(std::vector<std::string> scripted) : scripted_(std::move(scripted))
+        {
+        }
+
+        std::string ReadLine() override
+        {
+            if (index_ >= scripted_.size())
+            {
+                return "";
+            }
+            std::string line = scripted_[index_];
+            ++index_;
+            return line;
+        }
+
+      private:
+        std::vector<std::string> scripted_;
+        size_t index_ = 0;
+    };
 };
-} // namespace
 
-TEST(MenuAuthVisibility, RendererHidesProtectedItemsWhenGuest)
+TEST_F(MenuAuthVisibilityTest, RendererHidesProtectedItemsWhenGuest)
 {
     auto auth_context = std::make_shared<services::AuthenticationContext>();
     auto auth_service = std::make_shared<services::AuthenticationService>(auth_context);
@@ -82,7 +83,7 @@ TEST(MenuAuthVisibility, RendererHidesProtectedItemsWhenGuest)
     EXPECT_TRUE(output->ContainsSubstring("Choose an option (0-1)"));
 }
 
-TEST(MenuAuthVisibility, RendererShowsProtectedItemsWhenAuthenticated)
+TEST_F(MenuAuthVisibilityTest, RendererShowsProtectedItemsWhenAuthenticated)
 {
     auto auth_context = std::make_shared<services::AuthenticationContext>();
     auto auth_service = std::make_shared<services::AuthenticationService>(auth_context);
@@ -103,7 +104,7 @@ TEST(MenuAuthVisibility, RendererShowsProtectedItemsWhenAuthenticated)
     EXPECT_TRUE(output->ContainsSubstring("Choose an option (0-2)"));
 }
 
-TEST(MenuAuthVisibility, InputSelectionMapsToVisibleItems)
+TEST_F(MenuAuthVisibilityTest, InputSelectionMapsToVisibleItems)
 {
     auto auth_context = std::make_shared<services::AuthenticationContext>();
     auto auth_service = std::make_shared<services::AuthenticationService>(auth_context);

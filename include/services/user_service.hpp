@@ -38,6 +38,7 @@ class UserService
     utils::ServiceResult<void> ValidateUserId(int user_id) const;
 
   private:
+    static User ToUser(const UserRecord& record);
     std::shared_ptr<persistence::UserDataAdapter> adapter_;
     std::shared_ptr<services::AuthenticationService> auth_service_;
     std::shared_ptr<services::CredentialsService> credentials_service_;
