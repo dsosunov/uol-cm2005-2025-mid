@@ -40,6 +40,13 @@ class TradingActivitiesService
         bool is_bid = false;
         double price = 0.0;
         double amount = 0.0;
+
+        WalletEffect(std::string base_, std::string quote_, bool is_bid_, double price_,
+                     double amount_)
+            : base(std::move(base_)), quote(std::move(quote_)), is_bid(is_bid_), price(price_),
+              amount(amount_)
+        {
+        }
     };
 
     double SyntheticPrice(std::string_view base, std::string_view quote) const;

@@ -137,26 +137,18 @@ void TradingActivitiesService::GenerateOrdersAndEffects(
 
         if (remaining >= 1)
         {
-            services::OrderRecord bid_order;
-            bid_order.product_pair = product_pair;
-            bid_order.order_type = dto::OrderType::Bids;
-            bid_order.price = bid;
-            bid_order.amount = amount;
-            bid_order.timestamp = now + std::chrono::microseconds{micros_offset++};
-            new_orders.emplace_back(std::move(bid_order));
-            wallet_effects.emplace_back(WalletEffect{base, quote, true, bid, amount});
+            new_orders.emplace_back(services::OrderRecord{
+                product_pair, now + std::chrono::microseconds{micros_offset++},
+                dto::OrderType::Bids, bid, amount});
+            wallet_effects.emplace_back(base, quote, true, bid, amount);
         }
 
         if (remaining >= 2)
         {
-            services::OrderRecord ask_order;
-            ask_order.product_pair = product_pair;
-            ask_order.order_type = dto::OrderType::Asks;
-            ask_order.price = ask;
-            ask_order.amount = amount;
-            ask_order.timestamp = now + std::chrono::microseconds{micros_offset++};
-            new_orders.emplace_back(std::move(ask_order));
-            wallet_effects.emplace_back(WalletEffect{base, quote, false, ask, amount});
+            new_orders.emplace_back(services::OrderRecord{
+                product_pair, now + std::chrono::microseconds{micros_offset++},
+                dto::OrderType::Asks, ask, amount});
+            wallet_effects.emplace_back(base, quote, false, ask, amount);
         }
     }
 }

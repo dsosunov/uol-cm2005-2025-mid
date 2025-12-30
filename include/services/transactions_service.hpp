@@ -46,6 +46,13 @@ struct ActivityStats
         int total_transactions;
         double total_volume;
         double average_transaction_size;
+
+        Period(std::string period_, int total_transactions_, double total_volume_,
+               double average_transaction_size_)
+            : period(std::move(period_)), total_transactions(total_transactions_),
+              total_volume(total_volume_), average_transaction_size(average_transaction_size_)
+        {
+        }
     };
     std::vector<Period> per_period;
 };

@@ -34,9 +34,15 @@ static std::string MakeActivitySummaryKey(dto::Timeframe timeframe, utils::TimeP
 static std::string MakeDateSampleKey(dto::Timeframe timeframe, utils::TimePoint timestamp)
 {
     std::string formatted_date = utils::FormatDate(timestamp);
-    const size_t required_len = (timeframe == dto::Timeframe::Yearly)    ? 4
-                                : (timeframe == dto::Timeframe::Monthly) ? 7
-                                                                         : 10;
+    size_t required_len = 10;
+    if (timeframe == dto::Timeframe::Yearly)
+    {
+        required_len = 4;
+    }
+    else if (timeframe == dto::Timeframe::Monthly)
+    {
+        required_len = 7;
+    }
     if (formatted_date.length() < required_len)
     {
         return {};
@@ -133,9 +139,9 @@ utils::ServiceResult<ActivityStats> TransactionsService::GetActivitySummary(
         total_volume += transaction.amount;
 
         const std::string key = MakeActivitySummaryKey(timeframe, transaction.timestamp);
-        auto& bucket = buckets[key];
-        ++bucket.first;
-        bucket.second += transaction.amount;
+        auto& [count, volume] = buckets[key];
+        ++count;
+        volume += transaction.amount;
     });
 
     double average = (total > 0) ? (total_volume / total) : 0.0;
@@ -146,7 +152,7 @@ utils::ServiceResult<ActivityStats> TransactionsService::GetActivitySummary(
     {
         const auto& [count, volume] = values;
         const double avg = (count > 0) ? (volume / count) : 0.0;
-        per_period.emplace_back(ActivityStats::Period{period, count, volume, avg});
+        per_period.emplace_back(period, count, volume, avg);
     }
 
     return {true, "Activity summary retrieved successfully",
