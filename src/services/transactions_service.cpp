@@ -6,6 +6,7 @@
 #include "services/user_service.hpp"
 
 #include <algorithm>
+#include <map>
 #include <set>
 #include <stdexcept>
 
@@ -73,8 +74,7 @@ utils::ServiceResult<std::vector<WalletTransaction>> TransactionsService::GetTra
 }
 
 utils::ServiceResult<ActivityStats> TransactionsService::GetActivitySummary(
-    int user_id, [[maybe_unused]] dto::Timeframe timeframe,
-    const std::optional<utils::TimePoint>& start_date,
+    int user_id, dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
     const std::optional<utils::TimePoint>& end_date) const
 {
     auto validate = user_service_->ValidateUserId(user_id);
@@ -85,21 +85,53 @@ utils::ServiceResult<ActivityStats> TransactionsService::GetActivitySummary(
     int total = 0;
     double total_volume = 0.0;
 
+    std::map<std::string, std::pair<int, double>> buckets;
+
     utils::DateFilter date_filter(start_date, end_date);
 
-    adapter_->ReadWithProcessor(
-        [&total, &total_volume, user_id, &date_filter](const WalletTransaction& transaction) {
-            if (transaction.user_id == user_id && date_filter.IsInRange(transaction.timestamp))
+    adapter_->ReadWithProcessor([&total, &total_volume, &buckets, user_id, &date_filter,
+                                 timeframe](const WalletTransaction& transaction) {
+        if (transaction.user_id == user_id && date_filter.IsInRange(transaction.timestamp))
+        {
+            total++;
+            total_volume += transaction.amount;
+
+            std::string formatted_date = utils::FormatDate(transaction.timestamp);
+            std::string key;
+
+            if (timeframe == dto::Timeframe::Yearly)
             {
-                total++;
-                total_volume += transaction.amount;
+                key = (formatted_date.length() >= 4) ? formatted_date.substr(0, 4) : formatted_date;
             }
-        });
+            else if (timeframe == dto::Timeframe::Monthly)
+            {
+                key = (formatted_date.length() >= 7) ? formatted_date.substr(0, 7) : formatted_date;
+            }
+            else
+            {
+                key = formatted_date;
+            }
+
+            auto& bucket = buckets[key];
+            bucket.first++;
+            bucket.second += transaction.amount;
+        }
+    });
 
     double average = (total > 0) ? (total_volume / total) : 0.0;
 
+    std::vector<ActivityStats::Period> per_period;
+    per_period.reserve(buckets.size());
+    for (const auto& [period, values] : buckets)
+    {
+        const int count = values.first;
+        const double volume = values.second;
+        const double avg = (count > 0) ? (volume / count) : 0.0;
+        per_period.push_back(ActivityStats::Period{period, count, volume, avg});
+    }
+
     return {true, "Activity summary retrieved successfully",
-            ActivityStats{total, total_volume, average}};
+            ActivityStats{total, total_volume, average, std::move(per_period)}};
 }
 
 utils::ServiceResult<std::vector<std::string>> TransactionsService::GetDateSamples(

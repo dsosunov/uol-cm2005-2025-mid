@@ -1,5 +1,6 @@
 ﻿#include "services/wallet_service.hpp"
 
+#include "app_constants.hpp"
 #include "core/utils/time_utils.hpp"
 #include "services/transactions_service.hpp" // for WalletTransaction
 #include "services/user_service.hpp"
@@ -47,6 +48,16 @@ std::map<std::string, double, std::less<>> WalletService::CalculateBalances(int 
     return balances;
 }
 
+double WalletService::ExchangeRateToUSD(std::string_view currency) const
+{
+    if (auto it = app::kExchangeRateToUSD.find(currency); it != app::kExchangeRateToUSD.end())
+    {
+        return it->second;
+    }
+
+    return app::kDefaultExchangeRateToUSD;
+}
+
 utils::ServiceResult<std::map<std::string, double, std::less<>>> WalletService::GetBalances(
     int user_id) const
 {
@@ -89,12 +100,21 @@ utils::ServiceResult<double> WalletService::GetTotalBalanceInUSD(int user_id) co
 
     auto balances = CalculateBalances(user_id);
 
-    if (auto it = balances.find("USD"); it != balances.end())
+    double total_usd = 0.0;
+    for (const auto& [currency, amount] : balances)
     {
-        return {true, "USD balance retrieved successfully", it->second};
+        if (amount == 0.0)
+        {
+            continue;
+        }
+
+        const double rate_to_usd = ExchangeRateToUSD(currency);
+
+        total_usd += amount * rate_to_usd;
     }
 
-    return {true, "No USD balance found", 0.0};
+    return utils::ServiceResult<double>::Success(total_usd,
+                                                 "Total wallet balance in USD calculated");
 }
 
 utils::ServiceResult<double> WalletService::Deposit(int user_id, std::string_view currency,

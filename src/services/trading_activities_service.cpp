@@ -9,8 +9,8 @@
 #include <algorithm>
 #include <cmath>
 #include <format>
-#include <map>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -34,6 +34,19 @@ std::vector<std::pair<std::string, std::string>> TradingActivitiesService::
     }
 
     return pairs;
+}
+
+double TradingActivitiesService::SyntheticPrice(std::string_view base, std::string_view quote) const
+{
+    auto it_base = app::kSyntheticPriceInUSDT.find(std::string(base));
+    auto it_quote = app::kSyntheticPriceInUSDT.find(std::string(quote));
+    if (it_base == app::kSyntheticPriceInUSDT.end() ||
+        it_quote == app::kSyntheticPriceInUSDT.end() || it_quote->second <= 0.0)
+    {
+        return 0.0;
+    }
+
+    return it_base->second / it_quote->second;
 }
 
 TradingActivitiesService::TradingActivitiesService(
@@ -101,14 +114,12 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
     std::vector<WalletEffect> wallet_effects;
     wallet_effects.reserve(simulation_pairs.size() * orders_per_side_per_pair * 2);
 
-    std::map<std::string, double, std::less<>> required;
-
     std::vector<std::string> supported_pairs;
     supported_pairs.reserve(simulation_pairs.size());
 
     for (const auto& [base, quote] : simulation_pairs)
     {
-        double ref = app::SyntheticPrice(base, quote);
+        double ref = SyntheticPrice(base, quote);
         if (!std::isfinite(ref) || ref <= 0.0)
         {
             continue;
@@ -133,7 +144,6 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
             bid_order.timestamp = now + std::chrono::microseconds{micros_offset++};
             new_orders.push_back(bid_order);
             wallet_effects.push_back(WalletEffect{base, quote, true, bid, kAmount});
-            required[quote] += bid * kAmount;
 
             services::OrderRecord ask_order;
             ask_order.product_pair = product_pair;
@@ -143,7 +153,6 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
             ask_order.timestamp = now + std::chrono::microseconds{micros_offset++};
             new_orders.push_back(ask_order);
             wallet_effects.push_back(WalletEffect{base, quote, false, ask, kAmount});
-            required[base] += kAmount;
         }
     }
 
@@ -160,26 +169,63 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
     }
 
     // Require sufficient balances; no auto-funding.
-    std::vector<std::string> missing;
-    for (const auto& [currency, required_amount] : required)
+    // Important: a bid immediately deposits `base` before the corresponding ask withdraws it.
+    // So we validate against the *sequential* wallet effects, not by summing all bids/asks
+    // up-front.
+    auto balances_result = wallet_service_->GetBalances(user_id);
+    if (!balances_result.success || !balances_result.data.has_value())
     {
-        if (required_amount <= 0.0)
+        return utils::ServiceResult<TradingSimulationSummary>::Failure(
+            balances_result.success ? "Failed to retrieve balances" : balances_result.message);
+    }
+
+    auto starting_balances = *balances_result.data;
+    auto running_balances = starting_balances;
+    auto min_balances = starting_balances;
+
+    for (const auto& effect : wallet_effects)
+    {
+        if (effect.is_bid)
+        {
+            const double spend = effect.price * effect.amount;
+            running_balances[effect.quote] -= spend;
+            running_balances[effect.base] += effect.amount;
+        }
+        else
+        {
+            running_balances[effect.base] -= effect.amount;
+            const double receive = effect.price * effect.amount;
+            running_balances[effect.quote] += receive;
+        }
+
+        for (const auto& [currency, value] : running_balances)
+        {
+            auto it = min_balances.find(currency);
+            if (it == min_balances.end())
+            {
+                min_balances.emplace(currency, value);
+            }
+            else
+            {
+                it->second = std::min(it->second, value);
+            }
+        }
+    }
+
+    constexpr double kEpsilon = 1e-9;
+    std::vector<std::string> missing;
+    for (const auto& [currency, min_value] : min_balances)
+    {
+        if (min_value >= -kEpsilon)
         {
             continue;
         }
 
-        auto bal = wallet_service_->GetBalance(user_id, currency);
-        if (!bal.success)
-        {
-            return utils::ServiceResult<TradingSimulationSummary>::Failure(bal.message);
-        }
-
-        double have = bal.data.value_or(0.0);
-        if (have + 1e-9 < required_amount)
-        {
-            missing.push_back(
-                std::format("{} need {:.6f} have {:.6f}", currency, required_amount, have));
-        }
+        const double have =
+            starting_balances.contains(currency) ? starting_balances[currency] : 0.0;
+        const double required_start = have + (-min_value);
+        missing.push_back(
+            std::format("{} need {:.6f} have {:.6f}", currency, required_start, have));
     }
 
     if (!missing.empty())

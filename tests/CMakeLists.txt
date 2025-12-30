@@ -17,6 +17,8 @@ add_executable(menu_tests
     test_timeframe_date_binders.cpp
     test_candlestick_service_e2e.cpp
     test_form_read_retries.cpp
+    test_transactions_activity_summary_e2e.cpp
+    test_trading_simulation_initial_balances_e2e.cpp
 )
 
 # Link against gtest and the MenuSystemLib library

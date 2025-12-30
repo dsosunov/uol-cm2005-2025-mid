@@ -29,17 +29,21 @@ inline const std::map<std::string, double, std::less<>> kSyntheticPriceInUSDT = 
     {"USDT", 1.0},
 };
 
-inline double SyntheticPrice(std::string_view base, std::string_view quote)
-{
-    auto it_base = kSyntheticPriceInUSDT.find(std::string(base));
-    auto it_quote = kSyntheticPriceInUSDT.find(std::string(quote));
-    if (it_base == kSyntheticPriceInUSDT.end() || it_quote == kSyntheticPriceInUSDT.end() ||
-        it_quote->second <= 0.0)
-    {
-        return 0.0;
-    }
+// Deterministic exchange rates to USD for computing wallet totals.
+// Since kSyntheticPriceInUSDT is quoted in USDT, we also define the USDT->USD peg.
+inline constexpr double kUSDTToUSD = 1.0;
 
-    return it_base->second / it_quote->second;
-}
+// Default exchange rate to use when a currency is missing from kExchangeRateToUSD.
+// Requirement: use 1 as the default.
+inline constexpr double kDefaultExchangeRateToUSD = 1.0;
+
+// Exchange rate table: 1 unit of currency * rate = USD.
+inline const std::map<std::string, double, std::less<>> kExchangeRateToUSD = {
+    {"USD", 1.0},
+    {"USDT", kUSDTToUSD},
+    {"BTC", kSyntheticPriceInUSDT.at("BTC") * kUSDTToUSD},
+    {"ETH", kSyntheticPriceInUSDT.at("ETH") * kUSDTToUSD},
+    {"DOGE", kSyntheticPriceInUSDT.at("DOGE") * kUSDTToUSD},
+};
 
 } // namespace app

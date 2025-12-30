@@ -32,6 +32,7 @@ class TradingActivitiesService
         int orders_per_side_per_pair = 5);
 
   private:
+    double SyntheticPrice(std::string_view base, std::string_view quote) const;
     std::vector<std::pair<std::string, std::string>> GetSimulationProductPairs() const;
 
     std::shared_ptr<AuthenticationService> auth_service_;

@@ -40,6 +40,14 @@ struct ActivityStats
     int total_transactions;
     double total_volume;
     double average_transaction_size;
+    struct Period
+    {
+        std::string period;
+        int total_transactions;
+        double total_volume;
+        double average_transaction_size;
+    };
+    std::vector<Period> per_period;
 };
 class TransactionsService
 {

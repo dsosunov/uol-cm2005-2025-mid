@@ -151,9 +151,9 @@ std::string FormatDate(const TimePoint& tp)
     std::tm tm;
 
 #ifdef _WIN32
-    localtime_s(&tm, &time);
+    gmtime_s(&tm, &time);
 #else
-    localtime_r(&time, &tm);
+    gmtime_r(&time, &tm);
 #endif
     std::ostringstream ss;
     ss << std::put_time(&tm, "%Y-%m-%d");
@@ -170,9 +170,9 @@ std::string FormatTimestamp(const TimePoint& tp)
     std::tm tm;
 
 #ifdef _WIN32
-    localtime_s(&tm, &time);
+    gmtime_s(&tm, &time);
 #else
-    localtime_r(&time, &tm);
+    gmtime_r(&time, &tm);
 #endif
 
     std::ostringstream ss;

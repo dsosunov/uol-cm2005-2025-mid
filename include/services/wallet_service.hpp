@@ -27,6 +27,7 @@ class WalletService
     utils::ServiceResult<double> Withdraw(int user_id, std::string_view currency, double amount);
 
   private:
+    double ExchangeRateToUSD(std::string_view currency) const;
     std::shared_ptr<services::TransactionsService> transactions_service_;
     std::shared_ptr<services::UserService> user_service_;
     std::map<std::string, double, std::less<>> CalculateBalances(int user_id) const;

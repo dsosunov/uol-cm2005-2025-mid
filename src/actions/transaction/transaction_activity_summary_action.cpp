@@ -79,6 +79,43 @@ void TransactionActivitySummaryAction::DisplayResults(
 
     WriteEmptyLine(context);
 
+    std::string period_header = "Period";
+    if (query.timeframe == dto::Timeframe::Daily)
+    {
+        period_header = "Day";
+    }
+    else if (query.timeframe == dto::Timeframe::Monthly)
+    {
+        period_header = "Month";
+    }
+    else if (query.timeframe == dto::Timeframe::Yearly)
+    {
+        period_header = "Year";
+    }
+
+    WriteLine(std::format("{:<12} {:>12} {:>18} {:>18}", period_header, "Txns", "Total Volume",
+                          "Avg Size"),
+              context);
+    WriteLine(std::string(12 + 1 + 12 + 1 + 18 + 1 + 18, '-'), context);
+
+    if (stats.per_period.empty())
+    {
+        WriteLine("No transactions found for selected timeframe.", context);
+    }
+    else
+    {
+        for (const auto& row : stats.per_period)
+        {
+            WriteLine(std::format("{:<12} {:>12} {:>18} {:>18}", row.period,
+                                  std::format("{}", row.total_transactions),
+                                  std::format("${:.4f}", row.total_volume),
+                                  std::format("${:.4f}", row.average_transaction_size)),
+                      context);
+        }
+    }
+
+    WriteEmptyLine(context);
+
     WriteLine(std::format("{:<28} {}", "Metric", "Value"), context);
     WriteLine(std::string(28 + 1 + 24, '-'), context);
     WriteLine(
