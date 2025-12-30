@@ -111,9 +111,8 @@ utils::ServiceResult<double> WalletService::Deposit(int user_id, std::string_vie
         return utils::ServiceResult<double>::Failure(validate.message);
     }
 
-    auto add =
-        transactions_service_->AddTransaction(user_id, currency, kWalletTransactionTypeDeposit,
-                                              amount, utils::Now());
+    auto add = transactions_service_->AddTransaction(
+        user_id, currency, kWalletTransactionTypeDeposit, amount, utils::Now());
     if (!add.success)
     {
         return utils::ServiceResult<double>::Failure(add.message);
@@ -145,9 +144,8 @@ utils::ServiceResult<double> WalletService::Withdraw(int user_id, std::string_vi
         return utils::ServiceResult<double>::Failure("Insufficient balance");
     }
 
-    auto add =
-        transactions_service_->AddTransaction(user_id, currency, kWalletTransactionTypeWithdraw,
-                                              amount, utils::Now());
+    auto add = transactions_service_->AddTransaction(
+        user_id, currency, kWalletTransactionTypeWithdraw, amount, utils::Now());
     if (!add.success)
     {
         return utils::ServiceResult<double>::Failure(add.message);
