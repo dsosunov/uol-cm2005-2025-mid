@@ -2,7 +2,7 @@
 
 #include "app_constants.hpp"
 #include "core/utils/time_utils.hpp"
-#include "services/transactions_service.hpp" // for WalletTransaction
+#include "services/transactions_service.hpp"
 #include "services/user_service.hpp"
 
 #include <stdexcept>

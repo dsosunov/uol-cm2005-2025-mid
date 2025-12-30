@@ -69,7 +69,7 @@ TradingActivitiesService::TradingActivitiesService(
     }
 }
 
-utils::ServiceResult<int> TradingActivitiesService::GetAuthenticatedUserId()
+utils::ServiceResult<int> TradingActivitiesService::GetAuthenticatedUserId() const
 {
     auto user = auth_service_->GetAuthenticatedUser();
     if (!user.success || !user.data)
@@ -109,7 +109,7 @@ void TradingActivitiesService::GenerateOrdersAndEffects(
     wallet_effects.reserve(static_cast<size_t>(orders_per_pair));
 
     std::string product_pair = base + "/" + quote;
-    supported_pairs.push_back(product_pair);
+    supported_pairs.emplace_back(product_pair);
 
     constexpr double kBaseSpread = 0.002;  // 0.2%
     constexpr double kStepSpread = 0.0005; // 0.05%
@@ -123,8 +123,9 @@ void TradingActivitiesService::GenerateOrdersAndEffects(
 
     // Generate up to `orders_per_pair` orders by alternating bid/ask per level.
     const int levels = (orders_per_pair + 1) / 2;
-    for (int i = 0; i < levels; ++i)
+    for (int i = 0; i < levels && static_cast<int>(new_orders.size()) < orders_per_pair; ++i)
     {
+        const int remaining = orders_per_pair - static_cast<int>(new_orders.size());
         const double level_spread = kBaseSpread + i * kStepSpread;
         double bid = reference_price * (1.0 - level_spread);
         double ask = reference_price * (1.0 + level_spread);
@@ -134,36 +135,34 @@ void TradingActivitiesService::GenerateOrdersAndEffects(
 
         const double amount = kBaseAmount * (1.0 + i * kAmountStep);
 
-        services::OrderRecord bid_order;
-        bid_order.product_pair = product_pair;
-        bid_order.order_type = dto::OrderType::Bids;
-        bid_order.price = bid;
-        bid_order.amount = amount;
-        bid_order.timestamp = now + std::chrono::microseconds{micros_offset++};
-        new_orders.push_back(bid_order);
-        wallet_effects.push_back(WalletEffect{base, quote, true, bid, amount});
-        if (static_cast<int>(new_orders.size()) >= orders_per_pair)
+        if (remaining >= 1)
         {
-            break;
+            services::OrderRecord bid_order;
+            bid_order.product_pair = product_pair;
+            bid_order.order_type = dto::OrderType::Bids;
+            bid_order.price = bid;
+            bid_order.amount = amount;
+            bid_order.timestamp = now + std::chrono::microseconds{micros_offset++};
+            new_orders.emplace_back(std::move(bid_order));
+            wallet_effects.emplace_back(WalletEffect{base, quote, true, bid, amount});
         }
 
-        services::OrderRecord ask_order;
-        ask_order.product_pair = product_pair;
-        ask_order.order_type = dto::OrderType::Asks;
-        ask_order.price = ask;
-        ask_order.amount = amount;
-        ask_order.timestamp = now + std::chrono::microseconds{micros_offset++};
-        new_orders.push_back(ask_order);
-        wallet_effects.push_back(WalletEffect{base, quote, false, ask, amount});
-        if (static_cast<int>(new_orders.size()) >= orders_per_pair)
+        if (remaining >= 2)
         {
-            break;
+            services::OrderRecord ask_order;
+            ask_order.product_pair = product_pair;
+            ask_order.order_type = dto::OrderType::Asks;
+            ask_order.price = ask;
+            ask_order.amount = amount;
+            ask_order.timestamp = now + std::chrono::microseconds{micros_offset++};
+            new_orders.emplace_back(std::move(ask_order));
+            wallet_effects.emplace_back(WalletEffect{base, quote, false, ask, amount});
         }
     }
 }
 
 utils::ServiceResult<void> TradingActivitiesService::EnsureSufficientBalances(
-    int user_id, const std::vector<TradingActivitiesService::WalletEffect>& wallet_effects)
+    int user_id, const std::vector<TradingActivitiesService::WalletEffect>& wallet_effects) const
 {
     // Require sufficient balances; no auto-funding.
     // Important: a bid immediately deposits `base` before the corresponding ask withdraws it.
@@ -200,7 +199,7 @@ utils::ServiceResult<void> TradingActivitiesService::EnsureSufficientBalances(
             auto it = min_balances.find(currency);
             if (it == min_balances.end())
             {
-                min_balances.emplace(currency, value);
+                min_balances.try_emplace(currency, value);
             }
             else
             {
@@ -241,7 +240,7 @@ utils::ServiceResult<void> TradingActivitiesService::EnsureSufficientBalances(
 }
 
 utils::ServiceResult<void> TradingActivitiesService::ApplyWalletEffects(
-    int user_id, const std::vector<TradingActivitiesService::WalletEffect>& wallet_effects)
+    int user_id, const std::vector<TradingActivitiesService::WalletEffect>& wallet_effects) const
 {
     // Apply wallet updates.
     for (const auto& effect : wallet_effects)
@@ -282,7 +281,7 @@ utils::ServiceResult<void> TradingActivitiesService::ApplyWalletEffects(
 }
 
 utils::ServiceResult<void> TradingActivitiesService::AppendOrders(
-    const std::vector<services::OrderRecord>& new_orders)
+    const std::vector<services::OrderRecord>& new_orders) const
 {
     auto append = trading_service_->AppendOrders(new_orders);
     if (!append.success)
@@ -294,7 +293,7 @@ utils::ServiceResult<void> TradingActivitiesService::AppendOrders(
 }
 
 utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
-    SimulateUserTradingActivities(int orders_per_pair)
+    SimulateUserTradingActivities(int orders_per_pair) const
 {
     if (orders_per_pair <= 0)
     {
@@ -303,7 +302,7 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
     }
 
     auto user_id_result = GetAuthenticatedUserId();
-    if (!user_id_result.success || !user_id_result.data)
+    if (!user_id_result.success || !user_id_result.data.has_value())
     {
         return utils::ServiceResult<TradingSimulationSummary>::Failure(user_id_result.message);
     }
@@ -317,7 +316,7 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
     }
 
     auto primary_pair_result = SelectPrimaryPair(simulation_pairs);
-    if (!primary_pair_result.success || !primary_pair_result.data)
+    if (!primary_pair_result.success || !primary_pair_result.data.has_value())
     {
         return utils::ServiceResult<TradingSimulationSummary>::Failure(primary_pair_result.message);
     }
