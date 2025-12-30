@@ -2,7 +2,7 @@
 
 #include "persistence/user_data_adapter.hpp"
 #include "services/authentication_service.hpp"
-#include "services/user_password_hash.hpp"
+#include "services/credentials_service.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -20,8 +20,10 @@ User ToUser(const UserRecord& record)
 } // namespace
 
 UserService::UserService(std::shared_ptr<persistence::UserDataAdapter> adapter,
-                         std::shared_ptr<services::AuthenticationService> auth_service)
-    : adapter_(std::move(adapter)), auth_service_(std::move(auth_service))
+                         std::shared_ptr<services::AuthenticationService> auth_service,
+                         std::shared_ptr<services::CredentialsService> credentials_service)
+    : adapter_(std::move(adapter)), auth_service_(std::move(auth_service)),
+      credentials_service_(std::move(credentials_service))
 {
     if (!adapter_)
     {
@@ -30,6 +32,10 @@ UserService::UserService(std::shared_ptr<persistence::UserDataAdapter> adapter,
     if (!auth_service_)
     {
         throw std::invalid_argument("AuthenticationService is required");
+    }
+    if (!credentials_service_)
+    {
+        throw std::invalid_argument("CredentialsService is required");
     }
 }
 
@@ -48,7 +54,6 @@ utils::ServiceResult<std::string> UserService::RemindUsername(std::string_view e
 utils::ServiceResult<User> UserService::LoginUser(std::string_view username,
                                                   std::string_view password)
 {
-    std::uint64_t password_hash = internal::HashPassword(password);
     auto user_record = adapter_->FindByUsername(username);
 
     if (!user_record)
@@ -56,9 +61,9 @@ utils::ServiceResult<User> UserService::LoginUser(std::string_view username,
         return utils::ServiceResult<User>::Failure("User not found");
     }
 
-    if (user_record->password_hash != password_hash)
+    if (auto pw = credentials_service_->ValidatePassword(user_record->id, password); !pw.success)
     {
-        return utils::ServiceResult<User>::Failure("Invalid password");
+        return utils::ServiceResult<User>::Failure(pw.message);
     }
 
     auto user = ToUser(*user_record);
@@ -78,11 +83,10 @@ utils::ServiceResult<void> UserService::ResetPassword(std::string_view username,
         return utils::ServiceResult<void>::Failure("User not found");
     }
 
-    user_record->password_hash = internal::HashPassword(new_password);
-
-    if (!adapter_->Update(*user_record))
+    if (auto saved = credentials_service_->SetPassword(user_record->id, new_password);
+        !saved.success)
     {
-        return utils::ServiceResult<void>::Failure("Failed to save password");
+        return saved;
     }
 
     return utils::ServiceResult<void>::Success("Password reset successful");

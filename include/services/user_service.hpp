@@ -12,7 +12,8 @@
 namespace services
 {
 class AuthenticationService;
-}
+class CredentialsService;
+} // namespace services
 
 namespace persistence
 {
@@ -24,7 +25,8 @@ class UserService
 {
   public:
     UserService(std::shared_ptr<persistence::UserDataAdapter> adapter,
-                std::shared_ptr<services::AuthenticationService> auth_service);
+                std::shared_ptr<services::AuthenticationService> auth_service,
+                std::shared_ptr<services::CredentialsService> credentials_service);
     ~UserService() = default;
     utils::ServiceResult<std::string> RemindUsername(std::string_view email) const;
     utils::ServiceResult<User> LoginUser(std::string_view username, std::string_view password);
@@ -38,5 +40,6 @@ class UserService
   private:
     std::shared_ptr<persistence::UserDataAdapter> adapter_;
     std::shared_ptr<services::AuthenticationService> auth_service_;
+    std::shared_ptr<services::CredentialsService> credentials_service_;
 };
 } // namespace services

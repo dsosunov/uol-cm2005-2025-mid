@@ -8,6 +8,24 @@
 namespace app
 {
 
+// Password rules (used by UI validators and services).
+inline constexpr std::size_t kPasswordMinLength = 6;
+inline constexpr std::size_t kPasswordMaxLength = 50;
+
+// User profile rules (used by UI validators).
+inline constexpr std::size_t kUsernameLength = 10;
+inline constexpr std::size_t kFullNameMinLength = 2;
+inline constexpr std::size_t kFullNameMaxLength = 100;
+
+// Wallet amount rules (used by UI validators).
+inline constexpr std::size_t kWalletAmountMaxDecimalPlaces = 2;
+inline constexpr double kWalletAmountMinExclusive = 0.0;
+inline constexpr double kWalletAmountMax = 1000000000.0;
+
+// Wallet amount hint text currently communicates a different precision than the validator enforces.
+// Keep it centralized so it can be changed intentionally.
+inline constexpr std::size_t kWalletAmountHintMaxDecimalPlaces = 8;
+
 // Trading/wallet currencies supported by the application.
 inline const std::set<std::string, std::less<>> kSupportedCurrencies = {"BTC", "DOGE", "ETH",
                                                                         "USDT"};

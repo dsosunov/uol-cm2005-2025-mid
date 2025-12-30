@@ -57,6 +57,17 @@ bool UserDataAdapter::ExistsByEmail(std::string_view email) const
     return exists;
 }
 
+bool UserDataAdapter::ExistsByFullName(std::string_view full_name) const
+{
+    bool exists = false;
+
+    ReadWithProcessor(
+        [full_name](const services::UserRecord& user) { return user.full_name == full_name; },
+        [&exists](const services::UserRecord&) { exists = true; });
+
+    return exists;
+}
+
 bool UserDataAdapter::Insert(services::UserRecord& user) const
 {
     user.id = GetNextId();
@@ -88,7 +99,7 @@ bool UserDataAdapter::Update(const services::UserRecord& user) const
 std::optional<services::UserRecord> UserDataAdapter::TransformToEntity(
     const data::CsvRecord& record) const
 {
-    if (record.fields.size() < 5)
+    if (record.fields.size() < 4)
     {
         return std::nullopt;
     }
@@ -101,7 +112,6 @@ std::optional<services::UserRecord> UserDataAdapter::TransformToEntity(
         user.username = record.fields[1];
         user.full_name = record.fields[2];
         user.email = record.fields[3];
-        user.password_hash = std::stoull(record.fields[4]);
     }
     catch (const std::invalid_argument&)
     {
@@ -118,13 +128,12 @@ std::optional<services::UserRecord> UserDataAdapter::TransformToEntity(
 data::CsvRecord UserDataAdapter::TransformFromUserRecord(const services::UserRecord& user)
 {
     data::CsvRecord record;
-    record.fields.reserve(5);
+    record.fields.reserve(4);
 
     record.fields.push_back(std::to_string(user.id));
     record.fields.push_back(user.username);
     record.fields.push_back(user.full_name);
     record.fields.push_back(user.email);
-    record.fields.push_back(std::to_string(user.password_hash));
 
     return record;
 }

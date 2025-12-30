@@ -16,12 +16,14 @@ namespace services
 {
 
 class WalletService;
+class CredentialsService;
 
 class UserRegistrationService
 {
   public:
     UserRegistrationService(std::shared_ptr<persistence::UserDataAdapter> adapter,
-                            std::shared_ptr<services::WalletService> wallet_service);
+                            std::shared_ptr<services::WalletService> wallet_service,
+                            std::shared_ptr<services::CredentialsService> credentials_service);
     ~UserRegistrationService() = default;
 
     std::string GenerateUsername() const;
@@ -33,6 +35,7 @@ class UserRegistrationService
   private:
     std::shared_ptr<persistence::UserDataAdapter> adapter_;
     std::shared_ptr<services::WalletService> wallet_service_;
+    std::shared_ptr<services::CredentialsService> credentials_service_;
 
     static User ToUser(const UserRecord& record);
 };

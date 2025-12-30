@@ -20,6 +20,7 @@ add_executable(menu_tests
     test_form_read_retries.cpp
     test_transactions_activity_summary_e2e.cpp
     test_trading_simulation_initial_balances_e2e.cpp
+    test_credentials_user_id_e2e.cpp
 )
 
 # Link against gtest and the MenuSystemLib library

@@ -1,5 +1,9 @@
 ﻿#include "forms/user/validators/password_validator.hpp"
 
+#include "app_constants.hpp"
+
+#include <format>
+
 namespace user_forms
 {
 
@@ -11,14 +15,16 @@ form::ValidationResult PasswordValidator::Validate(const std::string& value,
         return form::ValidationResult::Invalid("Password cannot be empty");
     }
 
-    if (value.length() < 6)
+    if (value.length() < app::kPasswordMinLength)
     {
-        return form::ValidationResult::Invalid("Password must be at least 6 characters");
+        return form::ValidationResult::Invalid(
+            std::format("Password must be at least {} characters", app::kPasswordMinLength));
     }
 
-    if (value.length() > 50)
+    if (value.length() > app::kPasswordMaxLength)
     {
-        return form::ValidationResult::Invalid("Password must be at most 50 characters");
+        return form::ValidationResult::Invalid(
+            std::format("Password must be at most {} characters", app::kPasswordMaxLength));
     }
 
     return form::ValidationResult::Valid();
@@ -26,7 +32,8 @@ form::ValidationResult PasswordValidator::Validate(const std::string& value,
 
 std::optional<std::string> PasswordValidator::GetHint() const
 {
-    return "Password must be 6-50 characters";
+    return std::format("Password must be {}-{} characters", app::kPasswordMinLength,
+                       app::kPasswordMaxLength);
 }
 
 } // namespace user_forms

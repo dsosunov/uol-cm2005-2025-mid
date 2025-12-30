@@ -1,6 +1,9 @@
 ﻿#include "forms/wallet/validators/amount_validator.hpp"
 
+#include "app_constants.hpp"
+
 #include <cctype>
+#include <format>
 #include <stdexcept>
 
 namespace wallet_forms
@@ -47,21 +50,22 @@ form::ValidationResult AmountValidator::Validate(const std::string& value,
         return form::ValidationResult::Invalid("Amount must contain at least one digit");
     }
 
-    if (decimal_places > 2)
+    if (decimal_places > app::kWalletAmountMaxDecimalPlaces)
     {
-        return form::ValidationResult::Invalid("Amount can have at most 2 decimal places");
+        return form::ValidationResult::Invalid(std::format(
+            "Amount can have at most {} decimal places", app::kWalletAmountMaxDecimalPlaces));
     }
 
     try
     {
         double amount = std::stod(value);
 
-        if (amount <= 0)
+        if (amount <= app::kWalletAmountMinExclusive)
         {
             return form::ValidationResult::Invalid("Amount must be positive");
         }
 
-        if (amount > 1000000000)
+        if (amount > app::kWalletAmountMax)
         {
             return form::ValidationResult::Invalid("Amount is too large");
         }
@@ -76,7 +80,8 @@ form::ValidationResult AmountValidator::Validate(const std::string& value,
 
 std::optional<std::string> AmountValidator::GetHint() const
 {
-    return "Enter a positive number with up to 8 decimal places";
+    return std::format("Enter a positive number with up to {} decimal places",
+                       app::kWalletAmountHintMaxDecimalPlaces);
 }
 
 } // namespace wallet_forms

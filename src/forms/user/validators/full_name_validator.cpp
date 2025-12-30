@@ -1,6 +1,9 @@
 ﻿#include "forms/user/validators/full_name_validator.hpp"
 
+#include "app_constants.hpp"
+
 #include <cctype>
+#include <format>
 
 namespace user_forms
 {
@@ -13,14 +16,16 @@ form::ValidationResult FullNameValidator::Validate(const std::string& value,
         return form::ValidationResult::Invalid("Full name cannot be empty");
     }
 
-    if (value.length() < 2)
+    if (value.length() < app::kFullNameMinLength)
     {
-        return form::ValidationResult::Invalid("Full name must be at least 2 characters");
+        return form::ValidationResult::Invalid(
+            std::format("Full name must be at least {} characters", app::kFullNameMinLength));
     }
 
-    if (value.length() > 100)
+    if (value.length() > app::kFullNameMaxLength)
     {
-        return form::ValidationResult::Invalid("Full name must be at most 100 characters");
+        return form::ValidationResult::Invalid(
+            std::format("Full name must be at most {} characters", app::kFullNameMaxLength));
     }
 
     bool has_letter = false;
@@ -44,7 +49,8 @@ form::ValidationResult FullNameValidator::Validate(const std::string& value,
 
 std::optional<std::string> FullNameValidator::GetHint() const
 {
-    return "Full name must be 2-100 characters and contain at least one letter";
+    return std::format("Full name must be {}-{} characters and contain at least one letter",
+                       app::kFullNameMinLength, app::kFullNameMaxLength);
 }
 
 } // namespace user_forms

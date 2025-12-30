@@ -1,8 +1,10 @@
 #include "core/data/csv_reader.hpp"
+#include "persistence/credentials_data_adapter.hpp"
 #include "persistence/transaction_data_adapter.hpp"
 #include "persistence/user_data_adapter.hpp"
 #include "services/authentication_context.hpp"
 #include "services/authentication_service.hpp"
+#include "services/credentials_service.hpp"
 #include "services/transactions_service.hpp"
 #include "services/user_service.hpp"
 
@@ -51,15 +53,21 @@ std::filesystem::path WriteTempCsv(std::string_view prefix, const std::vector<st
     return path;
 }
 
-std::shared_ptr<services::UserService> MakeUserService(const std::filesystem::path& users_csv)
+std::shared_ptr<services::UserService> MakeUserService(const std::filesystem::path& users_csv,
+                                                       const std::filesystem::path& shadow_csv)
 {
     auto reader = std::make_shared<data::CsvReader>(users_csv);
     auto adapter = std::make_shared<persistence::UserDataAdapter>(reader, nullptr);
 
+    auto shadow_reader = std::make_shared<data::CsvReader>(shadow_csv);
+    auto credentials_adapter =
+        std::make_shared<persistence::CredentialsDataAdapter>(shadow_reader, nullptr);
+    auto credentials_service = std::make_shared<services::CredentialsService>(credentials_adapter);
+
     auto auth_ctx = std::make_shared<services::AuthenticationContext>();
     auto auth_svc = std::make_shared<services::AuthenticationService>(auth_ctx);
 
-    return std::make_shared<services::UserService>(adapter, auth_svc);
+    return std::make_shared<services::UserService>(adapter, auth_svc, credentials_service);
 }
 
 services::TransactionsService MakeTransactionsService(const std::filesystem::path& txns_csv,
@@ -74,8 +82,9 @@ services::TransactionsService MakeTransactionsService(const std::filesystem::pat
 TEST(TransactionsActivitySummaryE2E, DailyGroupsByDay)
 {
     auto users_csv = WriteTempCsv("users", {
-                                               "1,testuser,Test User,test@example.com,0",
+                                               "1,testuser,Test User,test@example.com",
                                            });
+    auto shadow_csv = WriteTempCsv("shadow", {});
 
     auto txns_csv = WriteTempCsv("txns", {
                                              "2020/03/05 10:00:00,USD,Deposit,10.0,1",
@@ -83,7 +92,7 @@ TEST(TransactionsActivitySummaryE2E, DailyGroupsByDay)
                                              "2020/03/06 09:00:00,USD,Deposit,2.0,1",
                                          });
 
-    auto user_service = MakeUserService(users_csv);
+    auto user_service = MakeUserService(users_csv, shadow_csv);
     auto service = MakeTransactionsService(txns_csv, user_service);
 
     auto result = service.GetActivitySummary(1, dto::Timeframe::Daily,
@@ -114,15 +123,16 @@ TEST(TransactionsActivitySummaryE2E, DailyGroupsByDay)
 TEST(TransactionsActivitySummaryE2E, MonthlyGroupsByMonth)
 {
     auto users_csv = WriteTempCsv("users", {
-                                               "1,testuser,Test User,test@example.com,0",
+                                               "1,testuser,Test User,test@example.com",
                                            });
+    auto shadow_csv = WriteTempCsv("shadow", {});
 
     auto txns_csv = WriteTempCsv("txns", {
                                              "2020/03/31 23:59:59,USD,Deposit,1.0,1",
                                              "2020/04/01 00:00:00,USD,Deposit,2.0,1",
                                          });
 
-    auto user_service = MakeUserService(users_csv);
+    auto user_service = MakeUserService(users_csv, shadow_csv);
     auto service = MakeTransactionsService(txns_csv, user_service);
 
     auto result = service.GetActivitySummary(1, dto::Timeframe::Monthly,
@@ -149,8 +159,9 @@ TEST(TransactionsActivitySummaryE2E, MonthlyGroupsByMonth)
 TEST(TransactionsActivitySummaryE2E, YearlyGroupsByYear)
 {
     auto users_csv = WriteTempCsv("users", {
-                                               "1,testuser,Test User,test@example.com,0",
+                                               "1,testuser,Test User,test@example.com",
                                            });
+    auto shadow_csv = WriteTempCsv("shadow", {});
 
     auto txns_csv = WriteTempCsv("txns", {
                                              "2019/12/31 23:00:00,USD,Deposit,1.0,1",
@@ -158,7 +169,7 @@ TEST(TransactionsActivitySummaryE2E, YearlyGroupsByYear)
                                              "2020/06/01 00:00:00,USD,Deposit,3.0,1",
                                          });
 
-    auto user_service = MakeUserService(users_csv);
+    auto user_service = MakeUserService(users_csv, shadow_csv);
     auto service = MakeTransactionsService(txns_csv, user_service);
 
     auto result = service.GetActivitySummary(1, dto::Timeframe::Yearly,

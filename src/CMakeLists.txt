@@ -13,6 +13,7 @@ set(SOURCES
     actions/transaction/transaction_show_by_currency_action.cpp
     actions/transaction/transaction_activity_summary_action.cpp
     actions/trading/trading_simulation_action.cpp
+    services/credentials_service.cpp
     services/user_service.cpp
     services/user_registration_service.cpp
     services/wallet_service.cpp
@@ -20,6 +21,7 @@ set(SOURCES
     services/trading_service.cpp
     services/analytic_service.cpp
     services/trading_activities_service.cpp
+    persistence/credentials_data_adapter.cpp
     persistence/user_data_adapter.cpp
     persistence/trading_data_adapter.cpp
     persistence/transaction_data_adapter.cpp

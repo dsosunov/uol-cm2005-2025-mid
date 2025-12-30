@@ -5,6 +5,9 @@
 
 #include <memory>
 #include <optional>
+#include <span>
+#include <string_view>
+#include <vector>
 
 namespace services
 {
@@ -20,6 +23,14 @@ class MenuInput
                             std::optional<size_t> default_option = std::nullopt) const;
 
   private:
+    static bool IsBlankLine(std::string_view s);
+    void RenderInvalidAndMenu(const MenuNode& current, std::optional<size_t> default_option) const;
+    std::optional<int> TryReadOption(const std::string& line,
+                                     std::optional<size_t> default_option) const;
+    std::vector<MenuNode*> GetVisibleChildren(const MenuNode& current) const;
+    MenuNode* ResolveSelection(const MenuNode& current, std::span<MenuNode* const> visible_children,
+                               int option) const;
+
     std::shared_ptr<Input> input_;
     std::shared_ptr<MenuRenderer> renderer_;
     std::shared_ptr<services::AuthenticationService> auth_service_;

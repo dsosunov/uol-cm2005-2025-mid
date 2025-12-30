@@ -29,11 +29,9 @@ CsvWriter::~CsvWriter() noexcept
 
 CsvWriter::CsvWriter(CsvWriter&& other) noexcept
     : file_path_(std::move(other.file_path_)), append_mode_(other.append_mode_),
-      buffer_size_(other.buffer_size_), buffer_(std::move(other.buffer_)),
-      has_flushed_(other.has_flushed_)
+      buffer_size_(other.buffer_size_), buffer_(std::move(other.buffer_))
 {
     other.buffer_size_ = 0;
-    other.has_flushed_ = false;
 }
 
 CsvWriter& CsvWriter::operator=(CsvWriter&& other) noexcept
@@ -46,10 +44,8 @@ CsvWriter& CsvWriter::operator=(CsvWriter&& other) noexcept
         append_mode_ = other.append_mode_;
         buffer_size_ = other.buffer_size_;
         buffer_ = std::move(other.buffer_);
-        has_flushed_ = other.has_flushed_;
 
         other.buffer_size_ = 0;
-        other.has_flushed_ = false;
     }
 
     return *this;
@@ -117,14 +113,7 @@ bool CsvWriter::FlushInternal()
     }
 
     std::ios::openmode mode = std::ios::out;
-    if (append_mode_ || has_flushed_)
-    {
-        mode |= std::ios::app;
-    }
-    else
-    {
-        mode |= std::ios::trunc;
-    }
+    mode |= append_mode_ ? std::ios::app : std::ios::trunc;
 
     std::ofstream file(file_path_, mode);
     if (!file.is_open())
@@ -139,7 +128,6 @@ bool CsvWriter::FlushInternal()
 
     file.close();
     buffer_.clear();
-    has_flushed_ = true;
 
     return true;
 }

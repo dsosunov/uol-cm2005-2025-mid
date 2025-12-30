@@ -1,21 +1,25 @@
 #include "forms/user/validators/username_validator.hpp"
 
+#include "app_constants.hpp"
+
 #include <cctype>
+#include <format>
 
 namespace user_forms
 {
 
 std::optional<std::string> UsernameValidator::GetHint() const
 {
-    return "10 digits";
+    return std::format("{} digits", app::kUsernameLength);
 }
 
 form::ValidationResult UsernameValidator::Validate(const std::string& value,
                                                    const form::FormContext&) const
 {
-    if (value.size() != 10)
+    if (value.size() != app::kUsernameLength)
     {
-        return form::ValidationResult::Invalid("Username must be exactly 10 digits");
+        return form::ValidationResult::Invalid(
+            std::format("Username must be exactly {} digits", app::kUsernameLength));
     }
 
     for (unsigned char ch : value)

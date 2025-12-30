@@ -2,7 +2,7 @@
 
 #include "app_constants.hpp"
 #include "persistence/user_data_adapter.hpp"
-#include "services/user_password_hash.hpp"
+#include "services/credentials_service.hpp"
 #include "services/wallet_service.hpp"
 
 #include <cstdint>
@@ -15,8 +15,10 @@ namespace services
 
 UserRegistrationService::UserRegistrationService(
     std::shared_ptr<persistence::UserDataAdapter> adapter,
-    std::shared_ptr<services::WalletService> wallet_service)
-    : adapter_(std::move(adapter)), wallet_service_(std::move(wallet_service))
+    std::shared_ptr<services::WalletService> wallet_service,
+    std::shared_ptr<services::CredentialsService> credentials_service)
+    : adapter_(std::move(adapter)), wallet_service_(std::move(wallet_service)),
+      credentials_service_(std::move(credentials_service))
 {
     if (!adapter_)
     {
@@ -25,6 +27,10 @@ UserRegistrationService::UserRegistrationService(
     if (!wallet_service_)
     {
         throw std::invalid_argument("WalletService is required");
+    }
+    if (!credentials_service_)
+    {
+        throw std::invalid_argument("CredentialsService is required");
     }
 }
 
@@ -66,18 +72,26 @@ utils::ServiceResult<User> UserRegistrationService::RegisterUser(std::string_vie
         return utils::ServiceResult<User>::Failure("Username already registered");
     }
 
-    // Email must be unique so we can reliably remind usernames by email.
     if (adapter_->ExistsByEmail(email))
     {
         return utils::ServiceResult<User>::Failure("Email already registered");
     }
 
-    UserRecord new_record{0, std::string(username), std::string(full_name), std::string(email),
-                          internal::HashPassword(password)};
+    if (adapter_->ExistsByFullName(full_name))
+    {
+        return utils::ServiceResult<User>::Failure("Full name already registered");
+    }
+
+    UserRecord new_record{0, std::string(username), std::string(full_name), std::string(email)};
 
     if (!adapter_->Insert(new_record))
     {
         return utils::ServiceResult<User>::Failure("Failed to save user");
+    }
+
+    if (auto pw = credentials_service_->SetPassword(new_record.id, password); !pw.success)
+    {
+        return utils::ServiceResult<User>::Failure(pw.message);
     }
 
     for (const auto& [currency, amount] : app::kInitialBalances)
