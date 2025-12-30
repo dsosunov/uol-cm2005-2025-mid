@@ -29,7 +29,7 @@ class TradingActivitiesService
                              std::shared_ptr<TradingService> trading_service);
 
     utils::ServiceResult<TradingSimulationSummary> SimulateUserTradingActivities(
-        int orders_per_side_per_pair = 5);
+        int orders_per_pair = 5);
 
   private:
     double SyntheticPrice(std::string_view base, std::string_view quote) const;
