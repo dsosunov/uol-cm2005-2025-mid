@@ -5,7 +5,6 @@
 #include <format>
 #include <string>
 
-
 namespace forms::shared
 {
 
@@ -63,6 +62,19 @@ form::ValidationResult CurrencyPairValidator::Validate(const std::string& value,
 
     std::transform(first.begin(), first.end(), first.begin(), ::toupper);
     std::transform(second.begin(), second.end(), second.begin(), ::toupper);
+
+    if (first.empty() || second.empty())
+    {
+        return form::ValidationResult::Invalid(std::format(
+            "Format must be CUR1/CUR2. {}", FormatAllowedCurrencies(allowed_currencies_)));
+    }
+
+    if (first == second)
+    {
+        return form::ValidationResult::Invalid(
+            std::format("Currency pair must contain two different currencies. {}",
+                        FormatAllowedCurrencies(allowed_currencies_)));
+    }
 
     if (!allowed_currencies_.contains(first))
     {

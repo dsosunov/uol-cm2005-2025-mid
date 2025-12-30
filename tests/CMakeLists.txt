@@ -13,6 +13,7 @@ FetchContent_MakeAvailable(googletest)
 # Test executable
 add_executable(menu_tests
     test_full_name_validator.cpp
+    test_currency_pair_validator.cpp
     test_menu_auth_visibility.cpp
     test_timeframe_date_binders.cpp
     test_timestamp_parser.cpp
