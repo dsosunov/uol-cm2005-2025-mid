@@ -1,12 +1,12 @@
 ﻿#pragma once
 #include "core/ui/io/output.hpp"
 
-#include <string>
+#include <string_view>
 
 class StandardOutput : public Output
 {
   public:
     StandardOutput();
-    void Write(const std::string& text) override;
-    void WriteLine(const std::string& text) override;
+    void Write(std::string_view text) override;
+    void WriteLine(std::string_view text) override;
 };

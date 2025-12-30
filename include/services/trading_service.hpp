@@ -10,6 +10,7 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace persistence
@@ -25,6 +26,14 @@ struct OrderRecord
     dto::OrderType order_type;
     double price;
     double amount;
+
+    OrderRecord() = default;
+    OrderRecord(std::string product_pair_, utils::TimePoint timestamp_, dto::OrderType order_type_,
+                double price_, double amount_)
+        : product_pair(std::move(product_pair_)), timestamp(timestamp_), order_type(order_type_),
+          price(price_), amount(amount_)
+    {
+    }
 };
 class TradingService
 {

@@ -122,36 +122,27 @@ void TradingActivitiesService::GenerateOrdersAndEffects(
     long long micros_offset = 0;
 
     // Generate up to `orders_per_pair` orders by alternating bid/ask per level.
-    const int levels = (orders_per_pair + 1) / 2;
-    int created = 0;
-    for (int i = 0; i < levels && created < orders_per_pair; ++i)
+    for (int order_index = 0; order_index < orders_per_pair; ++order_index)
     {
-        const double level_spread = kBaseSpread + i * kStepSpread;
+        const int level = order_index / 2;
+        const double level_spread = kBaseSpread + level * kStepSpread;
         double bid = reference_price * (1.0 - level_spread);
         double ask = reference_price * (1.0 + level_spread);
 
         bid = std::max(bid, reference_price * 0.0000001);
         ask = std::max(ask, reference_price * 0.0000001);
 
-        const double amount = kBaseAmount * (1.0 + i * kAmountStep);
+        const double amount = kBaseAmount * (1.0 + level * kAmountStep);
 
-        if (created < orders_per_pair)
-        {
-            new_orders.emplace_back(services::OrderRecord{
-                product_pair, now + std::chrono::microseconds{micros_offset++},
-                dto::OrderType::Bids, bid, amount});
-            wallet_effects.emplace_back(base, quote, true, bid, amount);
-            ++created;
-        }
+        const bool is_bid = (order_index % 2) == 0;
+        const dto::OrderType order_type = is_bid ? dto::OrderType::Bids : dto::OrderType::Asks;
+        const double price = is_bid ? bid : ask;
 
-        if (created < orders_per_pair)
-        {
-            new_orders.emplace_back(services::OrderRecord{
-                product_pair, now + std::chrono::microseconds{micros_offset++},
-                dto::OrderType::Asks, ask, amount});
-            wallet_effects.emplace_back(base, quote, false, ask, amount);
-            ++created;
-        }
+        const auto timestamp = now + std::chrono::microseconds{micros_offset};
+        ++micros_offset;
+
+        new_orders.emplace_back(product_pair, timestamp, order_type, price, amount);
+        wallet_effects.emplace_back(base, quote, is_bid, price, amount);
     }
 }
 

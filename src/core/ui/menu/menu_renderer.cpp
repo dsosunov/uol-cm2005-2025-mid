@@ -36,7 +36,7 @@ void MenuRenderer::RenderMenu(const MenuNode& current, std::string_view status_l
 
     if (!status_line.empty())
     {
-        output_->WriteLine(std::string(status_line));
+        output_->WriteLine(status_line);
     }
 
     const bool is_authenticated = auth_service_ && auth_service_->IsAuthenticated();

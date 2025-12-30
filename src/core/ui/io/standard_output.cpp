@@ -14,12 +14,12 @@ StandardOutput::StandardOutput()
 #endif
 }
 
-void StandardOutput::Write(const std::string& text)
+void StandardOutput::Write(std::string_view text)
 {
     std::cout << text;
 }
 
-void StandardOutput::WriteLine(const std::string& text)
+void StandardOutput::WriteLine(std::string_view text)
 {
     std::cout << text << "\n";
 }

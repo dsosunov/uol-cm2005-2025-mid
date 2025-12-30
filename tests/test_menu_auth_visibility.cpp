@@ -9,28 +9,28 @@
 #include <memory>
 #include <ranges>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
-
 
 namespace
 {
 class TestOutput final : public Output
 {
   public:
-    void Write(const std::string& text) override
+    void Write(std::string_view text) override
     {
-        chunks_.push_back(text);
+        chunks_.emplace_back(text);
     }
 
-    void WriteLine(const std::string& text) override
+    void WriteLine(std::string_view text) override
     {
-        lines_.push_back(text);
+        lines_.emplace_back(text);
     }
 
-    bool ContainsSubstring(const std::string& needle) const
+    bool ContainsSubstring(std::string_view needle) const
     {
-        const auto contains = [&needle](const std::string& text) { return text.contains(needle); };
+        const auto contains = [needle](std::string_view text) { return text.contains(needle); };
         return std::ranges::any_of(lines_, contains) || std::ranges::any_of(chunks_, contains);
     }
 

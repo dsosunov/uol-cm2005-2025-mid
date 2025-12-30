@@ -14,7 +14,6 @@
 #include <utility>
 #include <vector>
 
-
 namespace
 {
 class ScriptedFormInputProvider final : public form::FormInputProvider
@@ -51,20 +50,20 @@ class ScriptedFormInputProvider final : public form::FormInputProvider
 class CollectingOutput final : public Output
 {
   public:
-    void Write(const std::string& text) override
+    void Write(std::string_view text) override
     {
-        chunks_.push_back(text);
+        chunks_.emplace_back(text);
     }
 
-    void WriteLine(const std::string& text) override
+    void WriteLine(std::string_view text) override
     {
-        lines_.push_back(text);
+        lines_.emplace_back(text);
     }
 
-    bool ContainsLineSubstring(const std::string& needle) const
+    bool ContainsLineSubstring(std::string_view needle) const
     {
         return std::ranges::any_of(
-            lines_, [&needle](const std::string& line) { return line.contains(needle); });
+            lines_, [needle](std::string_view line) { return line.contains(needle); });
     }
 
     size_t CountPromptWrites(std::string_view prompt_prefix) const

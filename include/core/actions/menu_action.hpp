@@ -52,7 +52,7 @@ struct MenuAction
 
     void WriteLine(std::string_view text, ActionContext& context) const
     {
-        context.output->WriteLine(std::string(text));
+        context.output->WriteLine(text);
     }
 
     void WriteEmptyLine(ActionContext& context) const
