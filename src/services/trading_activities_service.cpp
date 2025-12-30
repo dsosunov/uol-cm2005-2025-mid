@@ -69,94 +69,68 @@ TradingActivitiesService::TradingActivitiesService(
     }
 }
 
-utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
-    SimulateUserTradingActivities(int orders_per_pair)
+utils::ServiceResult<int> TradingActivitiesService::GetAuthenticatedUserId()
 {
-    if (orders_per_pair <= 0)
-    {
-        return utils::ServiceResult<TradingSimulationSummary>::Failure(
-            "Orders per pair must be positive");
-    }
-
     auto user = auth_service_->GetAuthenticatedUser();
-    if (!user.success)
+    if (!user.success || !user.data)
     {
-        return utils::ServiceResult<TradingSimulationSummary>::Failure(user.message);
+        return utils::ServiceResult<int>::Failure(user.message);
     }
 
-    int user_id = user.data->id;
+    return utils::ServiceResult<int>::Success(user.data->id);
+}
 
-    const auto simulation_pairs = GetSimulationProductPairs();
-    if (simulation_pairs.empty())
-    {
-        return utils::ServiceResult<TradingSimulationSummary>::Failure(
-            "No simulation product pairs configured");
-    }
-
-    std::pair<std::string, std::string> primary_pair;
-    bool found_pair = false;
-
+utils::ServiceResult<std::pair<std::string, std::string>> TradingActivitiesService::
+    SelectPrimaryPair(
+        const std::vector<std::pair<std::string, std::string>>& simulation_pairs) const
+{
     for (const auto& [base, quote] : simulation_pairs)
     {
         double ref = SyntheticPrice(base, quote);
         if (std::isfinite(ref) && ref > 0.0)
         {
-            primary_pair = {base, quote};
-            found_pair = true;
-            break;
+            return utils::ServiceResult<std::pair<std::string, std::string>>::Success(
+                {base, quote});
         }
     }
 
-    if (!found_pair)
-    {
-        return utils::ServiceResult<TradingSimulationSummary>::Failure(
-            "No supported product pairs found for simulation");
-    }
+    return utils::ServiceResult<std::pair<std::string, std::string>>::Failure(
+        "No supported product pairs found for simulation");
+}
 
-    constexpr double kBaseSpread = 0.002;  // 0.2%
-    constexpr double kStepSpread = 0.0005; // 0.05%
-
-    auto now = utils::Now();
-    long long micros_offset = 0;
-
-    std::vector<services::OrderRecord> new_orders;
-    new_orders.reserve(static_cast<size_t>(orders_per_pair));
-
-    struct WalletEffect
-    {
-        std::string base;
-        std::string quote;
-        bool is_bid;
-        double price;
-        double amount;
-    };
-    std::vector<WalletEffect> wallet_effects;
-    wallet_effects.reserve(static_cast<size_t>(orders_per_pair));
-
-    std::vector<std::string> supported_pairs;
+void TradingActivitiesService::GenerateOrdersAndEffects(
+    const std::string& base, const std::string& quote, double reference_price, int orders_per_pair,
+    std::vector<services::OrderRecord>& new_orders,
+    std::vector<TradingActivitiesService::WalletEffect>& wallet_effects,
+    std::vector<std::string>& supported_pairs) const
+{
     supported_pairs.reserve(1);
-
-    const auto& base = primary_pair.first;
-    const auto& quote = primary_pair.second;
-    const double ref = SyntheticPrice(base, quote);
+    new_orders.reserve(static_cast<size_t>(orders_per_pair));
+    wallet_effects.reserve(static_cast<size_t>(orders_per_pair));
 
     std::string product_pair = base + "/" + quote;
     supported_pairs.push_back(product_pair);
 
+    constexpr double kBaseSpread = 0.002;  // 0.2%
+    constexpr double kStepSpread = 0.0005; // 0.05%
+
     // Vary amount (and price) deterministically.
     constexpr double kBaseAmount = 1.0;
     constexpr double kAmountStep = 0.1; // +10% each level
+
+    auto now = utils::Now();
+    long long micros_offset = 0;
 
     // Generate up to `orders_per_pair` orders by alternating bid/ask per level.
     const int levels = (orders_per_pair + 1) / 2;
     for (int i = 0; i < levels; ++i)
     {
         const double level_spread = kBaseSpread + i * kStepSpread;
-        double bid = ref * (1.0 - level_spread);
-        double ask = ref * (1.0 + level_spread);
+        double bid = reference_price * (1.0 - level_spread);
+        double ask = reference_price * (1.0 + level_spread);
 
-        bid = std::max(bid, ref * 0.0000001);
-        ask = std::max(ask, ref * 0.0000001);
+        bid = std::max(bid, reference_price * 0.0000001);
+        ask = std::max(ask, reference_price * 0.0000001);
 
         const double amount = kBaseAmount * (1.0 + i * kAmountStep);
 
@@ -186,13 +160,11 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
             break;
         }
     }
+}
 
-    if (new_orders.empty())
-    {
-        return utils::ServiceResult<TradingSimulationSummary>::Failure(
-            "No valid products/prices found to simulate");
-    }
-
+utils::ServiceResult<void> TradingActivitiesService::EnsureSufficientBalances(
+    int user_id, const std::vector<TradingActivitiesService::WalletEffect>& wallet_effects)
+{
     // Require sufficient balances; no auto-funding.
     // Important: a bid immediately deposits `base` before the corresponding ask withdraws it.
     // So we validate against the *sequential* wallet effects, not by summing all bids/asks
@@ -200,7 +172,7 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
     auto balances_result = wallet_service_->GetBalances(user_id);
     if (!balances_result.success || !balances_result.data.has_value())
     {
-        return utils::ServiceResult<TradingSimulationSummary>::Failure(
+        return utils::ServiceResult<void>::Failure(
             balances_result.success ? "Failed to retrieve balances" : balances_result.message);
     }
 
@@ -253,18 +225,24 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
             std::format("{} need {:.6f} have {:.6f}", currency, required_start, have));
     }
 
-    if (!missing.empty())
+    if (missing.empty())
     {
-        std::string msg =
-            "Insufficient balances for simulation. Deposit required currencies first.";
-        for (const auto& line : missing)
-        {
-            msg += "\n";
-            msg += line;
-        }
-        return utils::ServiceResult<TradingSimulationSummary>::Failure(msg);
+        return utils::ServiceResult<void>::Success();
     }
 
+    std::string msg = "Insufficient balances for simulation. Deposit required currencies first.";
+    for (const auto& line : missing)
+    {
+        msg += "\n";
+        msg += line;
+    }
+
+    return utils::ServiceResult<void>::Failure(msg);
+}
+
+utils::ServiceResult<void> TradingActivitiesService::ApplyWalletEffects(
+    int user_id, const std::vector<TradingActivitiesService::WalletEffect>& wallet_effects)
+{
     // Apply wallet updates.
     for (const auto& effect : wallet_effects)
     {
@@ -274,13 +252,13 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
             auto w = wallet_service_->Withdraw(user_id, effect.quote, spend);
             if (!w.success)
             {
-                return utils::ServiceResult<TradingSimulationSummary>::Failure(w.message);
+                return utils::ServiceResult<void>::Failure(w.message);
             }
 
             auto d = wallet_service_->Deposit(user_id, effect.base, effect.amount);
             if (!d.success)
             {
-                return utils::ServiceResult<TradingSimulationSummary>::Failure(d.message);
+                return utils::ServiceResult<void>::Failure(d.message);
             }
         }
         else
@@ -288,22 +266,94 @@ utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
             auto w = wallet_service_->Withdraw(user_id, effect.base, effect.amount);
             if (!w.success)
             {
-                return utils::ServiceResult<TradingSimulationSummary>::Failure(w.message);
+                return utils::ServiceResult<void>::Failure(w.message);
             }
 
             double receive = effect.price * effect.amount;
             auto d = wallet_service_->Deposit(user_id, effect.quote, receive);
             if (!d.success)
             {
-                return utils::ServiceResult<TradingSimulationSummary>::Failure(d.message);
+                return utils::ServiceResult<void>::Failure(d.message);
             }
         }
     }
 
+    return utils::ServiceResult<void>::Success();
+}
+
+utils::ServiceResult<void> TradingActivitiesService::AppendOrders(
+    const std::vector<services::OrderRecord>& new_orders)
+{
     auto append = trading_service_->AppendOrders(new_orders);
     if (!append.success)
     {
-        return utils::ServiceResult<TradingSimulationSummary>::Failure(append.message);
+        return utils::ServiceResult<void>::Failure(append.message);
+    }
+
+    return utils::ServiceResult<void>::Success();
+}
+
+utils::ServiceResult<TradingSimulationSummary> TradingActivitiesService::
+    SimulateUserTradingActivities(int orders_per_pair)
+{
+    if (orders_per_pair <= 0)
+    {
+        return utils::ServiceResult<TradingSimulationSummary>::Failure(
+            "Orders per pair must be positive");
+    }
+
+    auto user_id_result = GetAuthenticatedUserId();
+    if (!user_id_result.success || !user_id_result.data)
+    {
+        return utils::ServiceResult<TradingSimulationSummary>::Failure(user_id_result.message);
+    }
+    const int user_id = *user_id_result.data;
+
+    const auto simulation_pairs = GetSimulationProductPairs();
+    if (simulation_pairs.empty())
+    {
+        return utils::ServiceResult<TradingSimulationSummary>::Failure(
+            "No simulation product pairs configured");
+    }
+
+    auto primary_pair_result = SelectPrimaryPair(simulation_pairs);
+    if (!primary_pair_result.success || !primary_pair_result.data)
+    {
+        return utils::ServiceResult<TradingSimulationSummary>::Failure(primary_pair_result.message);
+    }
+
+    const auto& base = primary_pair_result.data->first;
+    const auto& quote = primary_pair_result.data->second;
+    const double ref = SyntheticPrice(base, quote);
+
+    std::vector<services::OrderRecord> new_orders;
+    std::vector<WalletEffect> wallet_effects;
+    std::vector<std::string> supported_pairs;
+    GenerateOrdersAndEffects(base, quote, ref, orders_per_pair, new_orders, wallet_effects,
+                             supported_pairs);
+
+    if (new_orders.empty())
+    {
+        return utils::ServiceResult<TradingSimulationSummary>::Failure(
+            "No valid products/prices found to simulate");
+    }
+
+    auto balances_ok = EnsureSufficientBalances(user_id, wallet_effects);
+    if (!balances_ok.success)
+    {
+        return utils::ServiceResult<TradingSimulationSummary>::Failure(balances_ok.message);
+    }
+
+    auto apply_ok = ApplyWalletEffects(user_id, wallet_effects);
+    if (!apply_ok.success)
+    {
+        return utils::ServiceResult<TradingSimulationSummary>::Failure(apply_ok.message);
+    }
+
+    auto append_ok = AppendOrders(new_orders);
+    if (!append_ok.success)
+    {
+        return utils::ServiceResult<TradingSimulationSummary>::Failure(append_ok.message);
     }
 
     TradingSimulationSummary summary;

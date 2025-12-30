@@ -1,16 +1,17 @@
 #pragma once
 
 #include "core/utils/service_result.hpp"
+#include "services/trading_service.hpp" // OrderRecord
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
 namespace services
 {
 class AuthenticationService;
-class TradingService;
 class WalletService;
 
 struct TradingSimulationSummary
@@ -32,8 +33,31 @@ class TradingActivitiesService
         int orders_per_pair = 5);
 
   private:
+    struct WalletEffect
+    {
+        std::string base;
+        std::string quote;
+        bool is_bid = false;
+        double price = 0.0;
+        double amount = 0.0;
+    };
+
     double SyntheticPrice(std::string_view base, std::string_view quote) const;
     std::vector<std::pair<std::string, std::string>> GetSimulationProductPairs() const;
+
+    utils::ServiceResult<int> GetAuthenticatedUserId();
+    utils::ServiceResult<std::pair<std::string, std::string>> SelectPrimaryPair(
+        const std::vector<std::pair<std::string, std::string>>& simulation_pairs) const;
+    void GenerateOrdersAndEffects(
+        const std::string& base, const std::string& quote, double reference_price,
+        int orders_per_pair, std::vector<OrderRecord>& new_orders,
+        std::vector<TradingActivitiesService::WalletEffect>& wallet_effects,
+        std::vector<std::string>& supported_pairs) const;
+    utils::ServiceResult<void> EnsureSufficientBalances(
+        int user_id, const std::vector<TradingActivitiesService::WalletEffect>& wallet_effects);
+    utils::ServiceResult<void> ApplyWalletEffects(
+        int user_id, const std::vector<TradingActivitiesService::WalletEffect>& wallet_effects);
+    utils::ServiceResult<void> AppendOrders(const std::vector<OrderRecord>& new_orders);
 
     std::shared_ptr<AuthenticationService> auth_service_;
     std::shared_ptr<WalletService> wallet_service_;
