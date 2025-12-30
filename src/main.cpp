@@ -14,6 +14,7 @@
 #include "core/ui/menu/menu_builder.hpp"
 #include "core/ui/menu/menu_engine.hpp"
 #include "service_container.hpp"
+#include "services/analytic_service.hpp"
 #include "services/trading_activities_service.hpp"
 #include "services/user_registration_service.hpp"
 
@@ -45,6 +46,7 @@ std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
     auto wallet_service = container.Resolve<services::WalletService>();
     auto transactions_service = container.Resolve<services::TransactionsService>();
     auto trading_service = container.Resolve<services::TradingService>();
+    auto analytic_service = container.Resolve<services::AnalyticService>();
     auto trading_activities_service = container.Resolve<services::TradingActivitiesService>();
 
     return MenuBuilder("Trading Platform")
@@ -54,7 +56,8 @@ std::unique_ptr<MenuNode> BuildMenu(const ServiceContainer& container)
         .AddLeaf("Remind a user name", std::make_unique<UserRemindUsernameAction>(user_service))
         .AddLeaf("Change a password by name", std::make_unique<UserResetAction>(user_service))
         .Parent()
-        .AddLeaf("Candlestick summary", std::make_unique<CandlestickSummaryAction>(trading_service))
+        .AddLeaf("Candlestick summary",
+                 std::make_unique<CandlestickSummaryAction>(trading_service, analytic_service))
         .AddBranch("Wallet", true)
         .AddLeaf("View balance", std::make_unique<WalletViewBalanceAction>(wallet_service), true)
         .AddLeaf("Deposit", std::make_unique<WalletDepositAction>(wallet_service), true)

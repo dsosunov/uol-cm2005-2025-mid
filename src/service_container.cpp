@@ -11,6 +11,7 @@
 #include "persistence/trading_data_adapter.hpp"
 #include "persistence/transaction_data_adapter.hpp"
 #include "persistence/user_data_adapter.hpp"
+#include "services/analytic_service.hpp"
 #include "services/authentication_context.hpp"
 #include "services/authentication_service.hpp"
 #include "services/trading_activities_service.hpp"
@@ -59,6 +60,9 @@ ServiceContainer::ServiceContainer()
     Register(user_registration_service);
     auto trading_service = std::make_shared<services::TradingService>(trading_adapter);
     Register(trading_service);
+
+    auto analytic_service = std::make_shared<services::AnalyticService>(trading_service);
+    Register(analytic_service);
     Register(std::make_shared<services::TradingActivitiesService>(
         auth_service, Resolve<services::WalletService>(), trading_service));
 

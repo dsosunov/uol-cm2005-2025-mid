@@ -1,5 +1,6 @@
 #include "core/data/csv_reader.hpp"
 #include "persistence/trading_data_adapter.hpp"
+#include "services/analytic_service.hpp"
 #include "services/trading_service.hpp"
 
 #include <chrono>
@@ -12,10 +13,8 @@
 #include <string>
 #include <vector>
 
-namespace
-{
-utils::TimePoint MakeTp(int year, unsigned month, unsigned day, int hour = 0, int minute = 0,
-                        int second = 0)
+static utils::TimePoint MakeTp(int year, unsigned month, unsigned day, int hour = 0, int minute = 0,
+                               int second = 0)
 {
     auto ymd = std::chrono::year{year} / std::chrono::month{month} / std::chrono::day{day};
     auto days = std::chrono::sys_days{ymd};
@@ -24,7 +23,7 @@ utils::TimePoint MakeTp(int year, unsigned month, unsigned day, int hour = 0, in
     return std::chrono::time_point_cast<std::chrono::microseconds>(days + hms);
 }
 
-std::filesystem::path WriteTempCsv(const std::vector<std::string>& lines)
+static std::filesystem::path WriteTempCsv(const std::vector<std::string>& lines)
 {
     std::random_device rd;
     auto suffix = std::to_string(static_cast<unsigned long long>(
@@ -44,7 +43,6 @@ std::filesystem::path WriteTempCsv(const std::vector<std::string>& lines)
 
     return path;
 }
-} // namespace
 
 TEST(CandlestickServiceE2E, DailyOpenCloseUseTimestampsNotInputOrder)
 {
@@ -56,7 +54,8 @@ TEST(CandlestickServiceE2E, DailyOpenCloseUseTimestampsNotInputOrder)
 
     auto reader = std::make_shared<data::CsvReader>(csv_path);
     auto adapter = std::make_shared<persistence::TradingDataAdapter>(reader);
-    services::TradingService service(adapter);
+    auto trading_service = std::make_shared<services::TradingService>(adapter);
+    services::AnalyticService service(trading_service);
 
     auto result =
         service.GetCandlestickSummary("USD", "EUR", dto::OrderType::Asks, dto::Timeframe::Daily,
@@ -87,7 +86,8 @@ TEST(CandlestickServiceE2E, MonthlyEndExclusiveExcludesNextMonthAtMidnight)
 
     auto reader = std::make_shared<data::CsvReader>(csv_path);
     auto adapter = std::make_shared<persistence::TradingDataAdapter>(reader);
-    services::TradingService service(adapter);
+    auto trading_service = std::make_shared<services::TradingService>(adapter);
+    services::AnalyticService service(trading_service);
 
     auto result =
         service.GetCandlestickSummary("USD", "EUR", dto::OrderType::Asks, dto::Timeframe::Monthly,
@@ -119,7 +119,8 @@ TEST(CandlestickServiceE2E, FiltersByOrderType)
 
     auto reader = std::make_shared<data::CsvReader>(csv_path);
     auto adapter = std::make_shared<persistence::TradingDataAdapter>(reader);
-    services::TradingService service(adapter);
+    auto trading_service = std::make_shared<services::TradingService>(adapter);
+    services::AnalyticService service(trading_service);
 
     auto asks =
         service.GetCandlestickSummary("USD", "EUR", dto::OrderType::Asks, dto::Timeframe::Daily,

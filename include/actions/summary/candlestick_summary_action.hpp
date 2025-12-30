@@ -3,6 +3,7 @@
 #include "core/utils/service_result.hpp"
 #include "dto/candlestick_query.hpp"
 #include "forms/candlestick/candlestick_form.hpp"
+#include "services/analytic_service.hpp"
 #include "services/trading_service.hpp"
 
 #include <memory>
@@ -12,7 +13,8 @@ class CandlestickSummaryAction
                                       utils::ServiceResult<services::CandlestickSummaryData>>
 {
   public:
-    explicit CandlestickSummaryAction(std::shared_ptr<services::TradingService> trading_service);
+    CandlestickSummaryAction(std::shared_ptr<services::TradingService> trading_service,
+                             std::shared_ptr<services::AnalyticService> analytic_service);
 
   protected:
     candlestick::CandlestickForm CreateForm(ActionContext& context) override;
@@ -27,4 +29,5 @@ class CandlestickSummaryAction
 
   private:
     std::shared_ptr<services::TradingService> trading_service_;
+    std::shared_ptr<services::AnalyticService> analytic_service_;
 };

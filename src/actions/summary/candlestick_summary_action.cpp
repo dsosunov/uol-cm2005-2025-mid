@@ -7,8 +7,9 @@
 #include <format>
 
 CandlestickSummaryAction::CandlestickSummaryAction(
-    std::shared_ptr<services::TradingService> trading_service)
-    : trading_service_(std::move(trading_service))
+    std::shared_ptr<services::TradingService> trading_service,
+    std::shared_ptr<services::AnalyticService> analytic_service)
+    : trading_service_(std::move(trading_service)), analytic_service_(std::move(analytic_service))
 {
 }
 
@@ -23,9 +24,9 @@ candlestick::CandlestickForm CandlestickSummaryAction::CreateForm(ActionContext&
 utils::ServiceResult<services::CandlestickSummaryData> CandlestickSummaryAction::ExecuteService(
     const dto::CandlestickQuery& query, ActionContext& context)
 {
-    return trading_service_->GetCandlestickSummary(query.currency_base, query.currency_quote,
-                                                   query.order_type, query.timeframe,
-                                                   query.start_date, query.end_date);
+    return analytic_service_->GetCandlestickSummary(query.currency_base, query.currency_quote,
+                                                    query.order_type, query.timeframe,
+                                                    query.start_date, query.end_date);
 }
 
 void CandlestickSummaryAction::DisplayResults(

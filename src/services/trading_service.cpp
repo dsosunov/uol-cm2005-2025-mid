@@ -1,135 +1,28 @@
 ﻿#include "services/trading_service.hpp"
 
 #include "app_constants.hpp"
-#include "core/utils/date_filter.hpp"
 #include "dto/constants.hpp"
 #include "persistence/trading_data_adapter.hpp"
 
-#include <algorithm>
-#include <limits>
-#include <map>
-
+#include <functional>
 
 namespace services
 {
-namespace
-{
-struct PeriodStats
-{
-    utils::TimePoint first_timestamp{};
-    utils::TimePoint last_timestamp{};
-    double open = 0.0;
-    double high = 0.0;
-    double low = 0.0;
-    double close = 0.0;
-    double total_volume = 0.0;
-    int count = 0;
-};
-
-void ProcessSummaryOrder(const OrderRecord& order, std::string_view product_pair,
-                         const utils::DateFilter& date_filter, dto::Timeframe timeframe,
-                         std::map<std::string, PeriodStats, std::less<>>& aggregated_data)
-{
-    if (order.product_pair != product_pair)
-    {
-        return;
-    }
-
-    if (!date_filter.IsInRange(order.timestamp))
-    {
-        return;
-    }
-
-    std::string formatted_date = utils::FormatDate(order.timestamp);
-    std::string period_key;
-
-    if (timeframe == dto::Timeframe::Monthly && formatted_date.length() >= 7)
-    {
-        period_key = formatted_date.substr(0, 7);
-    }
-    else if (timeframe == dto::Timeframe::Yearly && formatted_date.length() >= 4)
-    {
-        period_key = formatted_date.substr(0, 4);
-    }
-    else
-    {
-        period_key = formatted_date;
-    }
-
-    auto& stats = aggregated_data[period_key];
-
-    if (stats.count == 0)
-    {
-        stats.first_timestamp = order.timestamp;
-        stats.last_timestamp = order.timestamp;
-        stats.open = order.price;
-        stats.high = order.price;
-        stats.low = order.price;
-        stats.close = order.price;
-    }
-    else
-    {
-        stats.high = std::max(stats.high, order.price);
-        stats.low = std::min(stats.low, order.price);
-
-        if (order.timestamp < stats.first_timestamp)
-        {
-            stats.first_timestamp = order.timestamp;
-            stats.open = order.price;
-        }
-
-        if (order.timestamp > stats.last_timestamp)
-        {
-            stats.last_timestamp = order.timestamp;
-            stats.close = order.price;
-        }
-    }
-
-    stats.total_volume += order.amount;
-    stats.count++;
-}
-
-} // namespace
-
 TradingService::TradingService(std::shared_ptr<persistence::TradingDataAdapter> adapter)
     : adapter_(adapter)
 {
 }
 
-utils::ServiceResult<CandlestickSummaryData> TradingService::GetCandlestickSummary(
-    std::string_view currency_base, std::string_view currency_quote, dto::OrderType order_type,
-    dto::Timeframe timeframe, const std::optional<utils::TimePoint>& start_date,
-    const std::optional<utils::TimePoint>& end_date) const
+utils::ServiceResult<void> TradingService::ForEachOrder(
+    dto::OrderType order_type, const std::function<void(const OrderRecord&)>& processor) const
 {
-    std::string product_pair = std::string(currency_base) + "/" + std::string(currency_quote);
-    std::map<std::string, PeriodStats, std::less<>> aggregated_data;
-    utils::DateFilter date_filter = utils::DateFilter::Create(start_date, end_date);
-
-    adapter_->ReadWithProcessor(order_type, [&product_pair, &date_filter, &timeframe,
-                                             &aggregated_data](const OrderRecord& order) {
-        ProcessSummaryOrder(order, product_pair, date_filter, timeframe, aggregated_data);
-    });
-
-    if (aggregated_data.empty())
+    if (!adapter_)
     {
-        return utils::ServiceResult<CandlestickSummaryData>::Failure(
-            "No data found for the specified currency pair and date range");
+        return utils::ServiceResult<void>::Failure("Trading data adapter is not configured");
     }
 
-    std::vector<Candlestick> candlesticks;
-    candlesticks.reserve(aggregated_data.size());
-    for (const auto& [period, stats] : aggregated_data)
-    {
-        candlesticks.emplace_back(period, stats.open, stats.high, stats.low, stats.close,
-                                  stats.total_volume, stats.total_volume / stats.count,
-                                  stats.count);
-    }
-
-    CandlestickSummaryData data{
-        candlesticks, std::string(currency_base) + "/" + std::string(currency_quote), timeframe};
-
-    return utils::ServiceResult<CandlestickSummaryData>::Success(data,
-                                                                 "Summary generated successfully");
+    adapter_->ReadWithProcessor(order_type, processor);
+    return utils::ServiceResult<void>::Success("Orders streamed successfully");
 }
 
 utils::ServiceResult<std::set<std::string, std::less<>>> TradingService::GetAvailableProducts()
